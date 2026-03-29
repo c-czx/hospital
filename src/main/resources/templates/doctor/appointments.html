@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>患者预约 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>医生中心</h3>
+            <ul>
+                <li><a href="/doctor/dashboard">首页</a></li>
+                <li><a href="/doctor/appointments">患者预约</a></li>
+                <li><a href="/doctor/schedule">排班管理</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>患者预约</h1>
+            <div class="appointments-list">
+                <div th:each="appointment : ${appointments}" class="appointment-card">
+                    <div class="appointment-header">
+                        <h3 th:text="${appointment.user.name}"></h3>
+                        <span class="status" th:text="${appointment.status}"></span>
+                    </div>
+                    <div class="appointment-body">
+                        <p><strong>预约时间：</strong><span th:text="${appointment.appointmentTime}"></span></p>
+                        <p><strong>症状：</strong><span th:text="${appointment.symptoms}"></span></p>
+                        <p><strong>电话：</strong><span th:text="${appointment.user.phone}"></span></p>
+                        <div class="actions">
+                            <a th:href="@{/doctor/appointment/{id}(id=${appointment.id})}" class="btn btn-primary">查看详情</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

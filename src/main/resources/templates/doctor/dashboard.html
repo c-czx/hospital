@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医生首页 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>医生中心</h3>
+            <ul>
+                <li><a href="/doctor/dashboard">首页</a></li>
+                <li><a href="/doctor/patients">患者信息查看</a></li>
+                <li><a href="/doctor/appointments">预约管理</a></li>
+                <li><a href="/doctor/schedule">号源发布</a></li>
+                <li><a href="/doctor/prescriptions">处方管理</a></li>
+                <li><a href="/doctor/medical-records">医嘱管理</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>欢迎，医生</h1>
+            <div class="dashboard-cards">
+                <div class="card">
+                    <h3>👥 患者信息查看</h3>
+                    <p>查看预约患者的信息、病历等</p>
+                    <a href="/doctor/patients" class="btn btn-primary">查看患者</a>
+                </div>
+                <div class="card">
+                    <h3>📅 预约管理</h3>
+                    <p>管理患者预约信息</p>
+                    <a href="/doctor/appointments" class="btn btn-secondary">查看预约</a>
+                </div>
+                <div class="card">
+                    <h3>📋 号源发布</h3>
+                    <p>发布坐诊时间、可预约号数等</p>
+                    <a href="/doctor/schedule" class="btn btn-secondary">发布号源</a>
+                </div>
+                <div class="card">
+                    <h3>💊 诊疗工作</h3>
+                    <p>开具处方、检查检验申请等</p>
+                    <a href="/doctor/prescriptions" class="btn btn-secondary">处方管理</a>
+                </div>
+                <div class="card">
+                    <h3>📝 医嘱管理</h3>
+                    <p>查看、修改医嘱</p>
+                    <a href="/doctor/medical-records" class="btn btn-secondary">医嘱管理</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

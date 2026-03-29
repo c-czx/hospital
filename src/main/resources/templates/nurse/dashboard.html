@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>护士首页 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>护士中心</h3>
+            <ul>
+                <li><a href="/nurse/dashboard">首页</a></li>
+                <li><a href="/nurse/patients">患者信息查看</a></li>
+                <li><a href="/nurse/appointments">协助诊疗</a></li>
+                <li><a href="/nurse/billing">缴费管理</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>欢迎，护士</h1>
+            <div class="dashboard-cards">
+                <div class="card">
+                    <h3>👥 患者信息查看</h3>
+                    <p>查看患者的信息、病历等</p>
+                    <a href="/nurse/patients" class="btn btn-primary">查看患者</a>
+                </div>
+                <div class="card">
+                    <h3>🏥 协助诊疗</h3>
+                    <p>协助医生完成诊疗工作，如测量体温、血压等</p>
+                    <a href="/nurse/appointments" class="btn btn-secondary">协助诊疗</a>
+                </div>
+                <div class="card">
+                    <h3>💰 缴费管理</h3>
+                    <p>协助患者进行缴费</p>
+                    <a href="/nurse/billing" class="btn btn-secondary">缴费管理</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

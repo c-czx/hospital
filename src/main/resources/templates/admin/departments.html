@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科室管理 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>管理员中心</h3>
+            <ul>
+                <li><a href="/admin/dashboard">首页</a></li>
+                <li><a href="/admin/users">用户管理</a></li>
+                <li><a href="/admin/departments">科室管理</a></li>
+                <li><a href="/admin/doctors">医生管理</a></li>
+                <li><a href="/admin/appointments">预约管理</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>科室管理</h1>
+            <a href="/admin/department/create" class="btn btn-primary">添加科室</a>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>科室名称</th>
+                        <th>描述</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="dept : ${departments}">
+                        <td th:text="${dept.id}"></td>
+                        <td th:text="${dept.name}"></td>
+                        <td th:text="${dept.description}"></td>
+                        <td>
+                            <a th:href="@{/admin/department/edit/{id}(id=${dept.id})}" class="btn btn-secondary">编辑</a>
+                            <a th:href="@{/admin/department/delete/{id}(id=${dept.id})}" class="btn btn-danger">删除</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

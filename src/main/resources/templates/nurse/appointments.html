@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预约管理 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>护士中心</h3>
+            <ul>
+                <li><a href="/nurse/dashboard">首页</a></li>
+                <li><a href="/nurse/patients">患者信息</a></li>
+                <li><a href="/nurse/appointments">预约管理</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>预约管理</h1>
+            <div class="appointments-list">
+                <div th:each="appointment : ${appointments}" class="appointment-card">
+                    <div class="appointment-header">
+                        <h3 th:text="${appointment.user.name}"></h3>
+                        <span class="status" th:text="${appointment.status}"></span>
+                    </div>
+                    <div class="appointment-body">
+                        <p><strong>科室：</strong><span th:text="${appointment.department.name}"></span></p>
+                        <p><strong>医生：</strong><span th:text="${appointment.doctor.user.name}"></span></p>
+                        <p><strong>预约时间：</strong><span th:text="${appointment.appointmentTime}"></span></p>
+                        <p><strong>症状：</strong><span th:text="${appointment.symptoms}"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

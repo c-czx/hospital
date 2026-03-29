@@ -1,0 +1,133 @@
+package com.hospital.config;
+
+import com.hospital.entity.*;
+import com.hospital.service.*;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+
+@Component
+public class DataInitializer implements CommandLineRunner {
+    
+    private final UserService userService;
+    private final DepartmentService departmentService;
+    private final DoctorService doctorService;
+    private final PasswordEncoder passwordEncoder;
+    
+    public DataInitializer(UserService userService, DepartmentService departmentService, 
+                         DoctorService doctorService, PasswordEncoder passwordEncoder) {
+        this.userService = userService;
+        this.departmentService = departmentService;
+        this.doctorService = doctorService;
+        this.passwordEncoder = passwordEncoder;
+    }
+    
+    @Override
+    public void run(String... args) throws Exception {
+        initializeUsers();
+        initializeDepartments();
+        initializeDoctors();
+    }
+    
+    private void initializeUsers() {
+        if (userService.findByPhone("13800000000") == null) {
+            User admin = new User();
+            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setName("系统管理员");
+            admin.setRole("ADMIN");
+            admin.setGender("male");
+            admin.setPhone("13800000000");
+            admin.setEmail("admin@hospital.com");
+            userService.saveUser(admin);
+        }
+        
+        if (userService.findByPhone("13800000001") == null) {
+            User doctor1 = new User();
+            doctor1.setPassword(passwordEncoder.encode("doctor123"));
+            doctor1.setName("张医生");
+            doctor1.setRole("DOCTOR");
+            doctor1.setGender("male");
+            doctor1.setPhone("13800000001");
+            doctor1.setEmail("doctor1@hospital.com");
+            userService.saveUser(doctor1);
+        }
+        
+        if (userService.findByPhone("13800000002") == null) {
+            User nurse1 = new User();
+            nurse1.setPassword(passwordEncoder.encode("nurse123"));
+            nurse1.setName("李护士");
+            nurse1.setRole("NURSE");
+            nurse1.setGender("female");
+            nurse1.setPhone("13800000002");
+            nurse1.setEmail("nurse1@hospital.com");
+            userService.saveUser(nurse1);
+        }
+        
+        if (userService.findByPhone("13800000003") == null) {
+            User patient1 = new User();
+            patient1.setPassword(passwordEncoder.encode("patient123"));
+            patient1.setName("王患者");
+            patient1.setRole("PATIENT");
+            patient1.setGender("male");
+            patient1.setPhone("13800000003");
+            patient1.setEmail("patient1@hospital.com");
+            userService.saveUser(patient1);
+        }
+    }
+    
+    private void initializeDepartments() {
+        if (departmentService.findByNameContaining("内科").isEmpty()) {
+            Department internalMedicine = new Department();
+            internalMedicine.setName("内科");
+            internalMedicine.setDescription("内科疾病诊疗");
+            departmentService.saveDepartment(internalMedicine);
+        }
+        
+        if (departmentService.findByNameContaining("外科").isEmpty()) {
+            Department surgery = new Department();
+            surgery.setName("外科");
+            surgery.setDescription("外科手术及治疗");
+            departmentService.saveDepartment(surgery);
+        }
+        
+        if (departmentService.findByNameContaining("儿科").isEmpty()) {
+            Department pediatrics = new Department();
+            pediatrics.setName("儿科");
+            pediatrics.setDescription("儿童疾病诊疗");
+            departmentService.saveDepartment(pediatrics);
+        }
+        
+        if (departmentService.findByNameContaining("妇产科").isEmpty()) {
+            Department gynecology = new Department();
+            gynecology.setName("妇产科");
+            gynecology.setDescription("妇科产科疾病诊疗");
+            departmentService.saveDepartment(gynecology);
+        }
+        
+        if (departmentService.findByNameContaining("眼科").isEmpty()) {
+            Department ophthalmology = new Department();
+            ophthalmology.setName("眼科");
+            ophthalmology.setDescription("眼科疾病诊疗");
+            departmentService.saveDepartment(ophthalmology);
+        }
+    }
+    
+    private void initializeDoctors() {
+        User doctor1User = userService.findByPhone("13800000001");
+        Department internalMedicine = departmentService.findByNameContaining("内科").get(0);
+        
+        if (doctor1User != null && internalMedicine != null) {
+            if (doctorService.findByUserId(doctor1User.getId()) == null) {
+                Doctor doctor1 = new Doctor();
+                doctor1.setUser(doctor1User);
+                doctor1.setDepartment(internalMedicine);
+                doctor1.setTitle("主任医师");
+                doctor1.setSpecialty("心血管疾病");
+                doctor1.setSchedule("周一至周五 8:00-12:00, 14:00-17:00");
+                doctorService.saveDoctor(doctor1);
+            }
+        }
+    }
+}

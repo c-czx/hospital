@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医生管理 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>管理员中心</h3>
+            <ul>
+                <li><a href="/admin/dashboard">首页</a></li>
+                <li><a href="/admin/users">用户管理</a></li>
+                <li><a href="/admin/departments">科室管理</a></li>
+                <li><a href="/admin/doctors">医生管理</a></li>
+                <li><a href="/admin/appointments">预约管理</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>医生管理</h1>
+            <a href="/admin/doctor/create" class="btn btn-primary">添加医生</a>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>姓名</th>
+                        <th>科室</th>
+                        <th>职称</th>
+                        <th>专长</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="doctor : ${doctors}">
+                        <td th:text="${doctor.id}"></td>
+                        <td th:text="${doctor.user.name}"></td>
+                        <td th:text="${doctor.department.name}"></td>
+                        <td th:text="${doctor.title}"></td>
+                        <td th:text="${doctor.specialty}"></td>
+                        <td>
+                            <a th:href="@{/admin/doctor/edit/{id}(id=${doctor.id})}" class="btn btn-secondary">编辑</a>
+                            <a th:href="@{/admin/doctor/delete/{id}(id=${doctor.id})}" class="btn btn-danger">删除</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

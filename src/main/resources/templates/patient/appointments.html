@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的预约 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>患者中心</h3>
+            <ul>
+                <li><a href="/patient/dashboard">首页</a></li>
+                <li><a href="/patient/book">预约挂号</a></li>
+                <li><a href="/patient/appointments">我的预约</a></li>
+                <li><a href="/patient/departments">科室查询</a></li>
+                <li><a href="/patient/profile">个人信息</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>我的预约</h1>
+            <div class="appointments-list">
+                <div th:each="appointment : ${appointments}" class="appointment-card">
+                    <div class="appointment-header">
+                        <h3 th:text="${appointment.department.name}"></h3>
+                        <span class="status" th:text="${appointment.status}"></span>
+                    </div>
+                    <div class="appointment-body">
+                        <p><strong>医生：</strong><span th:text="${appointment.doctor.user.name}"></span></p>
+                        <p><strong>预约时间：</strong><span th:text="${appointment.appointmentTime}"></span></p>
+                        <p><strong>症状：</strong><span th:text="${appointment.symptoms}"></span></p>
+                        <p><strong>预约时间：</strong><span th:text="${appointment.createTime}"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

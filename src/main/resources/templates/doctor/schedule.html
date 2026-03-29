@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排班管理 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>医生中心</h3>
+            <ul>
+                <li><a href="/doctor/dashboard">首页</a></li>
+                <li><a href="/doctor/appointments">患者预约</a></li>
+                <li><a href="/doctor/schedule">排班管理</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>排班管理</h1>
+            <form th:action="@{/doctor/schedule}" method="post">
+                <input type="hidden" name="doctorId" th:value="${doctor.id}">
+                
+                <div class="form-group">
+                    <label>当前排班</label>
+                    <textarea name="schedule" rows="6" th:text="${doctor.schedule}" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">更新排班</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>医生列表</title>
+</head>
+<body>
+    <option value="">请选择医生</option>
+    <option th:each="doctor : ${doctors}" th:value="${doctor.id}" th:text="${doctor.user.name} + ' - ' + ${doctor.title}"></option>
+</body>
+</html>

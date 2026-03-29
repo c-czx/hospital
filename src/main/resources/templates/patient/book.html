@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预约挂号 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>患者中心</h3>
+            <ul>
+                <li><a href="/patient/dashboard">首页</a></li>
+                <li><a href="/patient/book">预约挂号</a></li>
+                <li><a href="/patient/appointments">我的预约</a></li>
+                <li><a href="/patient/departments">科室查询</a></li>
+                <li><a href="/patient/profile">个人信息</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>预约挂号</h1>
+            <form th:action="@{/patient/book}" method="post" id="bookingForm">
+                <div class="form-group">
+                    <label>选择科室</label>
+                    <select name="departmentId" id="departmentSelect" required onchange="loadDoctors()">
+                        <option value="">请选择科室</option>
+                        <option th:each="dept : ${departments}" th:value="${dept.id}" th:text="${dept.name}"></option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>选择医生</label>
+                    <select name="doctorId" id="doctorSelect" required>
+                        <option value="">请先选择科室</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>预约时间</label>
+                    <input type="datetime-local" name="appointmentTime" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>症状描述</label>
+                    <textarea name="symptoms" rows="4"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">提交预约</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function loadDoctors() {
+            const departmentId = document.getElementById('departmentSelect').value;
+            const doctorSelect = document.getElementById('doctorSelect');
+            
+            if (departmentId) {
+                fetch(`/patient/doctors?departmentId=${departmentId}`)
+                    .then(response => response.text())
+                    .then(html => {
+                        doctorSelect.innerHTML = html;
+                    });
+            } else {
+                doctorSelect.innerHTML = '<option value="">请先选择科室</option>';
+            }
+        }
+    </script>
+</body>
+</html>

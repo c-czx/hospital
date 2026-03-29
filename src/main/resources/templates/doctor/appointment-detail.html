@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预约详情 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>医生中心</h3>
+            <ul>
+                <li><a href="/doctor/dashboard">首页</a></li>
+                <li><a href="/doctor/appointments">患者预约</a></li>
+                <li><a href="/doctor/schedule">排班管理</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>预约详情</h1>
+            <div class="appointment-detail">
+                <div class="patient-info">
+                    <h3>患者信息</h3>
+                    <p><strong>姓名：</strong><span th:text="${appointment.user.name}"></span></p>
+                    <p><strong>性别：</strong><span th:text="${appointment.user.gender == 'male' ? '男' : '女'}"></span></p>
+                    <p><strong>电话：</strong><span th:text="${appointment.user.phone}"></span></p>
+                    <p><strong>邮箱：</strong><span th:text="${appointment.user.email}"></span></p>
+                </div>
+                
+                <div class="appointment-info">
+                    <h3>预约信息</h3>
+                    <p><strong>科室：</strong><span th:text="${appointment.department.name}"></span></p>
+                    <p><strong>预约时间：</strong><span th:text="${appointment.appointmentTime}"></span></p>
+                    <p><strong>症状：</strong><span th:text="${appointment.symptoms}"></span></p>
+                    <p><strong>状态：</strong><span th:text="${appointment.status}"></span></p>
+                </div>
+                
+                <div class="diagnosis-form">
+                    <h3>诊疗记录</h3>
+                    <form th:action="@{/doctor/appointment/{id}/complete(id=${appointment.id})}" method="post">
+                        <div class="form-group">
+                            <label>诊断结果</label>
+                            <textarea name="diagnosis" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>治疗方案</label>
+                            <textarea name="treatment" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>医嘱备注</label>
+                            <textarea name="notes" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">完成诊疗</button>
+                    </form>
+                </div>
+                
+                <div class="prescription-action">
+                    <a th:href="@{/doctor/prescription/create(userId=${appointment.user.id}, doctorId=${appointment.doctor.id})}" class="btn btn-secondary">开具处方</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

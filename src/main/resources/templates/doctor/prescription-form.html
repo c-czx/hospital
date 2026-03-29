@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>开具处方 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>医生中心</h3>
+            <ul>
+                <li><a href="/doctor/dashboard">首页</a></li>
+                <li><a href="/doctor/appointments">患者预约</a></li>
+                <li><a href="/doctor/schedule">排班管理</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>开具处方</h1>
+            <form th:action="@{/doctor/prescription/create}" method="post">
+                <input type="hidden" name="userId" th:value="${user.id}">
+                <input type="hidden" name="doctorId" th:value="${doctorId}">
+                
+                <div class="form-group">
+                    <label>患者姓名</label>
+                    <input type="text" th:value="${user.name}" disabled>
+                </div>
+                
+                <div class="form-group">
+                    <label>药品信息</label>
+                    <textarea name="medicines" rows="4" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>用法用量</label>
+                    <textarea name="dosage" rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>服用说明</label>
+                    <textarea name="instructions" rows="3" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">开具处方</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

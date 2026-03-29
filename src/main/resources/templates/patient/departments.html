@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科室查询 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>患者中心</h3>
+            <ul>
+                <li><a href="/patient/dashboard">首页</a></li>
+                <li><a href="/patient/book">预约挂号</a></li>
+                <li><a href="/patient/appointments">我的预约</a></li>
+                <li><a href="/patient/departments">科室查询</a></li>
+                <li><a href="/patient/profile">个人信息</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>科室查询</h1>
+            <div class="departments-list">
+                <div th:each="dept : ${departments}" class="department-card">
+                    <h3 th:text="${dept.name}"></h3>
+                    <p th:text="${dept.description}"></p>
+                    <a th:href="@{/patient/book}" class="btn btn-primary">预约挂号</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

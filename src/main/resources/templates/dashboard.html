@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仪表盘 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>欢迎来到医院挂号系统</h1>
+        </div>
+        
+        <div class="dashboard-cards">
+            <div class="card">
+                <h3>患者</h3>
+                <p>预约挂号、查看订单</p>
+                <a href="/patient/dashboard" class="btn btn-primary">进入患者端</a>
+            </div>
+            <div class="card">
+                <h3>医生</h3>
+                <p>查看预约、开具处方</p>
+                <a href="/doctor/dashboard" class="btn btn-primary">进入医生端</a>
+            </div>
+            <div class="card">
+                <h3>护士</h3>
+                <p>患者信息、缴费管理</p>
+                <a href="/nurse/dashboard" class="btn btn-primary">进入护士端</a>
+            </div>
+            <div class="card">
+                <h3>管理员</h3>
+                <p>系统管理、数据维护</p>
+                <a href="/admin/dashboard" class="btn btn-primary">进入管理端</a>
+            </div>
+        </div>
+        
+        <div class="logout-section">
+            <a href="/logout" class="btn btn-secondary">退出登录</a>
+        </div>
+    </div>
+</body>
+</html>

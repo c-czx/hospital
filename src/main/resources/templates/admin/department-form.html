@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科室表单 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>管理员中心</h3>
+            <ul>
+                <li><a href="/admin/dashboard">首页</a></li>
+                <li><a href="/admin/users">用户管理</a></li>
+                <li><a href="/admin/departments">科室管理</a></li>
+                <li><a href="/admin/doctors">医生管理</a></li>
+                <li><a href="/admin/appointments">预约管理</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1 th:text="${department.id != null ? '编辑科室' : '添加科室'}"></h1>
+            <form th:action="@{/admin/department/create}" method="post" th:object="${department}">
+                <div class="form-group">
+                    <label>科室名称</label>
+                    <input type="text" th:field="*{name}" required>
+                </div>
+                <div class="form-group">
+                    <label>科室描述</label>
+                    <textarea th:field="*{description}" rows="4"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">保存</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员首页 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>管理员中心</h3>
+            <ul>
+                <li><a href="/admin/dashboard">首页</a></li>
+                <li><a href="/admin/users">用户管理</a></li>
+                <li><a href="/admin/permissions">权限管理</a></li>
+                <li><a href="/admin/departments">科室管理</a></li>
+                <li><a href="/admin/doctors">医生管理</a></li>
+                <li><a href="/admin/appointments">预约管理</a></li>
+                <li><a href="/admin/data">数据管理</a></li>
+                <li><a href="/admin/settings">系统设置</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>欢迎，管理员</h1>
+            <div class="dashboard-cards">
+                <div class="card">
+                    <h3>👥 用户管理</h3>
+                    <p>添加、删除、修改用户</p>
+                    <a href="/admin/users" class="btn btn-primary">用户管理</a>
+                </div>
+                <div class="card">
+                    <h3>🔐 权限管理</h3>
+                    <p>设置用户权限</p>
+                    <a href="/admin/permissions" class="btn btn-secondary">权限管理</a>
+                </div>
+                <div class="card">
+                    <h3>🏥 科室管理</h3>
+                    <p>管理医院科室信息</p>
+                    <a href="/admin/departments" class="btn btn-secondary">科室管理</a>
+                </div>
+                <div class="card">
+                    <h3>👨‍⚕️ 医生管理</h3>
+                    <p>管理医生信息</p>
+                    <a href="/admin/doctors" class="btn btn-secondary">医生管理</a>
+                </div>
+                <div class="card">
+                    <h3>📅 预约管理</h3>
+                    <p>管理预约信息</p>
+                    <a href="/admin/appointments" class="btn btn-secondary">预约管理</a>
+                </div>
+                <div class="card">
+                    <h3>💾 数据管理</h3>
+                    <p>数据备份、恢复</p>
+                    <a href="/admin/data" class="btn btn-secondary">数据管理</a>
+                </div>
+                <div class="card">
+                    <h3>⚙️ 系统设置</h3>
+                    <p>设置系统参数</p>
+                    <a href="/admin/settings" class="btn btn-secondary">系统设置</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

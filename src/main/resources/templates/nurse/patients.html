@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>患者信息 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>护士中心</h3>
+            <ul>
+                <li><a href="/nurse/dashboard">首页</a></li>
+                <li><a href="/nurse/patients">患者信息</a></li>
+                <li><a href="/nurse/appointments">预约管理</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>患者信息</h1>
+            <div class="patients-list">
+                <div th:each="patient : ${patients}" class="patient-card">
+                    <h3 th:text="${patient.name}"></h3>
+                    <p><strong>性别：</strong><span th:text="${patient.gender == 'male' ? '男' : '女'}"></span></p>
+                    <p><strong>电话：</strong><span th:text="${patient.phone}"></span></p>
+                    <p><strong>邮箱：</strong><span th:text="${patient.email}"></span></p>
+                    <a th:href="@{/nurse/patient/{id}(id=${patient.id})}" class="btn btn-primary">查看详情</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
