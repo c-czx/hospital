@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "prescriptions")
-public class Prescription {
+@Table(name = "advices")
+public class Advice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -18,9 +18,10 @@ public class Prescription {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
     
-    private String drugList;
-    private String usage;
+    private String content;
+    private Integer status;
     private LocalDateTime createTime;
+    private LocalDateTime updateTime;
 
     public Long getId() { 
         return id; 
@@ -46,20 +47,20 @@ public class Prescription {
         this.user = user; 
     }
     
-    public String getDrugList() { 
-        return drugList; 
+    public String getContent() { 
+        return content; 
     }
     
-    public void setDrugList(String drugList) { 
-        this.drugList = drugList; 
+    public void setContent(String content) { 
+        this.content = content; 
     }
     
-    public String getUsage() { 
-        return usage; 
+    public Integer getStatus() { 
+        return status; 
     }
     
-    public void setUsage(String usage) { 
-        this.usage = usage; 
+    public void setStatus(Integer status) { 
+        this.status = status; 
     }
     
     public LocalDateTime getCreateTime() { 
@@ -68,5 +69,13 @@ public class Prescription {
     
     public void setCreateTime(LocalDateTime createTime) { 
         this.createTime = createTime; 
+    }
+    
+    public LocalDateTime getUpdateTime() { 
+        return updateTime; 
+    }
+    
+    public void setUpdateTime(LocalDateTime updateTime) { 
+        this.updateTime = updateTime; 
     }
 }

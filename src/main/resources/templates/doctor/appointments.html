@@ -1,42 +1,49 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>患者预约 - 医院挂号系统</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>全部预约</title>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap/3.3.7/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="dashboard-container">
-        <div class="sidebar">
-            <h3>医生中心</h3>
-            <ul>
-                <li><a href="/doctor/dashboard">首页</a></li>
-                <li><a href="/doctor/appointments">患者预约</a></li>
-                <li><a href="/doctor/schedule">排班管理</a></li>
-                <li><a href="/logout">退出登录</a></li>
-            </ul>
-        </div>
-        
-        <div class="main-content">
-            <h1>患者预约</h1>
-            <div class="appointments-list">
-                <div th:each="appointment : ${appointments}" class="appointment-card">
-                    <div class="appointment-header">
-                        <h3 th:text="${appointment.user.name}"></h3>
-                        <span class="status" th:text="${appointment.status}"></span>
-                    </div>
-                    <div class="appointment-body">
-                        <p><strong>预约时间：</strong><span th:text="${appointment.appointmentTime}"></span></p>
-                        <p><strong>症状：</strong><span th:text="${appointment.symptoms}"></span></p>
-                        <p><strong>电话：</strong><span th:text="${appointment.user.phone}"></span></p>
-                        <div class="actions">
-                            <a th:href="@{/doctor/appointment/{id}(id=${appointment.id})}" class="btn btn-primary">查看详情</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="container" style="margin-top:30px;">
+    <h3>全部预约患者</h3>
+    <table class="table table-bordered" style="margin-top:20px;">
+        <thead>
+        <tr>
+            <th>患者姓名</th>
+            <th>性别</th>
+            <th>年龄</th>
+            <th>预约时间</th>
+            <th>症状</th>
+            <th>状态</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${#lists.isEmpty(allAppointments)}">
+            <td colspan="7" style="text-align:center;">暂无预约信息</td>
+        </tr>
+        <tr th:each="apt : ${allAppointments}">
+            <td th:text="${apt.name}"></td>
+            <td th:text="${apt.gender == 'male' ? '男' : '女'}"></td>
+            <td th:text="${apt.age}"></td>
+            <td th:text="${#temporals.format(apt.appointmentTime, 'yyyy-MM-dd HH:mm')}"></td>
+            <td th:text="${apt.symptoms}"></td>
+            <td>
+                <span th:if="${apt.status == '已预约'}" class="label label-info">已预约</span>
+                <span th:if="${apt.status == '已完成'}" class="label label-success">已完成</span>
+                <span th:if="${apt.status == '已取消'}" class="label label-danger">已取消</span>
+            </td>
+            <td>
+                <a class="btn btn-info btn-sm" th:href="@{/doctor/appointment-detail(patientId=${apt.id})}">查看详情</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <a href="/doctor/dashboard" class="btn btn-default">返回工作台</a>
+</div>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 </body>
 </html>
