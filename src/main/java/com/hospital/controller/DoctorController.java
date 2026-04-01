@@ -1,127 +1,151 @@
 package com.hospital.controller;
 
-import com.hospital.entity.*;
-import com.hospital.service.*;
+import com.hospital.entity.Advice;
+import com.hospital.entity.MedicalRecord;
+import com.hospital.entity.Prescription;
+import com.hospital.entity.Schedule;
+import com.hospital.entity.Doctor;
+import com.hospital.entity.User;
+import com.hospital.service.DoctorService;
+import com.hospital.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/doctor")
 public class DoctorController {
-    
-    @Autowired
-    private AppointmentService appointmentService;
-    
-    @Autowired
-    private MedicalRecordService medicalRecordService;
-    
-    @Autowired
-    private PrescriptionService prescriptionService;
-    
+
     @Autowired
     private DoctorService doctorService;
     
     @Autowired
     private UserService userService;
     
-    @GetMapping("/dashboard")
-    public String dashboard(Authentication authentication, Model model) {
-        User user = userService.findByPhone(authentication.getName());
-        Doctor doctor = doctorService.findByUserId(user.getId());
-        
-        if (doctor != null) {
-            List<Appointment> appointments = appointmentService.findByDoctorId(doctor.getId());
-            model.addAttribute("appointments", appointments);
-            model.addAttribute("doctor", doctor);
+    private Long getCurrentDoctorId(Authentication authentication) {
+        String phone = authentication.getName();
+        User user = userService.findByPhone(phone);
+        if (user == null) {
+            return null;
         }
-        
+        Doctor doctor = doctorService.findByUserId(user.getId());
+        return doctor != null ? doctor.getId() : null;
+    }
+
+    // ====================== 页面跳转 ======================
+    // 医生工作台
+    @GetMapping("/dashboard")
+    public String dashboard(Model model, Authentication authentication) {
+        Long doctorId = getCurrentDoctorId(authentication);
+        if (doctorId == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("todayList", doctorService.getTodayPatient(doctorId).get("data"));
         return "doctor/dashboard";
     }
-    
+
+    // 全部预约
     @GetMapping("/appointments")
-    public String appointments(Authentication authentication, Model model) {
-        User user = userService.findByPhone(authentication.getName());
-        Doctor doctor = doctorService.findByUserId(user.getId());
-        
-        if (doctor != null) {
-            List<Appointment> appointments = appointmentService.findByDoctorId(doctor.getId());
-            model.addAttribute("appointments", appointments);
+    public String appointments(Model model, Authentication authentication) {
+        Long doctorId = getCurrentDoctorId(authentication);
+        if (doctorId == null) {
+            return "redirect:/login";
         }
-        
+        model.addAttribute("allAppointments", doctorService.getAllAppointments(doctorId).get("data"));
         return "doctor/appointments";
     }
-    
-    @GetMapping("/appointment/{id}")
-    public String appointmentDetail(@PathVariable Long id, Model model) {
-        Appointment appointment = appointmentService.findById(id);
-        model.addAttribute("appointment", appointment);
+
+    // 患者详情
+    @GetMapping("/appointment-detail")
+    public String appointmentDetail(@RequestParam Long patientId, Model model, Authentication authentication) {
+        Long doctorId = getCurrentDoctorId(authentication);
+        if (doctorId == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("patient", doctorService.getPatientDetail(patientId).get("data"));
+        model.addAttribute("adviceList", doctorService.getAdviceList(patientId).get("data"));
         return "doctor/appointment-detail";
     }
-    
-    @PostMapping("/appointment/{id}/complete")
-    public String completeAppointment(@PathVariable Long id, @RequestParam String diagnosis,
-                                     @RequestParam String treatment, @RequestParam String notes) {
-        Appointment appointment = appointmentService.findById(id);
-        
-        MedicalRecord medicalRecord = new MedicalRecord();
-        medicalRecord.setUser(appointment.getUser());
-        medicalRecord.setDoctor(appointment.getDoctor());
-        medicalRecord.setDiagnosis(diagnosis);
-        medicalRecord.setTreatment(treatment);
-        medicalRecord.setNotes(notes);
-        medicalRecordService.saveMedicalRecord(medicalRecord);
-        
-        appointment.setStatus("已完成");
-        appointmentService.updateAppointment(appointment);
-        
-        return "redirect:/doctor/appointments";
-    }
-    
-    @GetMapping("/prescription/create")
-    public String createPrescription(@RequestParam Long userId, Model model) {
-        User user = userService.findById(userId);
-        model.addAttribute("user", user);
+
+    // 开处方页面
+    @GetMapping("/prescription-form")
+    public String prescriptionForm(@RequestParam Long patientId, Model model, Authentication authentication) {
+        Long doctorId = getCurrentDoctorId(authentication);
+        if (doctorId == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("patientId", patientId);
+        model.addAttribute("doctorId", doctorId);
         return "doctor/prescription-form";
     }
-    
-    @PostMapping("/prescription/create")
-    public String savePrescription(@RequestParam Long userId, @RequestParam Long doctorId,
-                                   @RequestParam String medicines, @RequestParam String dosage,
-                                   @RequestParam String instructions) {
-        
-        User user = userService.findById(userId);
-        Doctor doctor = doctorService.findById(doctorId);
-        
-        Prescription prescription = new Prescription();
-        prescription.setUser(user);
-        prescription.setDoctor(doctor);
-        prescription.setMedicines(medicines);
-        prescription.setDosage(dosage);
-        prescription.setInstructions(instructions);
-        prescriptionService.savePrescription(prescription);
-        
-        return "redirect:/doctor/appointments";
-    }
-    
+
+    // 排班/号源页面
     @GetMapping("/schedule")
-    public String schedule(Authentication authentication, Model model) {
-        User user = userService.findByPhone(authentication.getName());
-        Doctor doctor = doctorService.findByUserId(user.getId());
-        model.addAttribute("doctor", doctor);
+    public String schedule(Model model, Authentication authentication) {
+        Long doctorId = getCurrentDoctorId(authentication);
+        if (doctorId == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("scheduleList", doctorService.getScheduleList(doctorId).get("data"));
         return "doctor/schedule";
     }
-    
-    @PostMapping("/schedule")
-    public String updateSchedule(@RequestParam Long doctorId, @RequestParam String schedule) {
-        Doctor doctor = doctorService.findById(doctorId);
-        doctor.setSchedule(schedule);
-        doctorService.updateDoctor(doctor);
+
+    // ====================== 功能接口 ======================
+    // 发布号源
+    @PostMapping("/publishSchedule")
+    public String publishSchedule(Schedule schedule, Authentication authentication) {
+        Long doctorId = getCurrentDoctorId(authentication);
+        if (doctorId == null) {
+            return "redirect:/login";
+        }
         
+        Doctor doctor = new Doctor();
+        doctor.setId(doctorId);
+        schedule.setDoctor(doctor);
+        schedule.setRemainNumber(schedule.getTotalNumber());
+        doctorService.publishSchedule(schedule);
         return "redirect:/doctor/schedule";
+    }
+
+    // 保存病历
+    @PostMapping("/saveRecord")
+    public String saveRecord(MedicalRecord record, @RequestParam Long doctorId, Authentication authentication) {
+        Doctor doctor = new Doctor();
+        doctor.setId(doctorId);
+        record.setDoctor(doctor);
+        doctorService.saveRecord(record);
+        return "redirect:/doctor/dashboard";
+    }
+
+    // 开具处方
+    @PostMapping("/createPrescription")
+    public String createPrescription(Prescription prescription, @RequestParam Long doctorId, Authentication authentication) {
+        Doctor doctor = new Doctor();
+        doctor.setId(doctorId);
+        prescription.setDoctor(doctor);
+        doctorService.createPrescription(prescription);
+        return "redirect:/doctor/dashboard";
+    }
+    
+    // 创建医嘱
+    @PostMapping("/createAdvice")
+    public String createAdvice(Advice advice, @RequestParam Long doctorId, Authentication authentication) {
+        Doctor doctor = new Doctor();
+        doctor.setId(doctorId);
+        advice.setDoctor(doctor);
+        doctorService.createAdvice(advice);
+        return "redirect:/doctor/appointment-detail?patientId=" + advice.getUser().getId();
+    }
+    
+    // 修改医嘱
+    @PostMapping("/updateAdvice")
+    public String updateAdvice(Advice advice, Authentication authentication) {
+        doctorService.updateAdvice(advice);
+        return "redirect:/doctor/appointment-detail?patientId=" + advice.getUser().getId();
     }
 }

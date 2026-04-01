@@ -11,68 +11,77 @@ public class MedicalRecord {
     private Long id;
     
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-    
-    @ManyToOne
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
     
-    private String diagnosis;
-    private String treatment;
-    private String notes;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+    
+    private String chiefComplaint;
+    private String presentIllness;
+    private String diagnosisResult;
+    private LocalDateTime diagnosisTime;
     private LocalDateTime createTime;
-    
-    public Long getId() {
-        return id;
+
+    public Long getId() { 
+        return id; 
     }
     
-    public void setId(Long id) {
-        this.id = id;
+    public void setId(Long id) { 
+        this.id = id; 
     }
     
-    public User getUser() {
-        return user;
+    public Doctor getDoctor() { 
+        return doctor; 
     }
     
-    public void setUser(User user) {
-        this.user = user;
+    public void setDoctor(Doctor doctor) { 
+        this.doctor = doctor; 
     }
     
-    public Doctor getDoctor() {
-        return doctor;
+    public User getUser() { 
+        return user; 
     }
     
-    public void setDoctor(Doctor doctor) {
-        this.doctor = doctor;
+    public void setUser(User user) { 
+        this.user = user; 
     }
     
-    public String getDiagnosis() {
-        return diagnosis;
+    public String getChiefComplaint() { 
+        return chiefComplaint; 
     }
     
-    public void setDiagnosis(String diagnosis) {
-        this.diagnosis = diagnosis;
+    public void setChiefComplaint(String chiefComplaint) { 
+        this.chiefComplaint = chiefComplaint; 
     }
     
-    public String getTreatment() {
-        return treatment;
+    public String getPresentIllness() { 
+        return presentIllness; 
     }
     
-    public void setTreatment(String treatment) {
-        this.treatment = treatment;
+    public void setPresentIllness(String presentIllness) { 
+        this.presentIllness = presentIllness; 
     }
     
-    public String getNotes() {
-        return notes;
+    public String getDiagnosisResult() { 
+        return diagnosisResult; 
     }
     
-    public void setNotes(String notes) {
-        this.notes = notes;
+    public void setDiagnosisResult(String diagnosisResult) { 
+        this.diagnosisResult = diagnosisResult; 
     }
     
-    public LocalDateTime getCreateTime() {
-        return createTime;
+    public LocalDateTime getDiagnosisTime() { 
+        return diagnosisTime; 
+    }
+    
+    public void setDiagnosisTime(LocalDateTime diagnosisTime) { 
+        this.diagnosisTime = diagnosisTime; 
+    }
+    
+    public LocalDateTime getCreateTime() { 
+        return createTime; 
     }
     
     public void setCreateTime(LocalDateTime createTime) {

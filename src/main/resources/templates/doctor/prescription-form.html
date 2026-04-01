@@ -1,52 +1,62 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>开具处方 - 医院挂号系统</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>开具处方</title>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap/3.3.7/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="dashboard-container">
-        <div class="sidebar">
-            <h3>医生中心</h3>
-            <ul>
-                <li><a href="/doctor/dashboard">首页</a></li>
-                <li><a href="/doctor/appointments">患者预约</a></li>
-                <li><a href="/doctor/schedule">排班管理</a></li>
-                <li><a href="/logout">退出登录</a></li>
-            </ul>
+<div class="container" style="margin-top:30px;">
+    <h3>病历记录</h3>
+    <form id="diagnosisForm" method="post" th:action="@{/doctor/saveRecord}">
+        <input type="hidden" name="patientId" th:value="${patientId}">
+        <input type="hidden" name="doctorId" th:value="${doctorId}">
+
+        <div class="form-group">
+            <label>主诉：</label>
+            <textarea name="chiefComplaint" class="form-control" rows="2" required></textarea>
         </div>
-        
-        <div class="main-content">
-            <h1>开具处方</h1>
-            <form th:action="@{/doctor/prescription/create}" method="post">
-                <input type="hidden" name="userId" th:value="${user.id}">
-                <input type="hidden" name="doctorId" th:value="${doctorId}">
-                
-                <div class="form-group">
-                    <label>患者姓名</label>
-                    <input type="text" th:value="${user.name}" disabled>
-                </div>
-                
-                <div class="form-group">
-                    <label>药品信息</label>
-                    <textarea name="medicines" rows="4" required></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>用法用量</label>
-                    <textarea name="dosage" rows="3" required></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>服用说明</label>
-                    <textarea name="instructions" rows="3" required></textarea>
-                </div>
-                
-                <button type="submit" class="btn btn-primary">开具处方</button>
-            </form>
+        <div class="form-group">
+            <label>现病史：</label>
+            <textarea name="presentIllness" class="form-control" rows="3" required></textarea>
         </div>
-    </div>
+        <div class="form-group">
+            <label>诊断结果：</label>
+            <textarea name="diagnosisResult" class="form-control" rows="2" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">保存病历</button>
+    </form>
+
+    <h3 style="margin-top:40px;">开具处方</h3>
+    <form id="presForm" method="post" th:action="@{/doctor/createPrescription}">
+        <input type="hidden" name="patientId" th:value="${patientId}">
+        <input type="hidden" name="doctorId" th:value="${doctorId}">
+
+        <div class="form-group">
+            <label>药品列表：</label>
+            <input type="text" name="drugList" class="form-control" placeholder="例：阿莫西林，布洛芬" required>
+        </div>
+        <div class="form-group">
+            <label>用法用量：</label>
+            <textarea name="usage" class="form-control" rows="2" placeholder="例：口服，一日三次，一次一片" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">确认开方</button>
+    </form>
+
+    <h3 style="margin-top:40px;">添加医嘱</h3>
+    <form id="adviceForm" method="post" th:action="@{/doctor/createAdvice}">
+        <input type="hidden" name="patientId" th:value="${patientId}">
+        <input type="hidden" name="doctorId" th:value="${doctorId}">
+
+        <div class="form-group">
+            <label>医嘱内容：</label>
+            <textarea name="content" class="form-control" rows="3" placeholder="例：注意休息，多喝水，避免剧烈运动" required></textarea>
+        </div>
+        <input type="hidden" name="user.id" th:value="${patientId}">
+        <button type="submit" class="btn btn-warning">添加医嘱</button>
+    </form>
+
+    <a href="/doctor/dashboard" class="btn btn-default" style="margin-top:20px;">返回工作台</a>
+</div>
 </body>
 </html>
