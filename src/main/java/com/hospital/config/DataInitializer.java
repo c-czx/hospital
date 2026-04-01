@@ -115,19 +115,34 @@ public class DataInitializer implements CommandLineRunner {
     }
     
     private void initializeDoctors() {
-        User doctor1User = userService.findByPhone("13800000001");
-        Department internalMedicine = departmentService.findByNameContaining("内科").get(0);
+        System.out.println("========================================");
+        System.out.println("【初始化医生数据】开始检查...");
         
-        if (doctor1User != null && internalMedicine != null) {
-            if (doctorService.findByUserId(doctor1User.getId()) == null) {
-                Doctor doctor1 = new Doctor();
-                doctor1.setUser(doctor1User);
-                doctor1.setDepartment(internalMedicine);
-                doctor1.setTitle("主任医师");
-                doctor1.setSpecialty("心血管疾病");
-                doctor1.setSchedule("周一至周五 8:00-12:00, 14:00-17:00");
-                doctorService.saveDoctor(doctor1);
+        // 为所有 DOCTOR 角色的用户创建医生记录
+        java.util.List<User> doctorUsers = userService.findByRole("DOCTOR");
+        System.out.println("【医生用户数量】" + doctorUsers.size());
+        
+        for (User user : doctorUsers) {
+            Doctor existingDoctor = doctorService.findByUserId(user.getId());
+            if (existingDoctor == null) {
+                System.out.println("【创建医生记录】用户：" + user.getName() + ", ID: " + user.getId());
+                
+                Department internalMedicine = departmentService.findByNameContaining("内科").get(0);
+                
+                Doctor doctor = new Doctor();
+                doctor.setUser(user);
+                doctor.setDepartment(internalMedicine);
+                doctor.setTitle("主任医师");
+                doctor.setSpecialty("普通内科");
+                doctor.setSchedule("周一至周五 8:00-12:00, 14:00-17:00");
+                doctorService.saveDoctor(doctor);
+                
+                System.out.println("【创建成功】医生 ID: " + doctor.getId());
+            } else {
+                System.out.println("【已存在】用户：" + user.getName() + ", 医生 ID: " + existingDoctor.getId());
             }
         }
+        
+        System.out.println("========================================");
     }
 }
