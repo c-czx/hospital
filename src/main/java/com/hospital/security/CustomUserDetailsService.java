@@ -19,11 +19,21 @@ public class CustomUserDetailsService implements UserDetailsService {
     
     @Override
     public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
+        System.out.println("========================================");
+        System.out.println("【尝试登录】手机号：" + phone);
+        
         User user = userService.findByPhone(phone);
         
         if (user == null) {
+            System.out.println("【用户不存在】手机号：" + phone);
+            System.out.println("========================================");
             throw new UsernameNotFoundException("用户不存在");
         }
+        
+        System.out.println("【用户找到】姓名：" + user.getName());
+        System.out.println("【用户角色】" + user.getRole());
+        System.out.println("【加密密码】" + user.getPassword().substring(0, 10) + "...");
+        System.out.println("========================================");
         
         return new org.springframework.security.core.userdetails.User(
             user.getPhone(),

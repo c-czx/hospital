@@ -8,6 +8,7 @@ import com.hospital.entity.Doctor;
 import com.hospital.entity.User;
 import com.hospital.service.DoctorService;
 import com.hospital.service.UserService;
+import com.hospital.service.AdviceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -27,6 +28,9 @@ public class DoctorController {
     @Autowired
     private UserService userService;
     
+    @Autowired
+    private AdviceService adviceService;
+    
     private Long getCurrentDoctorId(Authentication authentication) {
         String phone = authentication.getName();
         User user = userService.findByPhone(phone);
@@ -37,8 +41,6 @@ public class DoctorController {
         return doctor != null ? doctor.getId() : null;
     }
 
-    // ====================== 页面跳转 ======================
-    // 医生工作台
     @GetMapping("/dashboard")
     public String dashboard(Model model, Authentication authentication) {
         Long doctorId = getCurrentDoctorId(authentication);
@@ -49,7 +51,6 @@ public class DoctorController {
         return "doctor/dashboard";
     }
 
-    // 全部预约
     @GetMapping("/appointments")
     public String appointments(Model model, Authentication authentication) {
         Long doctorId = getCurrentDoctorId(authentication);
@@ -60,7 +61,6 @@ public class DoctorController {
         return "doctor/appointments";
     }
 
-    // 患者详情
     @GetMapping("/appointment-detail")
     public String appointmentDetail(@RequestParam Long patientId, Model model, Authentication authentication) {
         Long doctorId = getCurrentDoctorId(authentication);
@@ -72,7 +72,6 @@ public class DoctorController {
         return "doctor/appointment-detail";
     }
 
-    // 开处方页面
     @GetMapping("/prescription-form")
     public String prescriptionForm(@RequestParam Long patientId, Model model, Authentication authentication) {
         Long doctorId = getCurrentDoctorId(authentication);
@@ -84,7 +83,6 @@ public class DoctorController {
         return "doctor/prescription-form";
     }
 
-    // 排班/号源页面
     @GetMapping("/schedule")
     public String schedule(Model model, Authentication authentication) {
         Long doctorId = getCurrentDoctorId(authentication);
@@ -94,9 +92,57 @@ public class DoctorController {
         model.addAttribute("scheduleList", doctorService.getScheduleList(doctorId).get("data"));
         return "doctor/schedule";
     }
+    
+    @GetMapping("/profile")
+    public String profile(Model model, Authentication authentication) {
+        Long doctorId = getCurrentDoctorId(authentication);
+        if (doctorId == null) {
+            return "redirect:/login";
+        }
+        Doctor doctor = doctorService.findById(doctorId);
+        model.addAttribute("doctor", doctor);
+        return "doctor/profile";
+    }
+    
+    @PostMapping("/profile/update")
+    public String updateProfile(@RequestParam String name, @RequestParam String gender,
+                               @RequestParam Integer age, @RequestParam String phone,
+                               @RequestParam String email, @RequestParam String title,
+                               @RequestParam String specialty, @RequestParam String schedule,
+                               Authentication authentication) {
+        Long doctorId = getCurrentDoctorId(authentication);
+        if (doctorId == null) {
+            return "redirect:/login";
+        }
+        
+        Doctor doctor = doctorService.findById(doctorId);
+        User user = doctor.getUser();
+        
+        user.setName(name);
+        user.setGender(gender);
+        user.setAge(age);
+        user.setPhone(phone);
+        user.setEmail(email);
+        userService.updateUser(user);
+        
+        doctor.setTitle(title);
+        doctor.setSpecialty(specialty);
+        doctor.setSchedule(schedule);
+        doctorService.updateDoctor(doctor);
+        
+        return "redirect:/doctor/profile";
+    }
+    
+    @GetMapping("/advices")
+    public String advices(Model model, Authentication authentication) {
+        Long doctorId = getCurrentDoctorId(authentication);
+        if (doctorId == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("advices", adviceService.getAdvicesWithPatientName(doctorId));
+        return "doctor/advices";
+    }
 
-    // ====================== 功能接口 ======================
-    // 发布号源
     @PostMapping("/publishSchedule")
     public String publishSchedule(Schedule schedule, Authentication authentication) {
         Long doctorId = getCurrentDoctorId(authentication);
@@ -112,7 +158,6 @@ public class DoctorController {
         return "redirect:/doctor/schedule";
     }
 
-    // 保存病历
     @PostMapping("/saveRecord")
     public String saveRecord(MedicalRecord record, @RequestParam Long doctorId, Authentication authentication) {
         Doctor doctor = new Doctor();
@@ -122,7 +167,6 @@ public class DoctorController {
         return "redirect:/doctor/dashboard";
     }
 
-    // 开具处方
     @PostMapping("/createPrescription")
     public String createPrescription(Prescription prescription, @RequestParam Long doctorId, Authentication authentication) {
         Doctor doctor = new Doctor();
@@ -132,7 +176,6 @@ public class DoctorController {
         return "redirect:/doctor/dashboard";
     }
     
-    // 创建医嘱
     @PostMapping("/createAdvice")
     public String createAdvice(Advice advice, @RequestParam Long doctorId, Authentication authentication) {
         Doctor doctor = new Doctor();
@@ -142,7 +185,6 @@ public class DoctorController {
         return "redirect:/doctor/appointment-detail?patientId=" + advice.getUser().getId();
     }
     
-    // 修改医嘱
     @PostMapping("/updateAdvice")
     public String updateAdvice(Advice advice, Authentication authentication) {
         doctorService.updateAdvice(advice);

@@ -23,8 +23,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/", "/login", "/register", "/captcha").permitAll()
+                .requestMatchers("/", "/login", "/register", "/captcha", "/css/**", "/js/**", "/debug/**").permitAll()
                 .requestMatchers("/patient/**").hasRole("PATIENT")
                 .requestMatchers("/doctor/**").hasRole("DOCTOR")
                 .requestMatchers("/nurse/**").hasRole("NURSE")
