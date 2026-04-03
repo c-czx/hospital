@@ -19,7 +19,10 @@ public class Prescription {
     private User user;
     
     private String drugList;
+
+    @Column(name = "usage_info")
     private String usage;
+    
     private LocalDateTime createTime;
 
     public Long getId() { 
