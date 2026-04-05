@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * 管理员控制器
+ * 提供管理员端的用户管理、科室管理、医生管理、预约管理等功能
+ */
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
@@ -25,6 +29,9 @@ public class AdminController {
     @Autowired
     private AppointmentService appointmentService;
     
+    /**
+     * 显示管理员首页
+     */
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         long userCount = userService.findAll().size();
@@ -40,6 +47,9 @@ public class AdminController {
         return "admin/dashboard";
     }
     
+    /**
+     * 显示用户列表
+     */
     @GetMapping("/users")
     public String users(Model model) {
         List<User> users = userService.findAll();
@@ -47,18 +57,27 @@ public class AdminController {
         return "admin/users";
     }
     
+    /**
+     * 显示添加用户表单
+     */
     @GetMapping("/user/create")
     public String createUserForm(Model model) {
         model.addAttribute("user", new User());
         return "admin/user-form";
     }
     
+    /**
+     * 处理添加用户请求
+     */
     @PostMapping("/user/create")
     public String createUser(@ModelAttribute User user) {
         userService.saveUser(user);
         return "redirect:/admin/users";
     }
     
+    /**
+     * 显示编辑用户表单
+     */
     @GetMapping("/user/edit/{id}")
     public String editUser(@PathVariable Long id, Model model) {
         User user = userService.findById(id);
@@ -66,19 +85,34 @@ public class AdminController {
         return "admin/user-form";
     }
     
+    /**
+     * 处理编辑用户请求
+     */
     @PostMapping("/user/edit/{id}")
     public String updateUser(@PathVariable Long id, @ModelAttribute User user) {
-        user.setId(id);
-        userService.updateUser(user);
+        User existingUser = userService.findById(id);
+        if (existingUser != null) {
+            if (user.getPassword() == null || user.getPassword().isEmpty()) {
+                user.setPassword(existingUser.getPassword());
+            }
+            user.setId(id);
+            userService.updateUser(user);
+        }
         return "redirect:/admin/users";
     }
     
+    /**
+     * 删除用户
+     */
     @GetMapping("/user/delete/{id}")
     public String deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return "redirect:/admin/users";
     }
     
+    /**
+     * 显示科室列表
+     */
     @GetMapping("/departments")
     public String departments(Model model) {
         List<Department> departments = departmentService.findAll();
@@ -86,18 +120,27 @@ public class AdminController {
         return "admin/departments";
     }
     
+    /**
+     * 显示添加科室表单
+     */
     @GetMapping("/department/create")
     public String createDepartmentForm(Model model) {
         model.addAttribute("department", new Department());
         return "admin/department-form";
     }
     
+    /**
+     * 处理添加科室请求
+     */
     @PostMapping("/department/create")
     public String createDepartment(@ModelAttribute Department department) {
         departmentService.saveDepartment(department);
         return "redirect:/admin/departments";
     }
     
+    /**
+     * 显示编辑科室表单
+     */
     @GetMapping("/department/edit/{id}")
     public String editDepartment(@PathVariable Long id, Model model) {
         Department department = departmentService.findById(id);
@@ -105,6 +148,9 @@ public class AdminController {
         return "admin/department-form";
     }
     
+    /**
+     * 处理编辑科室请求
+     */
     @PostMapping("/department/edit/{id}")
     public String updateDepartment(@PathVariable Long id, @ModelAttribute Department department) {
         department.setId(id);
@@ -112,12 +158,18 @@ public class AdminController {
         return "redirect:/admin/departments";
     }
     
+    /**
+     * 删除科室
+     */
     @GetMapping("/department/delete/{id}")
     public String deleteDepartment(@PathVariable Long id) {
         departmentService.deleteDepartment(id);
         return "redirect:/admin/departments";
     }
     
+    /**
+     * 显示医生列表
+     */
     @GetMapping("/doctors")
     public String doctors(Model model) {
         List<Doctor> doctors = doctorService.findAll();
@@ -125,16 +177,22 @@ public class AdminController {
         return "admin/doctors";
     }
     
+    /**
+     * 显示添加医生表单
+     */
     @GetMapping("/doctor/create")
     public String createDoctorForm(Model model) {
         List<Department> departments = departmentService.findAll();
-        List<User> users = userService.findByRole("doctor");
+        List<User> users = userService.findByRole("DOCTOR");
         model.addAttribute("doctor", new Doctor());
         model.addAttribute("departments", departments);
         model.addAttribute("users", users);
         return "admin/doctor-form";
     }
     
+    /**
+     * 处理添加医生请求
+     */
     @PostMapping("/doctor/create")
     public String createDoctor(@RequestParam Long userId, @RequestParam Long departmentId,
                            @RequestParam String title, @RequestParam String specialty,
@@ -153,17 +211,23 @@ public class AdminController {
         return "redirect:/admin/doctors";
     }
     
+    /**
+     * 显示编辑医生表单
+     */
     @GetMapping("/doctor/edit/{id}")
     public String editDoctor(@PathVariable Long id, Model model) {
         Doctor doctor = doctorService.findById(id);
         List<Department> departments = departmentService.findAll();
-        List<User> users = userService.findByRole("doctor");
+        List<User> users = userService.findByRole("DOCTOR");
         model.addAttribute("doctor", doctor);
         model.addAttribute("departments", departments);
         model.addAttribute("users", users);
         return "admin/doctor-form";
     }
     
+    /**
+     * 处理编辑医生请求
+     */
     @PostMapping("/doctor/edit/{id}")
     public String updateDoctor(@PathVariable Long id, @RequestParam Long userId, @RequestParam Long departmentId,
                            @RequestParam String title, @RequestParam String specialty,
@@ -182,12 +246,18 @@ public class AdminController {
         return "redirect:/admin/doctors";
     }
     
+    /**
+     * 删除医生
+     */
     @GetMapping("/doctor/delete/{id}")
     public String deleteDoctor(@PathVariable Long id) {
         doctorService.deleteDoctor(id);
         return "redirect:/admin/doctors";
     }
     
+    /**
+     * 显示预约列表
+     */
     @GetMapping("/appointments")
     public String appointments(Model model) {
         List<Appointment> appointments = appointmentService.findAll();

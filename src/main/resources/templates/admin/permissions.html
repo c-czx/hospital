@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>用户管理 - 医院挂号系统</title>
+    <title>权限管理 - 医院挂号系统</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -22,29 +22,30 @@
         </div>
         
         <div class="main-content">
-            <h1>用户管理</h1>
-            <a href="/admin/user/create" class="btn btn-primary">添加用户</a>
+            <h1>权限管理</h1>
             <table class="data-table">
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>用户名</th>
                         <th>姓名</th>
-                        <th>角色</th>
-                        <th>性别</th>
-                        <th>电话</th>
+                        <th>当前角色</th>
                         <th>操作</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="user : ${users}">
                         <td th:text="${user.id}"></td>
+                        <td th:text="${user.phone}"></td>
                         <td th:text="${user.name}"></td>
                         <td th:text="${user.role}"></td>
-                        <td th:text="${user.gender == 'male' ? '男' : '女'}"></td>
-                        <td th:text="${user.phone}"></td>
                         <td>
-                            <a th:href="@{/admin/user/edit/{id}(id=${user.id})}" class="btn btn-secondary">编辑</a>
-                            <a th:href="@{/admin/user/delete/{id}(id=${user.id})}" class="btn btn-danger">删除</a>
+                            <select th:onchange="window.location.href='/admin/permission/update/' + ${user.id} + '?role=' + this.value" class="btn btn-secondary">
+                                <option value="PATIENT" th:selected="${user.role == 'PATIENT'}">患者</option>
+                                <option value="DOCTOR" th:selected="${user.role == 'DOCTOR'}">医生</option>
+                                <option value="NURSE" th:selected="${user.role == 'NURSE'}">护士</option>
+                                <option value="ADMIN" th:selected="${user.role == 'ADMIN'}">管理员</option>
+                            </select>
                         </td>
                     </tr>
                 </tbody>

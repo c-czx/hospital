@@ -11,6 +11,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
+/**
+ * 自定义用户详情服务
+ * 用户登录后，Spring Security使用该类根据用户输入的手机号查询，获取用户详情
+ * 根据用户详情验证密码是否匹配
+ * 用于Spring Security认证
+ */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
     

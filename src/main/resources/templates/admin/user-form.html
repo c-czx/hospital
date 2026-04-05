@@ -13,6 +13,7 @@
             <ul>
                 <li><a href="/admin/dashboard">首页</a></li>
                 <li><a href="/admin/users">用户管理</a></li>
+                <li><a href="/admin/permissions">权限管理</a></li>
                 <li><a href="/admin/departments">科室管理</a></li>
                 <li><a href="/admin/doctors">医生管理</a></li>
                 <li><a href="/admin/appointments">预约管理</a></li>
@@ -22,14 +23,11 @@
         
         <div class="main-content">
             <h1 th:text="${user.id != null ? '编辑用户' : '添加用户'}"></h1>
-            <form th:action="@{/admin/user/create}" method="post" th:object="${user}">
+            <form th:action="${user.id != null ? '/admin/user/edit/' + user.id : '/admin/user/create'}" method="post" th:object="${user}">
                 <div class="form-group">
-                    <label>用户名</label>
-                    <input type="text" th:field="*{username}" required>
-                </div>
-                <div class="form-group">
-                    <label>密码</label>
-                    <input type="password" th:field="*{password}" required>
+                    <label th:if="${user.id == null}">密码</label>
+                    <label th:if="${user.id != null}">密码（留空则保持不变）</label>
+                    <input type="password" th:field="*{password}" th:placeholder="留空则保持不变">
                 </div>
                 <div class="form-group">
                     <label>姓名</label>
@@ -38,10 +36,10 @@
                 <div class="form-group">
                     <label>角色</label>
                     <select th:field="*{role}" required>
-                        <option value="patient">患者</option>
-                        <option value="doctor">医生</option>
-                        <option value="nurse">护士</option>
-                        <option value="admin">管理员</option>
+                        <option value="PATIENT">患者</option>
+                        <option value="DOCTOR">医生</option>
+                        <option value="NURSE">护士</option>
+                        <option value="ADMIN">管理员</option>
                     </select>
                 </div>
                 <div class="form-group">

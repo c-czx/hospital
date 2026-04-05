@@ -8,6 +8,10 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 
+/**
+ * 数据初始化器
+ * 在应用启动时初始化基础数据
+ */
 @Component
 public class DataInitializer implements CommandLineRunner {
     
@@ -31,6 +35,9 @@ public class DataInitializer implements CommandLineRunner {
         initializeDoctors();
     }
     
+    /**
+     * 初始化用户数据
+     */
     private void initializeUsers() {
         if (userService.findByPhone("13800000000") == null) {
             User admin = new User();
@@ -77,6 +84,9 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
     
+    /**
+     * 初始化科室数据
+     */
     private void initializeDepartments() {
         if (departmentService.findByNameContaining("内科").isEmpty()) {
             Department internalMedicine = new Department();
@@ -114,6 +124,9 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
     
+    /**
+     * 初始化医生数据
+     */
     private void initializeDoctors() {
         System.out.println("========================================");
         System.out.println("【初始化医生数据】开始检查...");

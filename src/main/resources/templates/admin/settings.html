@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统设置 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>管理员中心</h3>
+            <ul>
+                <li><a href="/admin/dashboard">首页</a></li>
+                <li><a href="/admin/users">用户管理</a></li>
+                <li><a href="/admin/permissions">权限管理</a></li>
+                <li><a href="/admin/departments">科室管理</a></li>
+                <li><a href="/admin/doctors">医生管理</a></li>
+                <li><a href="/admin/appointments">预约管理</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>系统设置</h1>
+            <div class="dashboard-cards">
+                <div class="card">
+                    <h3>🏥 医院信息</h3>
+                    <form th:action="@{/admin/settings/hospital}" method="post">
+                        <div class="form-group">
+                            <label>医院名称</label>
+                            <input type="text" name="hospitalName" th:value="${hospitalName}">
+                        </div>
+                        <div class="form-group">
+                            <label>医院地址</label>
+                            <input type="text" name="hospitalAddress" th:value="${hospitalAddress}">
+                        </div>
+                        <div class="form-group">
+                            <label>联系电话</label>
+                            <input type="text" name="hospitalPhone" th:value="${hospitalPhone}">
+                        </div>
+                        <div class="form-group">
+                            <label>医院简介</label>
+                            <textarea name="hospitalDescription" rows="4" th:text="${hospitalDescription}"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">保存设置</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>⏰ 预约设置</h3>
+                    <form th:action="@{/admin/settings/appointment}" method="post">
+                        <div class="form-group">
+                            <label>每天最大预约数</label>
+                            <input type="number" name="maxAppointmentsPerDay" th:value="${maxAppointmentsPerDay}">
+                        </div>
+                        <div class="form-group">
+                            <label>预约提前天数</label>
+                            <input type="number" name="advanceDays" th:value="${advanceDays}">
+                        </div>
+                        <div class="form-group">
+                            <label>号源释放时间</label>
+                            <input type="time" name="scheduleReleaseTime" th:value="${scheduleReleaseTime}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">保存设置</button>
+                    </form>
+                </div>
+                <div class="card">
+                    <h3>🔧 系统配置</h3>
+                    <form th:action="@{/admin/settings/system}" method="post">
+                        <div class="form-group">
+                            <label>系统维护模式</label>
+                            <select name="maintenanceMode">
+                                <option value="false" th:selected="${!maintenanceMode}">关闭</option>
+                                <option value="true" th:selected="${maintenanceMode}">开启</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>维护说明</label>
+                            <textarea name="maintenanceMessage" rows="3" th:text="${maintenanceMessage}"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>日志保留天数</label>
+                            <input type="number" name="logRetentionDays" th:value="${logRetentionDays}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">保存设置</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
