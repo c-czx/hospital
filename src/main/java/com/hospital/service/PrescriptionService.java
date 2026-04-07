@@ -34,10 +34,6 @@ public class PrescriptionService {
         return prescriptionRepository.findAll();
     }
     
-    public Prescription updatePrescription(Prescription prescription) {
-        return prescriptionRepository.save(prescription);
-    }
-    
     public void deletePrescription(Long id) {
         prescriptionRepository.deleteById(id);
     }

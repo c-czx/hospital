@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/patient")
@@ -48,10 +49,9 @@ public class PatientController {
     }
     
     @GetMapping("/doctors")
-    public String getDoctors(@RequestParam Long departmentId, Model model) {
-        List<Doctor> doctors = doctorService.findByDepartmentId(departmentId);
-        model.addAttribute("doctors", doctors);
-        return "patient/doctors :: doctorsList";
+    @ResponseBody
+    public List<Doctor> getDoctors(@RequestParam Long departmentId) {
+        return doctorService.findByDepartmentId(departmentId);
     }
     
     @PostMapping("/book")
@@ -63,14 +63,52 @@ public class PatientController {
         Doctor doctor = doctorService.findById(doctorId);
         Department department = departmentService.findById(departmentId);
         
+        LocalDateTime appointTime = LocalDateTime.parse(appointmentTime);
+        LocalDateTime now = LocalDateTime.now();
+        
+        if (appointTime.isBefore(now)) {
+            return "redirect:/patient/book?error=past_time";
+        }
+        
+        Map<String, Object> scheduleResult = doctorService.getScheduleList(doctorId);
+        @SuppressWarnings("unchecked")
+        List<Object> scheduleData = (List<Object>) scheduleResult.get("data");
+        
+        boolean validSchedule = false;
+        if (scheduleData != null) {
+            for (Object schObj : scheduleData) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> sch = (Map<String, Object>) schObj;
+                LocalDateTime startTime = (LocalDateTime) sch.get("startTime");
+                LocalDateTime endTime = (LocalDateTime) sch.get("endTime");
+                Integer remainNumber = (Integer) sch.get("remainNumber");
+                Integer status = (Integer) sch.get("status");
+                
+                if (startTime != null && endTime != null && remainNumber != null && status != null &&
+                    status == 1 &&
+                    !appointTime.isBefore(startTime) && !appointTime.isAfter(endTime) && remainNumber > 0) {
+                    validSchedule = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!validSchedule) {
+            return "redirect:/patient/book?error=invalid_time";
+        }
+        
         Appointment appointment = new Appointment();
         appointment.setUser(user);
         appointment.setDoctor(doctor);
         appointment.setDepartment(department);
-        appointment.setAppointmentTime(LocalDateTime.parse(appointmentTime));
+        appointment.setAppointmentTime(appointTime);
+        appointment.setStatus("已预约");
+        appointment.setCreateTime(LocalDateTime.now());
         appointment.setSymptoms(symptoms);
         
         appointmentService.saveAppointment(appointment);
+        
+        doctorService.decreaseScheduleRemainNumber(doctorId, appointTime);
         
         return "redirect:/patient/appointments";
     }

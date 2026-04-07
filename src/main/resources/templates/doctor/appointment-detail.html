@@ -1,66 +1,191 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>预约详情 - 医院挂号系统</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <title>患者详情</title>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+        .navbar {
+            margin-bottom: 0;
+            border-radius: 0;
+        }
+        .container-fluid {
+            padding-top: 20px;
+        }
+        .sidebar {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            padding: 10px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .sidebar a:hover {
+            background: #10b981;
+            color: white;
+        }
+        .main-content {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .info-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .info-section h4 {
+            color: #10b981;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #10b981;
+            padding-bottom: 10px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+    </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <div class="sidebar">
-            <h3>医生中心</h3>
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/doctor/dashboard">医院管理系统 - 医生端</a>
+        </div>
+        <ul class="nav navbar-nav navbar-right">
+            <li><a href="/doctor/profile"><span class="glyphicon glyphicon-user"></span> 个人信息</a></li>
+            <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> 退出登录</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 sidebar">
             <ul>
-                <li><a href="/doctor/dashboard">首页</a></li>
-                <li><a href="/doctor/appointments">患者预约</a></li>
-                <li><a href="/doctor/schedule">排班管理</a></li>
-                <li><a href="/logout">退出登录</a></li>
+                <li><a href="/doctor/dashboard"><span class="glyphicon glyphicon-home"></span> 医生首页</a></li>
+                <li><a href="/doctor/schedule"><span class="glyphicon glyphicon-time"></span> 号源发布</a></li>
+                <li><a href="/doctor/patients"><span class="glyphicon glyphicon-user"></span> 我的就诊</a></li>
+                <li><a href="/doctor/prescriptions"><span class="glyphicon glyphicon-list-alt"></span> 处方管理</a></li>
             </ul>
         </div>
-        
-        <div class="main-content">
-            <h1>预约详情</h1>
-            <div class="appointment-detail">
-                <div class="patient-info">
-                    <h3>患者信息</h3>
-                    <p><strong>姓名：</strong><span th:text="${appointment.user.name}"></span></p>
-                    <p><strong>性别：</strong><span th:text="${appointment.user.gender == 'male' ? '男' : '女'}"></span></p>
-                    <p><strong>电话：</strong><span th:text="${appointment.user.phone}"></span></p>
-                    <p><strong>邮箱：</strong><span th:text="${appointment.user.email}"></span></p>
-                </div>
-                
-                <div class="appointment-info">
-                    <h3>预约信息</h3>
-                    <p><strong>科室：</strong><span th:text="${appointment.department.name}"></span></p>
-                    <p><strong>预约时间：</strong><span th:text="${appointment.appointmentTime}"></span></p>
-                    <p><strong>症状：</strong><span th:text="${appointment.symptoms}"></span></p>
-                    <p><strong>状态：</strong><span th:text="${appointment.status}"></span></p>
-                </div>
-                
-                <div class="diagnosis-form">
-                    <h3>诊疗记录</h3>
-                    <form th:action="@{/doctor/appointment/{id}/complete(id=${appointment.id})}" method="post">
-                        <div class="form-group">
-                            <label>诊断结果</label>
-                            <textarea name="diagnosis" rows="3" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>治疗方案</label>
-                            <textarea name="treatment" rows="3" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>医嘱备注</label>
-                            <textarea name="notes" rows="3"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">完成诊疗</button>
-                    </form>
-                </div>
-                
-                <div class="prescription-action">
-                    <a th:href="@{/doctor/prescription/create(userId=${appointment.user.id}, doctorId=${appointment.doctor.id})}" class="btn btn-secondary">开具处方</a>
-                </div>
+
+        <div class="col-md-10 main-content">
+            <h3>患者详情</h3>
+
+            <div class="info-section">
+                <h4>患者信息</h4>
+                <p><strong>姓名：</strong><span th:text="${patient.name}"></span></p>
+                <p><strong>性别：</strong><span th:text="${patient.gender == 'male' ? '男' : '女'}"></span></p>
+                <p><strong>年龄：</strong><span th:text="${patient.age}"></span></p>
+                <p><strong>电话：</strong><span th:text="${patient.phone}"></span></p>
+                <p><strong>邮箱：</strong><span th:text="${patient.email}"></span></p>
             </div>
+
+            <div class="info-section">
+                <h4>保存病历</h4>
+                <form method="post" th:action="@{/doctor/saveRecord}">
+                    <input type="hidden" name="doctorId" th:value="${doctorId}">
+                    <input type="hidden" name="user.id" th:value="${patient.id}">
+
+                    <div class="form-group">
+                        <label>主诉：</label>
+                        <textarea name="chiefComplaint" class="form-control" rows="2" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>现病史：</label>
+                        <textarea name="presentIllness" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>诊断结果：</label>
+                        <textarea name="diagnosisResult" class="form-control" rows="2" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">保存病历</button>
+                </form>
+            </div>
+
+            <div class="info-section">
+                <h4>开具处方</h4>
+                <form method="post" th:action="@{/doctor/createPrescription}">
+                    <input type="hidden" name="doctorId" th:value="${doctorId}">
+                    <input type="hidden" name="patientId" th:value="${patient.id}">
+
+                    <div class="form-group">
+                        <label>药品列表：</label>
+                        <input type="text" name="drugList" class="form-control" placeholder="例：阿莫西林，布洛芬" required>
+                    </div>
+                    <div class="form-group">
+                        <label>用法用量：</label>
+                        <textarea name="usage" class="form-control" rows="2" placeholder="例：口服，一日三次，一次一片" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">确认开方</button>
+                </form>
+            </div>
+
+            <div class="info-section">
+                <h4>添加医嘱</h4>
+                <form method="post" th:action="@{/doctor/createAdvice}">
+                    <input type="hidden" name="doctorId" th:value="${doctorId}">
+                    <input type="hidden" name="user.id" th:value="${patient.id}">
+
+                    <div class="form-group">
+                        <label>医嘱内容：</label>
+                        <textarea name="content" class="form-control" rows="3" placeholder="例：注意休息，多喝水，避免剧烈运动" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-warning">添加医嘱</button>
+                </form>
+            </div>
+
+            <div class="info-section" th:if="${adviceList != null and !#lists.isEmpty(adviceList)}">
+                <h4>历史医嘱</h4>
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>医嘱内容</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="advice : ${adviceList}">
+                        <td th:text="${advice.content}"></td>
+                        <td>
+                            <span th:if="${advice.status == 1}" class="label label-success">有效</span>
+                            <span th:if="${advice.status == 0}" class="label label-default">无效</span>
+                        </td>
+                        <td th:text="${#temporals.format(advice.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <a href="/doctor/dashboard" class="btn btn-default">返回工作台</a>
         </div>
     </div>
+</div>
+
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </body>
 </html>

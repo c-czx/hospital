@@ -12,14 +12,41 @@
             margin-bottom: 0;
             border-radius: 0;
         }
-        .container {
+        .container-fluid {
             padding-top: 20px;
         }
-        .profile-container {
+        .sidebar {
             background: white;
-            padding: 30px;
+            padding: 20px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            padding: 10px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .sidebar a:hover {
+            background: #10b981;
+            color: white;
+        }
+        .main-content {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .profile-container {
             max-width: 800px;
             margin: 0 auto;
         }
@@ -38,55 +65,78 @@
     </div>
 </nav>
 
-<div class="container">
-    <div class="profile-container">
-        <h2 style="margin-bottom: 30px;">个人信息</h2>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 sidebar">
+            <ul>
+                <li><a href="/doctor/dashboard"><span class="glyphicon glyphicon-home"></span> 医生首页</a></li>
+                <li><a href="/doctor/schedule"><span class="glyphicon glyphicon-time"></span> 号源发布</a></li>
+                <li><a href="/doctor/patients"><span class="glyphicon glyphicon-user"></span> 我的就诊</a></li>
+                <li><a href="/doctor/prescriptions"><span class="glyphicon glyphicon-list-alt"></span> 处方管理</a></li>
+            </ul>
+        </div>
 
-        <form method="post" th:action="@{/doctor/profile/update}">
-            <div class="form-group">
-                <label>姓名：</label>
-                <input type="text" class="form-control" name="name" th:value="${doctor.user.name}" required>
-            </div>
-            <div class="form-group">
-                <label>性别：</label>
-                <select class="form-control" name="gender">
-                    <option value="male" th:selected="${doctor.user.gender == 'male'}">男</option>
-                    <option value="female" th:selected="${doctor.user.gender == 'female'}">女</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>年龄：</label>
-                <input type="number" class="form-control" name="age" th:value="${doctor.user.age}">
-            </div>
-            <div class="form-group">
-                <label>手机号：</label>
-                <input type="text" class="form-control" name="phone" th:value="${doctor.user.phone}" required>
-            </div>
-            <div class="form-group">
-                <label>邮箱：</label>
-                <input type="email" class="form-control" name="email" th:value="${doctor.user.email}">
-            </div>
+        <div class="col-md-10 main-content">
+            <div class="profile-container">
+                <h2 style="margin-bottom: 30px;">个人信息</h2>
 
-            <hr>
+                <form method="post" th:action="@{/doctor/profile/update}">
+                    <h4 style="color: #10b981; margin-bottom: 20px;">基本信息</h4>
+                    <div class="form-group">
+                        <label>姓名：</label>
+                        <input type="text" class="form-control" name="name" th:value="${doctor.user.name}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>性别：</label>
+                        <select class="form-control" name="gender">
+                            <option value="male" th:selected="${doctor.user.gender == 'male'}">男</option>
+                            <option value="female" th:selected="${doctor.user.gender == 'female'}">女</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>年龄：</label>
+                        <input type="number" class="form-control" name="age" th:value="${doctor.user.age}">
+                    </div>
+                    <div class="form-group">
+                        <label>手机号：</label>
+                        <input type="text" class="form-control" name="phone" th:value="${doctor.user.phone}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>邮箱：</label>
+                        <input type="email" class="form-control" name="email" th:value="${doctor.user.email}">
+                    </div>
 
-            <div class="form-group">
-                <label>职称：</label>
-                <input type="text" class="form-control" name="title" th:value="${doctor.title}" required>
-            </div>
-            <div class="form-group">
-                <label>专长：</label>
-                <textarea class="form-control" name="specialty" rows="3" th:text="${doctor.specialty}" required></textarea>
-            </div>
-            <div class="form-group">
-                <label>排班信息：</label>
-                <textarea class="form-control" name="schedule" rows="3" th:text="${doctor.schedule}" required></textarea>
-            </div>
+                    <hr>
 
-            <div style="margin-top: 30px;">
-                <button type="submit" class="btn btn-primary">保存修改</button>
-                <a href="/doctor/dashboard" class="btn btn-default">返回主页</a>
+                    <h4 style="color: #10b981; margin-bottom: 20px;">职业信息</h4>
+                    <div class="form-group">
+                        <label>职称：</label>
+                        <input type="text" class="form-control" name="title" th:value="${doctor.title}" required placeholder="例如：主任医师、副主任医师">
+                    </div>
+                    <div class="form-group">
+                        <label>科室：</label>
+                        <select class="form-control" name="departmentId" required>
+                            <option value="">请选择科室</option>
+                            <option th:each="dept : ${departments}"
+                                    th:value="${dept.id}"
+                                    th:text="${dept.name}"
+                                    th:selected="${dept.id == doctor.department.id}">
+                            </option>
+                        </select>
+                        <small class="text-muted">当前科室：<span th:text="${doctor.department.name}"></span></small>
+                    </div>
+                    <div class="form-group">
+                        <label>排班信息：</label>
+                        <textarea class="form-control" name="schedule" rows="3" th:text="${doctor.schedule}" required placeholder="例如：周一至周五 8:00-12:00, 14:00-17:00"></textarea>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <button type="submit" class="btn btn-primary">保存修改</button>
+                        <a href="/doctor/dashboard" class="btn btn-default">返回主页</a>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 

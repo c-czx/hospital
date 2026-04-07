@@ -3,6 +3,9 @@ package com.hospital.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * 处方实体类
+ */
 @Entity
 @Table(name = "prescriptions")
 public class Prescription {
