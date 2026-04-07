@@ -80,18 +80,24 @@ public class DoctorService {
         List<Appointment> appointments = appointmentRepository.findByDoctorIdAndAppointmentTimeBetween(doctorId, todayStart, todayEnd);
         
         List<Object> data = new ArrayList<>();
-        for (Appointment apt : appointments) {
-            if ("已预约".equals(apt.getStatus())) {
-                Map<String, Object> patientMap = new HashMap<>();
-                User patient = apt.getUser();
-                patientMap.put("id", patient.getId());
-                patientMap.put("name", patient.getName());
-                patientMap.put("gender", patient.getGender());
-                patientMap.put("age", patient.getAge());
-                patientMap.put("phone", patient.getPhone());
-                patientMap.put("appointmentId", apt.getId());
-                patientMap.put("appointmentTime", apt.getAppointmentTime());
-                data.add(patientMap);
+        if (appointments != null) {
+            for (Appointment apt : appointments) {
+                if ("已预约".equals(apt.getStatus()) || "已完成".equals(apt.getStatus())) {
+                    Map<String, Object> patientMap = new HashMap<>();
+                    User patient = apt.getUser();
+                    if (patient != null) {
+                        patientMap.put("id", patient.getId());
+                        patientMap.put("name", patient.getName());
+                        patientMap.put("gender", patient.getGender());
+                        patientMap.put("age", patient.getAge());
+                        patientMap.put("phone", patient.getPhone());
+                        patientMap.put("appointmentId", apt.getId());
+                        patientMap.put("appointmentTime", apt.getAppointmentTime());
+                        patientMap.put("status", apt.getStatus());
+                        patientMap.put("symptoms", apt.getSymptoms());
+                        data.add(patientMap);
+                    }
+                }
             }
         }
         return Map.of("code", 200, "data", data);
@@ -214,5 +220,19 @@ public class DoctorService {
         advice.setStatus(1);
         adviceRepository.save(advice);
         return Map.of("code", 200, "msg", "创建成功");
+    }
+
+    // 【新增】减少号源剩余数量
+    public void decreaseScheduleRemainNumber(Long doctorId, LocalDateTime appointmentTime) {
+        List<Schedule> schedules = scheduleRepository.findByDoctorId(doctorId);
+        for (Schedule schedule : schedules) {
+            if (!appointmentTime.isBefore(schedule.getStartTime()) && 
+                !appointmentTime.isAfter(schedule.getEndTime()) &&
+                schedule.getRemainNumber() > 0) {
+                schedule.setRemainNumber(schedule.getRemainNumber() - 1);
+                scheduleRepository.save(schedule);
+                break;
+            }
+        }
     }
 }

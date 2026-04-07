@@ -60,9 +60,27 @@
             
             if (departmentId) {
                 fetch(`/patient/doctors?departmentId=${departmentId}`)
-                    .then(response => response.text())
-                    .then(html => {
-                        doctorSelect.innerHTML = html;
+                    .then(response => response.json())
+                    .then(doctors => {
+                        doctorSelect.innerHTML = '<option value="">请选择医生</option>';
+
+                        if (doctors && doctors.length > 0) {
+                            doctors.forEach(doctor => {
+                                const option = document.createElement('option');
+                                option.value = doctor.id;
+                                option.textContent = `${doctor.user.name} - ${doctor.title} (${doctor.specialty})`;
+                                doctorSelect.appendChild(option);
+                            });
+                        } else {
+                            const option = document.createElement('option');
+                            option.value = '';
+                            option.textContent = '该科室暂无医生';
+                            doctorSelect.appendChild(option);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('加载医生列表失败:', error);
+                        doctorSelect.innerHTML = '<option value="">加载失败，请重试</option>';
                     });
             } else {
                 doctorSelect.innerHTML = '<option value="">请先选择科室</option>';
