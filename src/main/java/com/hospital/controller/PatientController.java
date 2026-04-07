@@ -54,25 +54,74 @@ public class PatientController {
         return doctorService.findByDepartmentId(departmentId);
     }
     
+    @GetMapping("/schedules")
+    @ResponseBody
+    public List<Object> getSchedules(@RequestParam Long doctorId) {
+        Map<String, Object> scheduleResult = doctorService.getScheduleList(doctorId);
+        @SuppressWarnings("unchecked")
+        List<Object> scheduleData = (List<Object>) scheduleResult.get("data");
+        return scheduleData;
+    }
+    
     @PostMapping("/book")
     public String bookAppointment(@RequestParam Long doctorId, @RequestParam Long departmentId,
                                   @RequestParam String appointmentTime, @RequestParam String symptoms,
                                   Authentication authentication) {
         
-        User user = userService.findByPhone(authentication.getName());
-        Doctor doctor = doctorService.findById(doctorId);
-        Department department = departmentService.findById(departmentId);
+        System.out.println("【预约挂号】开始处理预约请求");
+        System.out.println("【预约挂号】医生ID: " + doctorId);
+        System.out.println("【预约挂号】科室ID: " + departmentId);
+        System.out.println("【预约挂号】预约时间: " + appointmentTime);
+        System.out.println("【预约挂号】症状描述: " + symptoms);
         
-        LocalDateTime appointTime = LocalDateTime.parse(appointmentTime);
+        User user = userService.findByPhone(authentication.getName());
+        if (user == null) {
+            System.out.println("【预约挂号】用户不存在");
+            return "redirect:/patient/book?error=user_not_found";
+        }
+        System.out.println("【预约挂号】用户ID: " + user.getId() + ", 用户名: " + user.getName());
+        
+        Doctor doctor = doctorService.findById(doctorId);
+        if (doctor == null) {
+            System.out.println("【预约挂号】医生不存在");
+            return "redirect:/patient/book?error=doctor_not_found";
+        }
+        System.out.println("【预约挂号】医生信息: " + doctor.getId() + ", " + doctor.getUser().getName());
+        
+        Department department = departmentService.findById(departmentId);
+        if (department == null) {
+            System.out.println("【预约挂号】科室不存在");
+            return "redirect:/patient/book?error=department_not_found";
+        }
+        System.out.println("【预约挂号】科室信息: " + department.getId() + ", " + department.getName());
+        
+        // 解析不同格式的日期时间字符串
+        LocalDateTime appointTime;
+        try {
+            // 尝试解析包含秒的格式：2026-04-09T08:00:00
+            appointTime = LocalDateTime.parse(appointmentTime);
+            System.out.println("【预约挂号】解析日期时间成功: " + appointTime);
+        } catch (Exception e) {
+            try {
+                // 尝试解析不包含秒的格式：2026-04-09T08:00
+                appointTime = LocalDateTime.parse(appointmentTime + ":00");
+                System.out.println("【预约挂号】解析日期时间成功: " + appointTime);
+            } catch (Exception ex) {
+                System.out.println("【预约挂号】解析日期时间失败: " + ex.getMessage());
+                return "redirect:/patient/book?error=invalid_time_format";
+            }
+        }
         LocalDateTime now = LocalDateTime.now();
         
         if (appointTime.isBefore(now)) {
+            System.out.println("【预约挂号】预约时间已过期: " + appointTime + " < " + now);
             return "redirect:/patient/book?error=past_time";
         }
         
         Map<String, Object> scheduleResult = doctorService.getScheduleList(doctorId);
         @SuppressWarnings("unchecked")
         List<Object> scheduleData = (List<Object>) scheduleResult.get("data");
+        System.out.println("【预约挂号】获取号源列表成功，数量: " + (scheduleData != null ? scheduleData.size() : 0));
         
         boolean validSchedule = false;
         if (scheduleData != null) {
@@ -88,12 +137,14 @@ public class PatientController {
                     status == 1 &&
                     !appointTime.isBefore(startTime) && !appointTime.isAfter(endTime) && remainNumber > 0) {
                     validSchedule = true;
+                    System.out.println("【预约挂号】号源验证成功: " + startTime + " - " + endTime);
                     break;
                 }
             }
         }
         
         if (!validSchedule) {
+            System.out.println("【预约挂号】号源验证失败");
             return "redirect:/patient/book?error=invalid_time";
         }
         
@@ -106,9 +157,22 @@ public class PatientController {
         appointment.setCreateTime(LocalDateTime.now());
         appointment.setSymptoms(symptoms);
         
-        appointmentService.saveAppointment(appointment);
+        try {
+            Appointment savedAppointment = appointmentService.saveAppointment(appointment);
+            System.out.println("【预约挂号】保存预约成功，预约ID: " + savedAppointment.getId());
+        } catch (Exception e) {
+            System.out.println("【预约挂号】保存预约失败: " + e.getMessage());
+            e.printStackTrace();
+            return "redirect:/patient/book?error=save_failed";
+        }
         
-        doctorService.decreaseScheduleRemainNumber(doctorId, appointTime);
+        try {
+            doctorService.decreaseScheduleRemainNumber(doctorId, appointTime);
+            System.out.println("【预约挂号】减少号源数量成功");
+        } catch (Exception e) {
+            System.out.println("【预约挂号】减少号源数量失败: " + e.getMessage());
+            e.printStackTrace();
+        }
         
         return "redirect:/patient/appointments";
     }
@@ -122,7 +186,16 @@ public class PatientController {
     
     @GetMapping("/profile")
     public String profile(Authentication authentication, Model model) {
+        // 尝试通过电话号码查找用户
         User user = userService.findByPhone(authentication.getName());
+        
+        // 如果找不到用户，可能是因为用户修改了电话号码
+        // 这里可以通过其他方式查找用户，比如从数据库中获取所有用户并匹配
+        // 为了简化，我们暂时使用重定向到登录页面的方式
+        if (user == null) {
+            return "redirect:/login";
+        }
+        
         model.addAttribute("user", user);
         return "patient/profile";
     }
@@ -131,13 +204,41 @@ public class PatientController {
     public String updateProfile(@RequestParam String name, @RequestParam String gender,
                                @RequestParam String phone, @RequestParam String email,
                                Authentication authentication) {
+        // 首先使用旧电话号码查找用户
         User user = userService.findByPhone(authentication.getName());
-        user.setName(name);
-        user.setGender(gender);
-        user.setPhone(phone);
-        user.setEmail(email);
-        userService.updateUser(user);
+        if (user != null) {
+            // 检查电话号码是否变更
+            boolean phoneChanged = !phone.equals(user.getPhone());
+            
+            // 检查新电话号码是否已经被其他用户使用
+            if (phoneChanged && userService.existsByPhone(phone)) {
+                // 电话号码已被使用，重定向回个人信息页面并显示错误信息
+                return "redirect:/patient/profile?error=phone_exists";
+            }
+            
+            // 更新用户信息
+            user.setPhone(phone);
+            user.setName(name);
+            user.setGender(gender);
+            user.setEmail(email);
+            userService.updateUser(user);
+            
+            // 如果电话号码变更，重定向到登录页面，让用户使用新的电话号码重新登录
+            if (phoneChanged) {
+                return "redirect:/login?message=phone_updated&success=1";
+            }
+            
+            // 如果电话号码没有变更，重定向回个人信息页面并显示成功信息
+            return "redirect:/patient/profile?success=1";
+        }
         
         return "redirect:/patient/profile";
+    }
+    
+    @GetMapping("/available-slots")
+    public String availableSlots(Model model) {
+        List<Department> departments = departmentService.findAll();
+        model.addAttribute("departments", departments);
+        return "patient/available-slots";
     }
 }

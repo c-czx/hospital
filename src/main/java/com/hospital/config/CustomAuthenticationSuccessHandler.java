@@ -18,7 +18,20 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         System.out.println("【认证成功】用户：" + authentication.getName());
         System.out.println("【角色信息】" + authentication.getAuthorities().iterator().next().getAuthority());
         System.out.println("【请求中的 role 参数】" + request.getParameter("role"));
+        System.out.println("【请求中的 message 参数】" + request.getParameter("message"));
+        System.out.println("【请求中的 success 参数】" + request.getParameter("success"));
         System.out.println("========================================");
+        
+        // 检查是否从电话号码更新后登录
+        String message = request.getParameter("message");
+        String success = request.getParameter("success");
+        
+        if (message != null && message.equals("phone_updated") && success != null && success.equals("1")) {
+            // 如果是从电话号码更新后登录，重定向到个人信息页面并显示成功提示
+            System.out.println("【重定向】跳转到个人信息页面：/patient/profile?success=1");
+            response.sendRedirect("/patient/profile?success=1");
+            return;
+        }
         
         String userRole = authentication.getAuthorities().iterator().next().getAuthority();
         

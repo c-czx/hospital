@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>号源查询 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>患者中心</h3>
+            <ul>
+                <li><a href="/patient/dashboard">首页</a></li>
+                <li><a href="/patient/book">预约挂号</a></li>
+                <li><a href="/patient/appointments">我的订单</a></li>
+                <li><a href="/patient/departments">科室医生查询</a></li>
+                <li><a href="/patient/available-slots">号源查询</a></li>
+                <li><a href="/patient/profile">个人信息管理</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>号源查询</h1>
+            <div class="search-form">
+                <div class="form-group">
+                    <label>选择科室</label>
+                    <select id="departmentSelect" required onchange="loadDoctors()">
+                        <option value="">请选择科室</option>
+                        <option th:each="department : ${departments}" th:value="${department.id}" th:text="${department.name}"></option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>选择医生</label>
+                    <select id="doctorSelect" required onchange="loadSchedules()">
+                        <option value="">请先选择科室</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="scheduleList">
+                    <p>请先选择医生</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function loadDoctors() {
+            const departmentId = document.getElementById('departmentSelect').value;
+            const doctorSelect = document.getElementById('doctorSelect');
+            const scheduleList = document.getElementById('scheduleList');
+            
+            if (departmentId) {
+                fetch(`/patient/doctors?departmentId=${departmentId}`)
+                    .then(response => response.json())
+                    .then(doctors => {
+                        doctorSelect.innerHTML = '<option value="">请选择医生</option>';
+                        scheduleList.innerHTML = '<p>请先选择医生</p>';
+
+                        if (doctors && doctors.length > 0) {
+                            doctors.forEach(doctor => {
+                                const option = document.createElement('option');
+                                option.value = doctor.id;
+                                const doctorName = doctor.user && doctor.user.name ? doctor.user.name : '未知医生';
+                                const doctorTitle = doctor.title ? doctor.title : '未知职称';
+                                const doctorSpecialty = doctor.specialty ? doctor.specialty : '未知专长';
+                                option.textContent = `${doctorName} - ${doctorTitle} (${doctorSpecialty})`;
+                                doctorSelect.appendChild(option);
+                            });
+                        } else {
+                            const option = document.createElement('option');
+                            option.value = '';
+                            option.textContent = '该科室暂无医生';
+                            doctorSelect.appendChild(option);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('加载医生列表失败:', error);
+                        doctorSelect.innerHTML = '<option value="">加载失败，请重试</option>';
+                    });
+            } else {
+                doctorSelect.innerHTML = '<option value="">请先选择科室</option>';
+                scheduleList.innerHTML = '<p>请先选择医生</p>';
+            }
+        }
+        
+        function loadSchedules() {
+            const doctorId = document.getElementById('doctorSelect').value;
+            const scheduleList = document.getElementById('scheduleList');
+            
+            if (doctorId) {
+                fetch(`/patient/schedules?doctorId=${doctorId}`)
+                    .then(response => response.json())
+                    .then(schedules => {
+                        if (schedules && schedules.length > 0) {
+                            scheduleList.innerHTML = '';
+                            
+                            schedules.forEach(schedule => {
+                                const scheduleItem = document.createElement('div');
+                                scheduleItem.style.border = '1px solid #ddd';
+                                scheduleItem.style.borderRadius = '8px';
+                                scheduleItem.style.padding = '10px';
+                                scheduleItem.style.marginBottom = '10px';
+                                
+                                const statusText = schedule.status === 1 ? '可预约' : '不可预约';
+                                const statusClass = schedule.status === 1 ? 'status-available' : 'status-unavailable';
+                                
+                                scheduleItem.innerHTML = `
+                                    <div style="font-weight: bold;">${formatDateTime(schedule.startTime)} - ${formatDateTime(schedule.endTime)}</div>
+                                    <div>剩余号源: ${schedule.remainNumber}/${schedule.totalNumber}</div>
+                                    <div class="${statusClass}">状态: ${statusText}</div>
+                                `;
+                                
+                                scheduleList.appendChild(scheduleItem);
+                            });
+                        } else {
+                            scheduleList.innerHTML = '<p>该医生暂无号源</p>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('加载号源失败:', error);
+                        scheduleList.innerHTML = '<p>加载号源失败，请重试</p>';
+                    });
+            } else {
+                scheduleList.innerHTML = '<p>请先选择医生</p>';
+            }
+        }
+        
+        function formatDateTime(dateTimeStr) {
+            const date = new Date(dateTimeStr);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}`;
+        }
+    </script>
+</body>
+</html>

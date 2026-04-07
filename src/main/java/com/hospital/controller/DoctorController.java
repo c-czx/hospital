@@ -208,8 +208,9 @@ public class DoctorController {
         doctor.setId(doctorId);
         schedule.setDoctor(doctor);
         
-        String startTime = scheduleDate + "T" + startHour + ":00:00";
-        String endTime = scheduleDate + "T" + endHour + ":00:00";
+        // 确保小时部分是两位数
+        String startTime = scheduleDate + "T" + (startHour.length() == 1 ? "0" + startHour : startHour) + ":00:00";
+        String endTime = scheduleDate + "T" + (endHour.length() == 1 ? "0" + endHour : endHour) + ":00:00";
         
         schedule.setStartTime(java.time.LocalDateTime.parse(startTime));
         schedule.setEndTime(java.time.LocalDateTime.parse(endTime));

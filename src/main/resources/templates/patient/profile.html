@@ -22,10 +22,18 @@
         
         <div class="main-content">
             <h1>个人信息</h1>
+
+            <div th:if="${param.error == 'phone_exists'}" style="color: red; margin-bottom: 15px;">
+                电话号码已被其他用户使用，请使用其他电话号码
+            </div>
+            <div th:if="${param.success != null and param.success[0] == '1'}" id="successMessage" style="color: green; margin-bottom: 15px; font-size: 16px; font-weight: bold;">
+                修改成功！
+            </div>
             <form th:action="@{/patient/profile}" method="post">
                 <div class="form-group">
                     <label>用户名</label>
-                    <input type="text" th:value="${user.username}" disabled>
+                    <input type="text" th:value="${user.phone}" disabled>
+                    <input type="hidden" id="originalPhone" th:value="${user.phone}">
                 </div>
                 <div class="form-group">
                     <label>姓名</label>
@@ -40,7 +48,8 @@
                 </div>
                 <div class="form-group">
                     <label>电话</label>
-                    <input type="text" name="phone" th:value="${user.phone}">
+                    <input type="text" name="phone" th:value="${user.phone}" required>
+                    <small style="color: #666; display: block; margin-top: 5px;">修改电话号码将更改您的登录账号，请谨慎操作</small>
                 </div>
                 <div class="form-group">
                     <label>邮箱</label>
@@ -50,5 +59,32 @@
             </form>
         </div>
     </div>
+    
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const phoneInput = document.querySelector('input[name="phone"]');
+            const originalPhone = document.getElementById('originalPhone').value;
+            
+            if (phoneInput.value !== originalPhone) {
+                if (!confirm('修改电话号码将更改您的登录账号，确定要修改吗？')) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+        });
+        
+        // 成功提示自动消失
+        document.addEventListener('DOMContentLoaded', function() {
+            const successMessage = document.getElementById('successMessage');
+            if (successMessage) {
+                console.log('成功提示元素存在，设置自动消失');
+                setTimeout(function() {
+                    successMessage.style.display = 'none';
+                }, 3000); // 3秒后自动消失
+            } else {
+                console.log('成功提示元素不存在');
+            }
+        });
+    </script>
 </body>
 </html>

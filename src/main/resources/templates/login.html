@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登录 - 柒叁柒安和医院</title>
-    <link rel="stylesheet" href="/css/style.css">
     <style>
         * {
             margin: 0;
@@ -88,19 +87,20 @@
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                justify-content: center;
                 position: relative;
                 z-index: 3;
                 background: none !important;
                 padding: 20px;
-                width: 100%;
+                width: 80%;
 
                 .login-title {
-                    text-align: center;
+                    text-align: right;
+                    margin-top: 30px;
                     margin-bottom: 40px;
+                    margin-left: 50px;
                     color: rgb(8, 86, 5);
                     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                    width: 100%;
+                    width: 80%;
                     max-width: 800px;
 
                     h1 {
@@ -126,18 +126,19 @@
 
                     .login-description {
                         flex: 1;
-                        min-width: 280px;
-                        max-width: 400px;
+                        min-width: 140px;
+                        max-width: 200px;
 
                         div {
-                            background: rgba(255, 255, 255, 0.9);
-                            padding: 20px;
-                            border-radius: 10px;
+                            margin-top: 30px;
+                            background: rgba(255, 255, 255, 0.5);
+                            padding: 10px;
+                            border-radius: 8px;
                             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 
                             p {
-                                font-size: clamp(16px, 2.5vw, 24px);
-                                line-height: 1.8;
+                                font-size: clamp(12px, 2vw, 16px);
+                                line-height: 1.6;
                                 color: #333;
                             }
                         }
@@ -145,29 +146,36 @@
 
                     .login-right {
                         flex: 0 0 auto;
-                        width: 100%;
-                        max-width: 450px;
+                        width: 90%;
+                        max-width: 280px;
+                        margin-top: -30px;
 
                         .login-box {
-                            background: rgba(255, 255, 255, 0.95);
-                            padding: 40px;
-                            border-radius: 20px;
-                            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+                            background: rgba(255, 255, 255, 0.5);
+                            padding: 10px;
+                            border-radius: 10px;
+                            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
                             width: 100%;
 
                             h2 {
                                 text-align: center;
-                                font-size: 28px;
-                                margin-bottom: 30px;
+                                font-size: 18px;
+                                margin-bottom: 16px;
                                 color: #10b981;
                             }
 
+                            .message {
+                                color: green;
+                                margin-bottom: 16px;
+                                text-align: center;
+                            }
+
                             .form-group {
-                                margin-bottom: 20px;
+                                margin-bottom: 8px;
 
                                 label {
-                                    font-size: 16px;
-                                    margin-bottom: 8px;
+                                    font-size: 11px;
+                                    margin-bottom: 2px;
                                     display: block;
                                     font-weight: 500;
                                 }
@@ -175,16 +183,16 @@
                                 input,
                                 select {
                                     width: 100%;
-                                    padding: 12px;
-                                    font-size: 16px;
+                                    padding: 6px;
+                                    font-size: 11px;
                                     border: 1px solid #ddd;
-                                    border-radius: 10px;
+                                    border-radius: 4px;
                                     transition: all 0.3s;
 
                                     &:focus {
                                         outline: none;
                                         border-color: #10b981;
-                                        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+                                        box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
                                     }
 
                                     &.error {
@@ -195,21 +203,23 @@
 
                             .error-message {
                                 color: #ef4444;
-                                font-size: 12px;
-                                margin-top: 5px;
+                                font-size: 9px;
+                                margin-top: 1px;
+                                margin-bottom: 6px;
                             }
 
                             .remember-me {
                                 display: flex;
                                 align-items: center;
-                                margin: 20px 0;
+                                margin: 8px 0;
 
                                 input {
-                                    margin-right: 8px;
+                                    margin-right: 4px;
+                                    transform: scale(0.7);
                                 }
 
                                 label {
-                                    font-size: 14px;
+                                    font-size: 10px;
                                     color: #555;
                                     cursor: pointer;
                                 }
@@ -217,26 +227,26 @@
 
                             .btn {
                                 width: 100%;
-                                padding: 14px;
-                                font-size: 18px;
+                                padding: 7px;
+                                font-size: 11px;
                                 background: #10b981;
                                 color: white;
                                 border: none;
-                                border-radius: 10px;
+                                border-radius: 4px;
                                 cursor: pointer;
-                                margin-bottom: 20px;
+                                margin-bottom: 8px;
                                 transition: all 0.3s;
 
                                 &:hover {
                                     background: #059669;
-                                    transform: translateY(-2px);
-                                    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                                    transform: translateY(-1px);
+                                    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
                                 }
                             }
 
                             .register-link {
                                 text-align: center;
-                                font-size: 14px;
+                                font-size: 10px;
 
                                 a {
                                     color: #3b82f6;
@@ -339,6 +349,9 @@
                         <div th:if="${param.logout != null}" class="error-message" style="text-align: center; margin-bottom: 20px; color: #10b981;">
                             <span>您已成功退出</span>
                         </div>
+                        <div th:if="${param.message == 'phone_updated'}" class="error-message" style="text-align: center; margin-bottom: 20px; color: #10b981;">
+                            <span>电话号码已更新，请使用新的电话号码登录</span>
+                        </div>
 
                         <div th:if="${param.debug != null}" class="error-message" style="text-align: center; margin-bottom: 20px; color: #3b82f6; background: #eff6ff; padding: 10px; border-radius: 5px;">
                             <strong>调试模式已启用</strong><br>
@@ -413,4 +426,12 @@
         }
     </script>
 </body>
+    <script>
+        // 检测是否是本地文件系统访问（Live Server）
+        if (window.location.protocol === 'file:') {
+            // 对于Live Server，使用相对路径
+            document.querySelector('.login-bg').style.background = "url('../static/css/images/login/login1.png') no-repeat center center";
+            document.querySelector('.login-bg').style.backgroundSize = "cover";
+        }
+    </script>
 </html>
