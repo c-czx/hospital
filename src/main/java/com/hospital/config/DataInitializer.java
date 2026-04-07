@@ -85,43 +85,67 @@ public class DataInitializer implements CommandLineRunner {
     }
     
     /**
-     * 初始化科室数据
+     * 初始化科室数据 - 统一科室命名
      */
     private void initializeDepartments() {
+        // 全科
+        if (departmentService.findByNameContaining("全科").isEmpty()) {
+            Department generalPractice = new Department();
+            generalPractice.setName("全科");
+            generalPractice.setDescription("全科医疗诊疗");
+            departmentService.saveDepartment(generalPractice);
+            System.out.println("【创建科室】全科");
+        } else {
+            System.out.println("【已存在】全科");
+        }
+        
+        // 内科
         if (departmentService.findByNameContaining("内科").isEmpty()) {
             Department internalMedicine = new Department();
             internalMedicine.setName("内科");
             internalMedicine.setDescription("内科疾病诊疗");
             departmentService.saveDepartment(internalMedicine);
+            System.out.println("【创建科室】内科");
+        } else {
+            System.out.println("【已存在】内科");
         }
         
+        // 外科
         if (departmentService.findByNameContaining("外科").isEmpty()) {
             Department surgery = new Department();
             surgery.setName("外科");
             surgery.setDescription("外科手术及治疗");
             departmentService.saveDepartment(surgery);
+            System.out.println("【创建科室】外科");
+        } else {
+            System.out.println("【已存在】外科");
         }
         
-        if (departmentService.findByNameContaining("儿科").isEmpty()) {
-            Department pediatrics = new Department();
-            pediatrics.setName("儿科");
-            pediatrics.setDescription("儿童疾病诊疗");
-            departmentService.saveDepartment(pediatrics);
+        // 耳鼻喉
+        if (departmentService.findByNameContaining("耳鼻喉").isEmpty()) {
+            Department ent = new Department();
+            ent.setName("耳鼻喉");
+            ent.setDescription("耳鼻喉科疾病诊疗");
+            departmentService.saveDepartment(ent);
+            System.out.println("【创建科室】耳鼻喉");
+        } else {
+            System.out.println("【已存在】耳鼻喉");
         }
         
+        // 妇产科
         if (departmentService.findByNameContaining("妇产科").isEmpty()) {
             Department gynecology = new Department();
             gynecology.setName("妇产科");
             gynecology.setDescription("妇科产科疾病诊疗");
             departmentService.saveDepartment(gynecology);
+            System.out.println("【创建科室】妇产科");
+        } else {
+            System.out.println("【已存在】妇产科");
         }
         
-        if (departmentService.findByNameContaining("眼科").isEmpty()) {
-            Department ophthalmology = new Department();
-            ophthalmology.setName("眼科");
-            ophthalmology.setDescription("眼科疾病诊疗");
-            departmentService.saveDepartment(ophthalmology);
-        }
+        System.out.println("========================================");
+        System.out.println("【科室初始化完成】共5个科室：全科、内科、外科、耳鼻喉、妇产科");
+        System.out.println("========================================");
     }
     
     /**
@@ -131,7 +155,6 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println("========================================");
         System.out.println("【初始化医生数据】开始检查...");
         
-        // 为所有 DOCTOR 角色的用户创建医生记录
         java.util.List<User> doctorUsers = userService.findByRole("DOCTOR");
         System.out.println("【医生用户数量】" + doctorUsers.size());
         
@@ -140,17 +163,18 @@ public class DataInitializer implements CommandLineRunner {
             if (existingDoctor == null) {
                 System.out.println("【创建医生记录】用户：" + user.getName() + ", ID: " + user.getId());
                 
-                Department internalMedicine = departmentService.findByNameContaining("内科").get(0);
+                // 默认使用全科作为初始科室
+                Department defaultDept = departmentService.findByNameContaining("全科").get(0);
                 
                 Doctor doctor = new Doctor();
                 doctor.setUser(user);
-                doctor.setDepartment(internalMedicine);
+                doctor.setDepartment(defaultDept);
                 doctor.setTitle("主任医师");
-                doctor.setSpecialty("普通内科");
+                doctor.setSpecialty("全科");
                 doctor.setSchedule("周一至周五 8:00-12:00, 14:00-17:00");
                 doctorService.saveDoctor(doctor);
                 
-                System.out.println("【创建成功】医生 ID: " + doctor.getId());
+                System.out.println("【创建成功】医生 ID: " + doctor.getId() + ", 科室: 全科");
             } else {
                 System.out.println("【已存在】用户：" + user.getName() + ", 医生 ID: " + existingDoctor.getId());
             }

@@ -19,7 +19,10 @@ public class Doctor {
     private Department department;
     
     private String title;
+    
+    @Column(name = "specialty")
     private String specialty;
+    
     private String schedule;
     
     @OneToMany(mappedBy = "doctor")

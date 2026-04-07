@@ -6,9 +6,14 @@ import com.hospital.entity.Prescription;
 import com.hospital.entity.Schedule;
 import com.hospital.entity.Doctor;
 import com.hospital.entity.User;
+import com.hospital.entity.Appointment;
+import com.hospital.entity.Department;
 import com.hospital.service.DoctorService;
 import com.hospital.service.UserService;
 import com.hospital.service.AdviceService;
+import com.hospital.service.PrescriptionService;
+import com.hospital.service.AppointmentService;
+import com.hospital.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -17,6 +22,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/doctor")
@@ -30,6 +38,15 @@ public class DoctorController {
     
     @Autowired
     private AdviceService adviceService;
+    
+    @Autowired
+    private PrescriptionService prescriptionService;
+    
+    @Autowired
+    private AppointmentService appointmentService;
+    
+    @Autowired
+    private DepartmentService departmentService;
     
     private Long getCurrentDoctorId(Authentication authentication) {
         String phone = authentication.getName();
@@ -47,7 +64,12 @@ public class DoctorController {
         if (doctorId == null) {
             return "redirect:/login";
         }
-        model.addAttribute("todayList", doctorService.getTodayPatient(doctorId).get("data"));
+        
+        Map<String, Object> result = doctorService.getTodayPatient(doctorId);
+        @SuppressWarnings("unchecked")
+        List<Object> todayList = (List<Object>) result.get("data");
+        
+        model.addAttribute("todayList", todayList);
         return "doctor/dashboard";
     }
 
@@ -69,6 +91,7 @@ public class DoctorController {
         }
         model.addAttribute("patient", doctorService.getPatientDetail(patientId).get("data"));
         model.addAttribute("adviceList", doctorService.getAdviceList(patientId).get("data"));
+        model.addAttribute("doctorId", doctorId);
         return "doctor/appointment-detail";
     }
 
@@ -100,7 +123,9 @@ public class DoctorController {
             return "redirect:/login";
         }
         Doctor doctor = doctorService.findById(doctorId);
+        List<Department> departments = departmentService.findAll();
         model.addAttribute("doctor", doctor);
+        model.addAttribute("departments", departments);
         return "doctor/profile";
     }
     
@@ -108,7 +133,8 @@ public class DoctorController {
     public String updateProfile(@RequestParam String name, @RequestParam String gender,
                                @RequestParam Integer age, @RequestParam String phone,
                                @RequestParam String email, @RequestParam String title,
-                               @RequestParam String specialty, @RequestParam String schedule,
+                               @RequestParam Long departmentId,
+                               @RequestParam String schedule,
                                Authentication authentication) {
         Long doctorId = getCurrentDoctorId(authentication);
         if (doctorId == null) {
@@ -117,6 +143,7 @@ public class DoctorController {
         
         Doctor doctor = doctorService.findById(doctorId);
         User user = doctor.getUser();
+        Department department = departmentService.findById(departmentId);
         
         user.setName(name);
         user.setGender(gender);
@@ -126,7 +153,8 @@ public class DoctorController {
         userService.updateUser(user);
         
         doctor.setTitle(title);
-        doctor.setSpecialty(specialty);
+        doctor.setDepartment(department);
+        doctor.setSpecialty(department.getName());
         doctor.setSchedule(schedule);
         doctorService.updateDoctor(doctor);
         
@@ -143,17 +171,52 @@ public class DoctorController {
         return "doctor/advices";
     }
 
+    @GetMapping("/patients")
+    public String myPatients(Model model, Authentication authentication) {
+        Long doctorId = getCurrentDoctorId(authentication);
+        if (doctorId == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("allAppointments", doctorService.getAllAppointments(doctorId).get("data"));
+        return "doctor/appointments";
+    }
+
+    @GetMapping("/prescriptions")
+    public String prescriptions(Model model, Authentication authentication) {
+        Long doctorId = getCurrentDoctorId(authentication);
+        if (doctorId == null) {
+            return "redirect:/login";
+        }
+        List<Prescription> prescriptions = prescriptionService.findByDoctorId(doctorId);
+        model.addAttribute("prescriptions", prescriptions);
+        return "doctor/advices";
+    }
+
     @PostMapping("/publishSchedule")
-    public String publishSchedule(Schedule schedule, Authentication authentication) {
+    public String publishSchedule(@RequestParam String scheduleDate, 
+                                  @RequestParam String startHour,
+                                  @RequestParam String endHour,
+                                  @RequestParam Integer totalNumber,
+                                  Authentication authentication) {
         Long doctorId = getCurrentDoctorId(authentication);
         if (doctorId == null) {
             return "redirect:/login";
         }
         
+        Schedule schedule = new Schedule();
         Doctor doctor = new Doctor();
         doctor.setId(doctorId);
         schedule.setDoctor(doctor);
-        schedule.setRemainNumber(schedule.getTotalNumber());
+        
+        String startTime = scheduleDate + "T" + startHour + ":00:00";
+        String endTime = scheduleDate + "T" + endHour + ":00:00";
+        
+        schedule.setStartTime(java.time.LocalDateTime.parse(startTime));
+        schedule.setEndTime(java.time.LocalDateTime.parse(endTime));
+        schedule.setTotalNumber(totalNumber);
+        schedule.setRemainNumber(totalNumber);
+        schedule.setStatus(1);
+        
         doctorService.publishSchedule(schedule);
         return "redirect:/doctor/schedule";
     }
@@ -168,10 +231,15 @@ public class DoctorController {
     }
 
     @PostMapping("/createPrescription")
-    public String createPrescription(Prescription prescription, @RequestParam Long doctorId, Authentication authentication) {
+    public String createPrescription(Prescription prescription, @RequestParam Long doctorId, @RequestParam Long patientId, Authentication authentication) {
         Doctor doctor = new Doctor();
         doctor.setId(doctorId);
         prescription.setDoctor(doctor);
+        
+        User user = new User();
+        user.setId(patientId);
+        prescription.setUser(user);
+        
         doctorService.createPrescription(prescription);
         return "redirect:/doctor/dashboard";
     }
