@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hospital.mapper.PatientMapper">
+    <resultMap id="PatientResultMap" type="com.hospital.entity.Patient">
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="gender" property="gender" />
+        <result column="age" property="age" />
+        <result column="address" property="address" />
+        <result column="medical_history" property="medicalHistory" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.hospital.entity.Patient">
+        INSERT INTO patient (user_id, gender, age, address, medical_history)
+        VALUES (#{userId}, #{gender}, #{age}, #{address}, #{medicalHistory})
+    </insert>
+
+    <update id="update" parameterType="com.hospital.entity.Patient">
+        UPDATE patient
+        SET user_id = #{userId}, gender = #{gender}, age = #{age}, 
+            address = #{address}, medical_history = #{medicalHistory}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM patient WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" parameterType="java.lang.Long" resultMap="PatientResultMap">
+        SELECT * FROM patient WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="PatientResultMap">
+        SELECT * FROM patient
+    </select>
+
+    <select id="findByUserId" parameterType="java.lang.Long" resultMap="PatientResultMap">
+        SELECT * FROM patient WHERE user_id = #{userId}
+    </select>
+</mapper>

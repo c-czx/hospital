@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hospital.mapper.ScheduleMapper">
+    <resultMap id="ScheduleResultMap" type="com.hospital.entity.Schedule">
+        <id column="id" property="id" />
+        <result column="doctor_id" property="doctorId" />
+        <result column="date" property="date" />
+        <result column="start_time" property="startTime" />
+        <result column="end_time" property="endTime" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.hospital.entity.Schedule">
+        INSERT INTO schedule (doctor_id, date, start_time, end_time, status)
+        VALUES (#{doctorId}, #{date}, #{startTime}, #{endTime}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.hospital.entity.Schedule">
+        UPDATE schedule
+        SET doctor_id = #{doctorId}, date = #{date}, start_time = #{startTime}, 
+            end_time = #{endTime}, status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM schedule WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" parameterType="java.lang.Long" resultMap="ScheduleResultMap">
+        SELECT * FROM schedule WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="ScheduleResultMap">
+        SELECT * FROM schedule
+    </select>
+
+    <select id="findByDoctorId" parameterType="java.lang.Long" resultMap="ScheduleResultMap">
+        SELECT * FROM schedule WHERE doctor_id = #{doctorId}
+    </select>
+</mapper>
