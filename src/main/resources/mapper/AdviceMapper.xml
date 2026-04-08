@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hospital.mapper.AdviceMapper">
+    <resultMap id="AdviceResultMap" type="com.hospital.entity.Advice">
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="doctor_id" property="doctorId" />
+        <result column="content" property="content" />
+        <result column="created_at" property="createdAt" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.hospital.entity.Advice">
+        INSERT INTO advice (user_id, doctor_id, content, created_at)
+        VALUES (#{userId}, #{doctorId}, #{content}, #{createdAt})
+    </insert>
+
+    <update id="update" parameterType="com.hospital.entity.Advice">
+        UPDATE advice
+        SET user_id = #{userId}, doctor_id = #{doctorId}, content = #{content}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM advice WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" parameterType="java.lang.Long" resultMap="AdviceResultMap">
+        SELECT * FROM advice WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="AdviceResultMap">
+        SELECT * FROM advice
+    </select>
+
+    <select id="findByUserId" parameterType="java.lang.Long" resultMap="AdviceResultMap">
+        SELECT * FROM advice WHERE user_id = #{userId}
+    </select>
+
+    <select id="findByDoctorId" parameterType="java.lang.Long" resultMap="AdviceResultMap">
+        SELECT * FROM advice WHERE doctor_id = #{doctorId}
+    </select>
+</mapper>

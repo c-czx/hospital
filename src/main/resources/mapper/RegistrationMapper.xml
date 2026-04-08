@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hospital.mapper.RegistrationMapper">
+    <resultMap id="RegistrationResultMap" type="com.hospital.entity.Registration">
+        <id column="id" property="id" />
+        <result column="patient_id" property="patientId" />
+        <result column="doctor_id" property="doctorId" />
+        <result column="department_id" property="departmentId" />
+        <result column="registration_date" property="registrationDate" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.hospital.entity.Registration">
+        INSERT INTO registration (patient_id, doctor_id, department_id, registration_date, status)
+        VALUES (#{patientId}, #{doctorId}, #{departmentId}, #{registrationDate}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.hospital.entity.Registration">
+        UPDATE registration
+        SET patient_id = #{patientId}, doctor_id = #{doctorId}, department_id = #{departmentId}, 
+            registration_date = #{registrationDate}, status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM registration WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" parameterType="java.lang.Long" resultMap="RegistrationResultMap">
+        SELECT * FROM registration WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="RegistrationResultMap">
+        SELECT * FROM registration
+    </select>
+
+    <select id="findByPatientId" parameterType="java.lang.Long" resultMap="RegistrationResultMap">
+        SELECT * FROM registration WHERE patient_id = #{patientId}
+    </select>
+
+    <select id="findByDoctorId" parameterType="java.lang.Long" resultMap="RegistrationResultMap">
+        SELECT * FROM registration WHERE doctor_id = #{doctorId}
+    </select>
+</mapper>

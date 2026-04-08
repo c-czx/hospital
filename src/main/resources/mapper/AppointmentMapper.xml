@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hospital.mapper.AppointmentMapper">
+    <resultMap id="AppointmentResultMap" type="com.hospital.entity.Appointment">
+        <id column="id" property="id" />
+        <result column="patient_id" property="patientId" />
+        <result column="doctor_id" property="doctorId" />
+        <result column="department_id" property="departmentId" />
+        <result column="appointment_date" property="appointmentDate" />
+        <result column="status" property="status" />
+        <result column="created_at" property="createdAt" />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.hospital.entity.Appointment">
+        INSERT INTO appointment (patient_id, doctor_id, department_id, appointment_date, status, created_at)
+        VALUES (#{patientId}, #{doctorId}, #{departmentId}, #{appointmentDate}, #{status}, #{createdAt})
+    </insert>
+
+    <update id="update" parameterType="com.hospital.entity.Appointment">
+        UPDATE appointment
+        SET patient_id = #{patientId}, doctor_id = #{doctorId}, department_id = #{departmentId}, 
+            appointment_date = #{appointmentDate}, status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM appointment WHERE id = #{id}
+    </delete>
+
+    <select id="selectById" parameterType="java.lang.Long" resultMap="AppointmentResultMap">
+        SELECT * FROM appointment WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="AppointmentResultMap">
+        SELECT * FROM appointment
+    </select>
+
+    <select id="findByPatientId" parameterType="java.lang.Long" resultMap="AppointmentResultMap">
+        SELECT * FROM appointment WHERE patient_id = #{patientId}
+    </select>
+
+    <select id="findByDoctorId" parameterType="java.lang.Long" resultMap="AppointmentResultMap">
+        SELECT * FROM appointment WHERE doctor_id = #{doctorId}
+    </select>
+
+    <select id="findByStatus" parameterType="java.lang.String" resultMap="AppointmentResultMap">
+        SELECT * FROM appointment WHERE status = #{status}
+    </select>
+</mapper>
