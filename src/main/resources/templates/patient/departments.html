@@ -26,7 +26,15 @@
                 <div th:each="dept : ${departments}" class="department-card">
                     <h3 th:text="${dept.name}"></h3>
                     <p th:text="${dept.description}"></p>
-                    <a th:href="@{/patient/book}" class="btn btn-primary">预约挂号</a>
+                    <h4>科室医生</h4>
+                    <ul class="doctor-list">
+                        <li th:each="doctor : ${dept.doctors}" class="doctor-item">
+                            <span th:text="${doctor.user.name}"></span> - 
+                            <span th:text="${doctor.title}"></span> - 
+                            <span th:text="${doctor.specialty}"></span>
+                            <a th:href="@{/patient/book(doctorId=${doctor.id}, departmentId=${dept.id})}" class="btn btn-primary btn-small" style="float: right; margin-top: -5px;">预约挂号</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>

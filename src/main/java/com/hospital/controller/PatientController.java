@@ -29,7 +29,9 @@ public class PatientController {
     private UserService userService;
     
     @GetMapping("/dashboard")
-    public String dashboard() {
+    public String dashboard(Model model, Authentication authentication) {
+        User user = userService.findByPhone(authentication.getName());
+        model.addAttribute("user", user);
         return "patient/dashboard";
     }
     
@@ -42,16 +44,48 @@ public class PatientController {
     }
     
     @GetMapping("/book")
-    public String bookAppointment(Model model) {
+    public String bookAppointment(Model model, @RequestParam(required = false) Long doctorId, @RequestParam(required = false) Long departmentId) {
         List<Department> departments = departmentService.findAll();
         model.addAttribute("departments", departments);
+        
+        if (departmentId != null) {
+            model.addAttribute("selectedDepartmentId", departmentId);
+            if (doctorId != null) {
+                model.addAttribute("selectedDoctorId", doctorId);
+            }
+        }
+        
         return "patient/book";
     }
     
     @GetMapping("/doctors")
     @ResponseBody
-    public List<Doctor> getDoctors(@RequestParam Long departmentId) {
-        return doctorService.findByDepartmentId(departmentId);
+    public List<Map<String, Object>> getDoctors(@RequestParam Long departmentId) {
+        List<Doctor> doctors = doctorService.findByDepartmentId(departmentId);
+        List<Map<String, Object>> doctorList = java.util.Collections.emptyList();
+        
+        if (doctors != null) {
+            doctorList = new java.util.ArrayList<>();
+            
+            for (Doctor doctor : doctors) {
+                Map<String, Object> doctorMap = new java.util.HashMap<>();
+                doctorMap.put("id", doctor.getId());
+                
+                if (doctor.getUser() != null) {
+                    Map<String, Object> userMap = new java.util.HashMap<>();
+                    userMap.put("id", doctor.getUser().getId());
+                    userMap.put("name", doctor.getUser().getName());
+                    doctorMap.put("user", userMap);
+                }
+                
+                doctorMap.put("title", doctor.getTitle());
+                doctorMap.put("specialty", doctor.getSpecialty());
+                
+                doctorList.add(doctorMap);
+            }
+        }
+        
+        return doctorList;
     }
     
     @GetMapping("/schedules")
@@ -180,6 +214,10 @@ public class PatientController {
     @GetMapping("/departments")
     public String departments(Model model) {
         List<Department> departments = departmentService.findAll();
+        for (Department dept : departments) {
+            List<Doctor> doctors = doctorService.findByDepartmentId(dept.getId());
+            dept.setDoctors(doctors);
+        }
         model.addAttribute("departments", departments);
         return "patient/departments";
     }

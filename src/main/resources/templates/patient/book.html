@@ -16,7 +16,7 @@
                 <li><a href="/patient/appointments">我的预约</a></li>
                 <li><a href="/patient/departments">科室查询</a></li>
                 <li><a href="/patient/profile">个人信息</a></li>
-                <li><a href="/logout">退出登录</a></li>
+                <li><a href="/logout" onclick="return confirm('确定要退出登录吗？');">退出登录</a></li>
             </ul>
         </div>
         
@@ -27,7 +27,7 @@
                     <label>选择科室</label>
                     <select name="departmentId" id="departmentSelect" required onchange="loadDoctors()">
                         <option value="">请选择科室</option>
-                        <option th:each="dept : ${departments}" th:value="${dept.id}" th:text="${dept.name}"></option>
+                        <option th:each="dept : ${departments}" th:value="${dept.id}" th:text="${dept.name}" th:selected="${dept.id == selectedDepartmentId}"></option>
                     </select>
                 </div>
                 
@@ -60,6 +60,9 @@
     </div>
     
     <script>
+        // 获取预选的医生ID
+        const selectedDoctorId = [[${selectedDoctorId}]];
+        
         function loadDoctors() {
             const departmentId = document.getElementById('departmentSelect').value;
             const doctorSelect = document.getElementById('doctorSelect');
@@ -80,8 +83,17 @@
                                 const doctorTitle = doctor.title ? doctor.title : '未知职称';
                                 const doctorSpecialty = doctor.specialty ? doctor.specialty : '未知专长';
                                 option.textContent = `${doctorName} - ${doctorTitle} (${doctorSpecialty})`;
+                                // 检查是否需要预选医生
+                                if (selectedDoctorId && doctor.id == selectedDoctorId) {
+                                    option.selected = true;
+                                }
                                 doctorSelect.appendChild(option);
                             });
+                            
+                            // 如果有预选医生，自动加载号源
+                            if (selectedDoctorId) {
+                                loadSchedules();
+                            }
                         } else {
                             const option = document.createElement('option');
                             option.value = '';
@@ -96,6 +108,14 @@
             } else {
                 doctorSelect.innerHTML = '<option value="">请先选择科室</option>';
                 scheduleList.innerHTML = '<p>请先选择医生</p>';
+            }
+        }
+        
+        // 页面加载时自动执行
+        window.onload = function() {
+            // 如果有预选科室，自动加载医生
+            if (document.getElementById('departmentSelect').value) {
+                loadDoctors();
             }
         }
         
