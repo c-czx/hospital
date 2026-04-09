@@ -41,7 +41,7 @@ public class DataInitializer implements CommandLineRunner {
     private void initializeUsers() {
         if (userService.findByPhone("13800000000") == null) {
             User admin = new User();
-            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setPassword("admin123");  // 不要预先加密，saveUser 方法会加密
             admin.setName("系统管理员");
             admin.setRole("ADMIN");
             admin.setGender("male");
@@ -52,7 +52,7 @@ public class DataInitializer implements CommandLineRunner {
         
         if (userService.findByPhone("13800000001") == null) {
             User doctor1 = new User();
-            doctor1.setPassword(passwordEncoder.encode("doctor123"));
+            doctor1.setPassword("doctor123");  // 不要预先加密，saveUser 方法会加密
             doctor1.setName("张医生");
             doctor1.setRole("DOCTOR");
             doctor1.setGender("male");
@@ -63,7 +63,7 @@ public class DataInitializer implements CommandLineRunner {
         
         if (userService.findByPhone("13800000002") == null) {
             User nurse1 = new User();
-            nurse1.setPassword(passwordEncoder.encode("nurse123"));
+            nurse1.setPassword("nurse123");  // 不要预先加密，saveUser 方法会加密
             nurse1.setName("李护士");
             nurse1.setRole("NURSE");
             nurse1.setGender("female");
@@ -74,7 +74,7 @@ public class DataInitializer implements CommandLineRunner {
         
         if (userService.findByPhone("13800000003") == null) {
             User patient1 = new User();
-            patient1.setPassword(passwordEncoder.encode("patient123"));
+            patient1.setPassword("patient123");  // 不要预先加密，saveUser 方法会加密
             patient1.setName("王患者");
             patient1.setRole("PATIENT");
             patient1.setGender("male");
