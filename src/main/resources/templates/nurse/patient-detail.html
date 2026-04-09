@@ -34,17 +34,26 @@
                     <div th:each="appointment : ${appointments}" class="appointment-item">
                         <p><strong>科室：</strong><span th:text="${appointment.department.name}"></span></p>
                         <p><strong>医生：</strong><span th:text="${appointment.doctor.user.name}"></span></p>
-                        <p><strong>预约时间：</strong><span th:text="${appointment.appointmentTime}"></span></p>
+                        <p><strong>预约时间：</strong><span th:text="${#temporals.format(appointment.appointmentTime, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
                         <p><strong>状态：</strong><span th:text="${appointment.status}"></span></p>
                     </div>
                 </div>
                 
                 <div class="medical-records-section">
                     <h3>病历记录</h3>
+                    <div th:if="${medicalRecords.isEmpty()}">
+                        <p>暂无病历记录</p>
+                        <a th:href="@{/nurse/medical-record/create(userId=${patient.id})}" class="btn btn-primary">创建病历</a>
+                    </div>
                     <div th:each="record : ${medicalRecords}" class="record-item">
-                        <p><strong>诊断：</strong><span th:text="${record.diagnosis}"></span></p>
-                        <p><strong>治疗：</strong><span th:text="${record.treatment}"></span></p>
-                        <p><strong>时间：</strong><span th:text="${record.createTime}"></span></p>
+                        <p><strong>诊断：</strong><span th:text="${record.diagnosisResult}"></span></p>
+                        <p><strong>主诉：</strong><span th:text="${record.chiefComplaint}"></span></p>
+                        <p><strong>现病史：</strong><span th:text="${record.presentIllness}"></span></p>
+                        <p><strong>体温：</strong><span th:text="${record.temperature == null ? '未记录' : (record.temperature + '℃')}"></span></p>
+                        <p><strong>血压：</strong><span th:text="${record.bloodPressure == null ? '未记录' : (record.bloodPressure + 'mmHg')}"></span></p>
+                        <p><strong>护士记录：</strong><span th:text="${record.nurseNotes == null ? '无' : record.nurseNotes}"></span></p>
+                        <p><strong>时间：</strong><span th:text="${#temporals.format(record.createTime, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
+                        <a th:href="@{/nurse/medical-record/edit/{id}(id=${record.id})}" class="btn btn-secondary">编辑</a>
                     </div>
                 </div>
                 

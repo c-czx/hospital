@@ -27,6 +27,9 @@ public class NurseController {
     @Autowired
     private BillingService billingService;
     
+    @Autowired
+    private DoctorService doctorService;
+    
     @GetMapping("/dashboard")
     public String dashboard() {
         return "nurse/dashboard";
@@ -91,5 +94,61 @@ public class NurseController {
         billingService.updateBilling(billing);
         
         return "redirect:/nurse/patient/" + billing.getUser().getId();
+    }
+    
+    @GetMapping("/medical-record/edit/{id}")
+    public String editMedicalRecord(@PathVariable Long id, Model model) {
+        MedicalRecord record = medicalRecordService.findById(id);
+        model.addAttribute("record", record);
+        model.addAttribute("patient", record.getUser());
+        return "nurse/medical-record-edit";
+    }
+    
+    @PostMapping("/medical-record/edit/{id}")
+    public String saveMedicalRecord(@PathVariable Long id, @RequestParam(required = false) Double temperature,
+                                  @RequestParam(required = false) Integer bloodPressure,
+                                  @RequestParam(required = false) String nurseNotes) {
+        MedicalRecord record = medicalRecordService.findById(id);
+        record.setTemperature(temperature);
+        record.setBloodPressure(bloodPressure);
+        record.setNurseNotes(nurseNotes);
+        medicalRecordService.updateMedicalRecord(record);
+        
+        return "redirect:/nurse/patient/" + record.getUser().getId();
+    }
+    
+    @GetMapping("/medical-record/create")
+    public String createMedicalRecord(@RequestParam Long userId, Model model) {
+        User patient = userService.findById(userId);
+        List<Doctor> doctors = doctorService.findAll();
+        model.addAttribute("patient", patient);
+        model.addAttribute("doctors", doctors);
+        return "nurse/medical-record-create";
+    }
+    
+    @PostMapping("/medical-record/create")
+    public String saveNewMedicalRecord(@RequestParam Long userId, @RequestParam Long doctorId,
+                                     @RequestParam(required = false) String chiefComplaint,
+                                     @RequestParam(required = false) String presentIllness,
+                                     @RequestParam(required = false) String diagnosisResult,
+                                     @RequestParam(required = false) Double temperature,
+                                     @RequestParam(required = false) Integer bloodPressure,
+                                     @RequestParam(required = false) String nurseNotes) {
+        User patient = userService.findById(userId);
+        Doctor doctor = doctorService.findById(doctorId);
+        
+        MedicalRecord record = new MedicalRecord();
+        record.setUser(patient);
+        record.setDoctor(doctor);
+        record.setChiefComplaint(chiefComplaint);
+        record.setPresentIllness(presentIllness);
+        record.setDiagnosisResult(diagnosisResult);
+        record.setTemperature(temperature);
+        record.setBloodPressure(bloodPressure);
+        record.setNurseNotes(nurseNotes);
+        
+        medicalRecordService.saveMedicalRecord(record);
+        
+        return "redirect:/nurse/patient/" + userId;
     }
 }

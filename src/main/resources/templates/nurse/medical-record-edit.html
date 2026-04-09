@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑病历 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>护士中心</h3>
+            <ul>
+                <li><a href="/nurse/dashboard">首页</a></li>
+                <li><a href="/nurse/patients">患者信息</a></li>
+                <li><a href="/nurse/appointments">预约管理</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>编辑病历</h1>
+            <div class="patient-info">
+                <h3>患者信息</h3>
+                <p><strong>姓名：</strong><span th:text="${patient.name}"></span></p>
+                <p><strong>性别：</strong><span th:text="${patient.gender == 'male' ? '男' : '女'}"></span></p>
+                <p><strong>电话：</strong><span th:text="${patient.phone}"></span></p>
+            </div>
+            
+            <form th:action="@{/nurse/medical-record/edit/{id}(id=${record.id})}" method="post">
+                <div class="form-group">
+                    <label>体温（℃）</label>
+                    <input type="number" name="temperature" step="0.1" th:value="${record.temperature}">
+                </div>
+                
+                <div class="form-group">
+                    <label>血压（mmHg）</label>
+                    <input type="number" name="bloodPressure" th:value="${record.bloodPressure}">
+                </div>
+                
+                <div class="form-group">
+                    <label>护士记录</label>
+                    <textarea name="nurseNotes" rows="4" th:text="${record.nurseNotes}"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">保存记录</button>
+                <a th:href="@{/nurse/patient/{id}(id=${patient.id})}" class="btn btn-secondary">返回</a>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -23,6 +23,9 @@ public class MedicalRecord {
     private String diagnosisResult;
     private LocalDateTime diagnosisTime;
     private LocalDateTime createTime;
+    private Double temperature;
+    private Integer bloodPressure;
+    private String nurseNotes;
 
     public Long getId() { 
         return id; 
@@ -86,5 +89,29 @@ public class MedicalRecord {
     
     public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
+    }
+    
+    public Double getTemperature() {
+        return temperature;
+    }
+    
+    public void setTemperature(Double temperature) {
+        this.temperature = temperature;
+    }
+    
+    public Integer getBloodPressure() {
+        return bloodPressure;
+    }
+    
+    public void setBloodPressure(Integer bloodPressure) {
+        this.bloodPressure = bloodPressure;
+    }
+    
+    public String getNurseNotes() {
+        return nurseNotes;
+    }
+    
+    public void setNurseNotes(String nurseNotes) {
+        this.nurseNotes = nurseNotes;
     }
 }

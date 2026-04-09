@@ -29,8 +29,11 @@
                     <div class="appointment-body">
                         <p><strong>科室：</strong><span th:text="${appointment.department.name}"></span></p>
                         <p><strong>医生：</strong><span th:text="${appointment.doctor.user.name}"></span></p>
-                        <p><strong>预约时间：</strong><span th:text="${appointment.appointmentTime}"></span></p>
+                        <p><strong>预约时间：</strong><span th:text="${#temporals.format(appointment.appointmentTime, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
                         <p><strong>症状：</strong><span th:text="${appointment.symptoms}"></span></p>
+                        <div class="appointment-actions">
+                            <a th:href="@{/nurse/patient/{id}(id=${appointment.user.id})}" class="btn btn-primary">查看患者详情</a>
+                        </div>
                     </div>
                 </div>
             </div>
