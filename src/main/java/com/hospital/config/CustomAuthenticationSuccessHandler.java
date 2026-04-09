@@ -22,6 +22,16 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         System.out.println("【请求中的 success 参数】" + request.getParameter("success"));
         System.out.println("========================================");
         
+        // 检查选择的角色是否与实际角色匹配
+        String selectedRole = request.getParameter("role");
+        String actualRole = authentication.getAuthorities().iterator().next().getAuthority().replace("ROLE_", "");
+        
+        if (selectedRole != null && !selectedRole.equals(actualRole)) {
+            System.out.println("【角色不匹配】选择的角色：" + selectedRole + "，实际角色：" + actualRole);
+            response.sendRedirect("/login?error=true&role_mismatch=true");
+            return;
+        }
+        
         // 检查是否从电话号码更新后登录
         String message = request.getParameter("message");
         String success = request.getParameter("success");
