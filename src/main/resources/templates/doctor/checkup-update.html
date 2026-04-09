@@ -2,7 +2,7 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>医生工作台</title>
+    <title>更新检查状态</title>
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap/3.3.7/css/bootstrap.min.css">
     <style>
         body {
@@ -46,13 +46,6 @@
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .stat-card {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
     </style>
 </head>
 <body>
@@ -81,38 +74,39 @@
         </div>
 
         <div class="col-md-10 main-content">
-            <h2>今日预约患者</h2>
-            <div class="stat-card" style="margin-top: 20px;">
-                <h4>今日就诊人数</h4>
-                <h1 th:text="${todayList.size()}">0</h1>
-            </div>
-
-            <table class="table table-bordered" style="margin-top:20px;">
-                <thead>
-                <tr>
-                    <th>患者姓名</th>
-                    <th>性别</th>
-                    <th>年龄</th>
-                    <th>预约时间</th>
-                    <th>操作</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:if="${#lists.isEmpty(todayList)}">
-                    <td colspan="5" style="text-align:center; padding: 40px;">暂无今日预约患者</td>
-                </tr>
-                <tr th:each="patient : ${todayList}">
-                    <td th:text="${patient.name}"></td>
-                    <td th:text="${patient.gender == 'male' ? '男' : '女'}"></td>
-                    <td th:text="${patient.age}"></td>
-                    <td th:text="${#temporals.format(patient.appointmentTime, 'HH:mm')}"></td>
-                    <td>
-                        <a class="btn btn-info btn-sm" th:href="@{/doctor/appointment-detail(patientId=${patient.id})}">查看详情</a>
-                        <a class="btn btn-success btn-sm" th:href="@{/doctor/prescription-form(patientId=${patient.id})}">诊疗开方</a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+            <h3>更新检查状态</h3>
+            <form action="/doctor/update-checkup" method="post" class="form-horizontal" style="margin-top:20px;">
+                <input type="hidden" name="id" th:value="${checkup.id}">
+                <input type="hidden" name="type" th:value="${checkup.type}">
+                <input type="hidden" name="description" th:value="${checkup.description}">
+                <input type="hidden" name="userId" th:value="${checkup.user.id}">
+                <input type="hidden" name="doctorId" th:value="${checkup.doctor.id}">
+                <input type="hidden" name="createTime" th:value="${checkup.createTime}">
+                
+                <div class="form-group">
+                    <label for="result" class="col-sm-2 control-label">检查结果</label>
+                    <div class="col-sm-10">
+                        <textarea id="result" name="result" class="form-control" rows="4" required></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="status" class="col-sm-2 control-label">状态</label>
+                    <div class="col-sm-10">
+                        <select id="status" name="status" class="form-control" required>
+                            <option value="0">待检查</option>
+                            <option value="1">已完成</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <a href="/doctor/checkups" class="btn btn-danger">取消</a>
+                        <button type="submit" class="btn btn-success">提交</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -2,7 +2,7 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>医生工作台</title>
+    <title>检查项目列表</title>
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap/3.3.7/css/bootstrap.min.css">
     <style>
         body {
@@ -46,12 +46,28 @@
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .stat-card {
-            background: linear-gradient(135deg, #10b981, #059669);
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-pending {
+            background-color: #ffeb3b;
+            color: #333;
+        }
+        .status-completed {
+            background-color: #4caf50;
             color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
         }
     </style>
 </head>
@@ -81,34 +97,41 @@
         </div>
 
         <div class="col-md-10 main-content">
-            <h2>今日预约患者</h2>
-            <div class="stat-card" style="margin-top: 20px;">
-                <h4>今日就诊人数</h4>
-                <h1 th:text="${todayList.size()}">0</h1>
-            </div>
-
+            <h3>检查项目列表</h3>
             <table class="table table-bordered" style="margin-top:20px;">
                 <thead>
                 <tr>
-                    <th>患者姓名</th>
-                    <th>性别</th>
-                    <th>年龄</th>
-                    <th>预约时间</th>
+                    <th>ID</th>
+                    <th>患者</th>
+                    <th>检查类型</th>
+                    <th>描述</th>
+                    <th>结果</th>
+                    <th>状态</th>
+                    <th>创建时间</th>
                     <th>操作</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:if="${#lists.isEmpty(todayList)}">
-                    <td colspan="5" style="text-align:center; padding: 40px;">暂无今日预约患者</td>
+                <tr th:if="${#lists.isEmpty(checkups)}">
+                    <td colspan="8" class="no-data">暂无检查项目</td>
                 </tr>
-                <tr th:each="patient : ${todayList}">
-                    <td th:text="${patient.name}"></td>
-                    <td th:text="${patient.gender == 'male' ? '男' : '女'}"></td>
-                    <td th:text="${patient.age}"></td>
-                    <td th:text="${#temporals.format(patient.appointmentTime, 'HH:mm')}"></td>
+                <tr th:each="checkup : ${checkups}">
+                    <td th:text="${checkup.id}"></td>
+                    <td th:text="${checkup.patientName}"></td>
+                    <td th:text="${checkup.type}"></td>
+                    <td th:text="${checkup.description}"></td>
+                    <td th:text="${checkup.result}"></td>
                     <td>
-                        <a class="btn btn-info btn-sm" th:href="@{/doctor/appointment-detail(patientId=${patient.id})}">查看详情</a>
-                        <a class="btn btn-success btn-sm" th:href="@{/doctor/prescription-form(patientId=${patient.id})}">诊疗开方</a>
+                        <span class="status" th:classappend="${checkup.status == 0 ? 'status-pending' : 'status-completed'}">
+                            <span th:text="${checkup.status == 0 ? '待检查' : '已完成'}"></span>
+                        </span>
+                    </td>
+                    <td th:text="${checkup.createTime}"></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-sm" th:onclick="|window.location.href='/doctor/checkup-detail?id=${checkup.id}'|">详情</button>
+                            <button class="btn btn-success btn-sm" th:if="${checkup.status == 0}" th:onclick="|window.location.href='/doctor/update-checkup?id=${checkup.id}'|">更新状态</button>
+                        </div>
                     </td>
                 </tr>
                 </tbody>

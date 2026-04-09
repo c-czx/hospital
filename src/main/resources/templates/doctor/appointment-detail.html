@@ -88,6 +88,7 @@
                 <li><a href="/doctor/schedule"><span class="glyphicon glyphicon-time"></span> 号源发布</a></li>
                 <li><a href="/doctor/patients"><span class="glyphicon glyphicon-user"></span> 我的就诊</a></li>
                 <li><a href="/doctor/prescriptions"><span class="glyphicon glyphicon-list-alt"></span> 处方管理</a></li>
+                <li><a href="/doctor/checkups"><span class="glyphicon glyphicon-stethoscope"></span> 检查管理</a></li>
             </ul>
         </div>
 
@@ -180,6 +181,11 @@
                 </table>
             </div>
 
+            <div class="info-section">
+                <h4>开具检查</h4>
+                <a th:href="@{/doctor/checkup-form(patientId=${patient.id})}" class="btn btn-info">开具检查</a>
+            </div>
+            
             <a href="/doctor/dashboard" class="btn btn-default">返回工作台</a>
         </div>
     </div>
