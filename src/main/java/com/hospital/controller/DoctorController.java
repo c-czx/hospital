@@ -8,12 +8,14 @@ import com.hospital.entity.Doctor;
 import com.hospital.entity.User;
 import com.hospital.entity.Appointment;
 import com.hospital.entity.Department;
+import com.hospital.entity.Checkup;
 import com.hospital.service.DoctorService;
 import com.hospital.service.UserService;
 import com.hospital.service.AdviceService;
 import com.hospital.service.PrescriptionService;
 import com.hospital.service.AppointmentService;
 import com.hospital.service.DepartmentService;
+import com.hospital.service.CheckupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -48,14 +50,31 @@ public class DoctorController {
     @Autowired
     private DepartmentService departmentService;
     
+    @Autowired
+    private CheckupService checkupService;
+    
     private Long getCurrentDoctorId(Authentication authentication) {
-        String phone = authentication.getName();
-        User user = userService.findByPhone(phone);
-        if (user == null) {
+        try {
+            String phone = authentication.getName();
+            System.out.println("【调试】获取当前医生ID，电话：" + phone);
+            
+            User user = userService.findByPhone(phone);
+            System.out.println("【调试】用户信息：" + (user != null ? user.getId() + " - " + user.getName() : "null"));
+            
+            if (user == null) {
+                System.out.println("【调试】用户不存在，返回null");
+                return null;
+            }
+            
+            Doctor doctor = doctorService.findByUserId(user.getId());
+            System.out.println("【调试】医生信息：" + (doctor != null ? doctor.getId() + " - " + doctor.getTitle() : "null"));
+            
+            return doctor != null ? doctor.getId() : null;
+        } catch (Exception e) {
+            System.out.println("【调试】获取医生ID异常：" + e.getMessage());
+            e.printStackTrace();
             return null;
         }
-        Doctor doctor = doctorService.findByUserId(user.getId());
-        return doctor != null ? doctor.getId() : null;
     }
 
     @GetMapping("/dashboard")
@@ -258,5 +277,72 @@ public class DoctorController {
     public String updateAdvice(Advice advice, Authentication authentication) {
         doctorService.updateAdvice(advice);
         return "redirect:/doctor/appointment-detail?patientId=" + advice.getUser().getId();
+    }
+    
+    @GetMapping("/checkup-form")
+    public String checkupForm(@RequestParam Long patientId, Model model, Authentication authentication) {
+        Long doctorId = getCurrentDoctorId(authentication);
+        if (doctorId == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("patientId", patientId);
+        model.addAttribute("doctorId", doctorId);
+        return "doctor/checkup-form";
+    }
+    
+    @PostMapping("/createCheckup")
+    public String createCheckup(Checkup checkup, @RequestParam Long doctorId, @RequestParam Long patientId, Authentication authentication) {
+        Doctor doctor = new Doctor();
+        doctor.setId(doctorId);
+        checkup.setDoctor(doctor);
+        
+        User user = new User();
+        user.setId(patientId);
+        checkup.setUser(user);
+        
+        checkupService.save(checkup);
+        return "redirect:/doctor/dashboard";
+    }
+    
+    @GetMapping("/checkups")
+    public String checkups(Model model, Authentication authentication) {
+        Long doctorId = getCurrentDoctorId(authentication);
+        if (doctorId == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("checkups", checkupService.getCheckupsWithPatientName(doctorId));
+        return "doctor/checkups";
+    }
+    
+    @GetMapping("/checkup-detail")
+    public String checkupDetail(@RequestParam Long id, Model model, Authentication authentication) {
+        Long doctorId = getCurrentDoctorId(authentication);
+        if (doctorId == null) {
+            return "redirect:/login";
+        }
+        Checkup checkup = checkupService.findById(id);
+        model.addAttribute("checkup", checkup);
+        return "doctor/checkup-detail";
+    }
+    
+    @GetMapping("/update-checkup")
+    public String updateCheckup(@RequestParam Long id, Model model, Authentication authentication) {
+        Long doctorId = getCurrentDoctorId(authentication);
+        if (doctorId == null) {
+            return "redirect:/login";
+        }
+        Checkup checkup = checkupService.findById(id);
+        model.addAttribute("checkup", checkup);
+        return "doctor/checkup-update";
+    }
+    
+    @PostMapping("/update-checkup")
+    public String updateCheckup(Checkup checkup, Authentication authentication) {
+        Long doctorId = getCurrentDoctorId(authentication);
+        if (doctorId == null) {
+            return "redirect:/login";
+        }
+        checkupService.save(checkup);
+        return "redirect:/doctor/checkups";
     }
 }
