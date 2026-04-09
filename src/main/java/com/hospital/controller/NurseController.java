@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -38,6 +39,19 @@ public class NurseController {
     @GetMapping("/patients")
     public String patients(Model model) {
         List<User> patients = userService.findByRole("patient");
+        model.addAttribute("patients", patients);
+        return "nurse/patients";
+    }
+    
+    @GetMapping("/billing/patients")
+    public String billingPatients(Model model) {
+        LocalDateTime todayStart = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
+        LocalDateTime todayEnd = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59);
+        List<Appointment> appointments = appointmentService.findByAppointmentTimeBetween(todayStart, todayEnd);
+        List<User> patients = appointments.stream()
+                .map(Appointment::getUser)
+                .distinct()
+                .toList();
         model.addAttribute("patients", patients);
         return "nurse/patients";
     }
