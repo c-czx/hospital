@@ -1,86 +1,69 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>医嘱管理</title>
-    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap/3.3.7/css/bootstrap.min.css">
-    <style>
-        body {
-            background-color: #f5f5f5;
-        }
-        .navbar {
-            margin-bottom: 0;
-            border-radius: 0;
-        }
-        .container-fluid {
-            padding-top: 20px;
-        }
-        .main-content {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医嘱管理 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<nav class="navbar navbar-inverse">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="/doctor/dashboard">医院管理系统 - 医生端</a>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>医生中心</h3>
+            <ul>
+                <li><a href="/doctor/dashboard">首页</a></li>
+                <li><a href="/doctor/schedule">号源发布</a></li>
+                <li><a href="/doctor/patients">今日预约</a></li>
+                <li><a href="/doctor/appointments">我的就诊</a></li>
+                <li><a href="/doctor/prescriptions">处方管理</a></li>
+                <li><a href="/doctor/checkups">检查管理</a></li>
+                <li><a href="/doctor/profile">个人信息</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
         </div>
-        <ul class="nav navbar-nav navbar-right">
-            <li><a href="/doctor/profile"><span class="glyphicon glyphicon-user"></span> 个人信息</a></li>
-            <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> 退出登录</a></li>
-        </ul>
+        
+        <div class="main-content">
+            <h1>我的医嘱</h1>
+            <div th:if="${#lists.isEmpty(advices)}" style="text-align: center; padding: 40px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                暂无医嘱记录
+            </div>
+            <table th:unless="${#lists.isEmpty(advices)}" class="data-table">
+                <thead>
+                    <tr>
+                        <th>患者姓名</th>
+                        <th>医嘱内容</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="advice : ${advices}">
+                        <td th:text="${advice.patientName}"></td>
+                        <td th:text="${advice.content}"></td>
+                        <td>
+                            <span th:if="${advice.status == 1}" class="status" style="background-color: #4caf50; color: white;">有效</span>
+                            <span th:if="${advice.status == 0}" class="status" style="background-color: #e9ecef; color: #333;">无效</span>
+                        </td>
+                        <td th:text="${#temporals.format(advice.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+                        <td>
+                            <button class="btn btn-primary" th:onclick="'editAdvice(' + ${advice.id} + ')'">修改</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="actions" style="margin-top: 30px;">
+                <a href="/doctor/dashboard" class="btn btn-secondary">返回工作台</a>
+            </div>
+        </div>
     </div>
-</nav>
-
-<div class="container-fluid">
-    <div class="main-content">
-        <h2>我的医嘱</h2>
-
-        <table class="table table-bordered" style="margin-top:20px;">
-            <thead>
-            <tr>
-                <th>患者姓名</th>
-                <th>医嘱内容</th>
-                <th>状态</th>
-                <th>创建时间</th>
-                <th>操作</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:if="${#lists.isEmpty(advices)}">
-                <td colspan="5" style="text-align:center; padding: 40px;">暂无医嘱记录</td>
-            </tr>
-            <tr th:each="advice : ${advices}">
-                <td th:text="${advice.patientName}"></td>
-                <td th:text="${advice.content}"></td>
-                <td>
-                    <span th:if="${advice.status == 1}" class="label label-success">有效</span>
-                    <span th:if="${advice.status == 0}" class="label label-default">无效</span>
-                </td>
-                <td th:text="${#temporals.format(advice.createTime, 'yyyy-MM-dd HH:mm')}"></td>
-                <td>
-                    <button class="btn btn-warning btn-sm"
-                            th:onclick="'editAdvice(' + ${advice.id} + ')'">修改</button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-
-        <a href="/doctor/dashboard" class="btn btn-default">返回主页</a>
-    </div>
-</div>
-
-<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<script>
-    function editAdvice(id) {
-        // TODO: 实现医嘱编辑功能
-        alert('医嘱编辑功能开发中...');
-    }
-</script>
+    
+    <script>
+        function editAdvice(id) {
+            // TODO: 实现医嘱编辑功能
+            alert('医嘱编辑功能开发中...');
+        }
+    </script>
 </body>
 </html>

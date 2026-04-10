@@ -1,111 +1,40 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>患者详情</title>
-    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap/3.3.7/css/bootstrap.min.css">
-    <style>
-        body {
-            background-color: #f5f5f5;
-        }
-        .navbar {
-            margin-bottom: 0;
-            border-radius: 0;
-        }
-        .container-fluid {
-            padding-top: 20px;
-        }
-        .sidebar {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-        }
-        .sidebar li {
-            margin-bottom: 10px;
-        }
-        .sidebar a {
-            text-decoration: none;
-            color: #333;
-            display: block;
-            padding: 10px;
-            border-radius: 5px;
-            transition: all 0.3s;
-        }
-        .sidebar a:hover {
-            background: #10b981;
-            color: white;
-        }
-        .main-content {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .info-section {
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 5px;
-        }
-        .info-section h4 {
-            color: #10b981;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #10b981;
-            padding-bottom: 10px;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #10b981, #059669);
-            border: none;
-        }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #059669, #047857);
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>患者详情 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<nav class="navbar navbar-inverse">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="/doctor/dashboard">医院管理系统 - 医生端</a>
-        </div>
-        <ul class="nav navbar-nav navbar-right">
-            <li><a href="/doctor/profile"><span class="glyphicon glyphicon-user"></span> 个人信息</a></li>
-            <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> 退出登录</a></li>
-        </ul>
-    </div>
-</nav>
-
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-2 sidebar">
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>医生中心</h3>
             <ul>
-                <li><a href="/doctor/dashboard"><span class="glyphicon glyphicon-home"></span> 医生首页</a></li>
-                <li><a href="/doctor/schedule"><span class="glyphicon glyphicon-time"></span> 号源发布</a></li>
-                <li><a href="/doctor/patients"><span class="glyphicon glyphicon-user"></span> 我的就诊</a></li>
-                <li><a href="/doctor/prescriptions"><span class="glyphicon glyphicon-list-alt"></span> 处方管理</a></li>
-                <li><a href="/doctor/checkups"><span class="glyphicon glyphicon-stethoscope"></span> 检查管理</a></li>
+                <li><a href="/doctor/dashboard">首页</a></li>
+                <li><a href="/doctor/schedule">号源发布</a></li>
+                <li><a href="/doctor/patients">我的就诊</a></li>
+                <li><a href="/doctor/prescriptions">处方管理</a></li>
+                <li><a href="/doctor/checkups">检查管理</a></li>
+                <li><a href="/doctor/profile">个人信息</a></li>
+                <li><a href="/logout">退出登录</a></li>
             </ul>
         </div>
-
-        <div class="col-md-10 main-content">
-            <h3>患者详情</h3>
-
-            <div class="info-section">
-                <h4>患者信息</h4>
+        
+        <div class="main-content">
+            <h1>患者详情</h1>
+            
+            <div class="appointment-detail">
+                <h3>患者信息</h3>
                 <p><strong>姓名：</strong><span th:text="${patient.name}"></span></p>
                 <p><strong>性别：</strong><span th:text="${patient.gender == 'male' ? '男' : '女'}"></span></p>
                 <p><strong>年龄：</strong><span th:text="${patient.age}"></span></p>
                 <p><strong>电话：</strong><span th:text="${patient.phone}"></span></p>
                 <p><strong>邮箱：</strong><span th:text="${patient.email}"></span></p>
             </div>
-
-            <div class="info-section">
-                <h4>保存病历</h4>
+            
+            <div class="appointment-detail" style="margin-top: 30px;">
+                <h3>保存病历</h3>
                 <form method="post" th:action="@{/doctor/saveRecord}">
                     <input type="hidden" name="doctorId" th:value="${doctorId}">
                     <input type="hidden" name="user.id" th:value="${patient.id}">
@@ -122,12 +51,14 @@
                         <label>诊断结果：</label>
                         <textarea name="diagnosisResult" class="form-control" rows="2" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary">保存病历</button>
+                    <div class="actions">
+                        <button type="submit" class="btn btn-primary">保存病历</button>
+                    </div>
                 </form>
             </div>
-
-            <div class="info-section">
-                <h4>开具处方</h4>
+            
+            <div class="appointment-detail" style="margin-top: 30px;">
+                <h3>开具处方</h3>
                 <form method="post" th:action="@{/doctor/createPrescription}">
                     <input type="hidden" name="doctorId" th:value="${doctorId}">
                     <input type="hidden" name="patientId" th:value="${patient.id}">
@@ -140,12 +71,14 @@
                         <label>用法用量：</label>
                         <textarea name="usage" class="form-control" rows="2" placeholder="例：口服，一日三次，一次一片" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-success">确认开方</button>
+                    <div class="actions">
+                        <button type="submit" class="btn btn-primary">确认开方</button>
+                    </div>
                 </form>
             </div>
-
-            <div class="info-section">
-                <h4>添加医嘱</h4>
+            
+            <div class="appointment-detail" style="margin-top: 30px;">
+                <h3>添加医嘱</h3>
                 <form method="post" th:action="@{/doctor/createAdvice}">
                     <input type="hidden" name="doctorId" th:value="${doctorId}">
                     <input type="hidden" name="user.id" th:value="${patient.id}">
@@ -154,13 +87,15 @@
                         <label>医嘱内容：</label>
                         <textarea name="content" class="form-control" rows="3" placeholder="例：注意休息，多喝水，避免剧烈运动" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-warning">添加医嘱</button>
+                    <div class="actions">
+                        <button type="submit" class="btn btn-primary">添加医嘱</button>
+                    </div>
                 </form>
             </div>
-
-            <div class="info-section" th:if="${adviceList != null and !#lists.isEmpty(adviceList)}">
-                <h4>历史医嘱</h4>
-                <table class="table table-bordered">
+            
+            <div class="appointment-detail" th:if="${adviceList != null and !#lists.isEmpty(adviceList)}" style="margin-top: 30px;">
+                <h3>历史医嘱</h3>
+                <table class="data-table">
                     <thead>
                     <tr>
                         <th>医嘱内容</th>
@@ -172,26 +107,24 @@
                     <tr th:each="advice : ${adviceList}">
                         <td th:text="${advice.content}"></td>
                         <td>
-                            <span th:if="${advice.status == 1}" class="label label-success">有效</span>
-                            <span th:if="${advice.status == 0}" class="label label-default">无效</span>
+                            <span th:if="${advice.status == 1}" class="status" style="background-color: #4caf50; color: white;">有效</span>
+                            <span th:if="${advice.status == 0}" class="status" style="background-color: #e9ecef; color: #333;">无效</span>
                         </td>
                         <td th:text="${#temporals.format(advice.createTime, 'yyyy-MM-dd HH:mm')}"></td>
                     </tr>
                     </tbody>
                 </table>
             </div>
-
-            <div class="info-section">
-                <h4>开具检查</h4>
-                <a th:href="@{/doctor/checkup-form(patientId=${patient.id})}" class="btn btn-info">开具检查</a>
+            
+            <div class="appointment-detail" style="margin-top: 30px;">
+                <h3>开具检查</h3>
+                <a th:href="@{/doctor/checkup-form(patientId=${patient.id})}" class="btn btn-primary">开具检查</a>
             </div>
             
-            <a href="/doctor/dashboard" class="btn btn-default">返回工作台</a>
+            <div class="actions" style="margin-top: 30px;">
+                <a href="/doctor/dashboard" class="btn btn-secondary">返回工作台</a>
+            </div>
         </div>
     </div>
-</div>
-
-<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </body>
 </html>

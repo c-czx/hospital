@@ -1,123 +1,75 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>医生工作台</title>
-    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap/3.3.7/css/bootstrap.min.css">
-    <style>
-        body {
-            background-color: #f5f5f5;
-        }
-        .navbar {
-            margin-bottom: 0;
-            border-radius: 0;
-        }
-        .container-fluid {
-            padding-top: 20px;
-        }
-        .sidebar {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-        }
-        .sidebar li {
-            margin-bottom: 10px;
-        }
-        .sidebar a {
-            text-decoration: none;
-            color: #333;
-            display: block;
-            padding: 10px;
-            border-radius: 5px;
-            transition: all 0.3s;
-        }
-        .sidebar a:hover {
-            background: #10b981;
-            color: white;
-        }
-        .main-content {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .stat-card {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医生工作台 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<nav class="navbar navbar-inverse">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="/doctor/dashboard">医院管理系统 - 医生端</a>
-        </div>
-        <ul class="nav navbar-nav navbar-right">
-            <li><a href="/doctor/profile"><span class="glyphicon glyphicon-user"></span> 个人信息</a></li>
-            <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> 退出登录</a></li>
-        </ul>
-    </div>
-</nav>
-
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-2 sidebar">
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>医生中心</h3>
             <ul>
-                <li><a href="/doctor/dashboard"><span class="glyphicon glyphicon-home"></span> 医生首页</a></li>
-                <li><a href="/doctor/schedule"><span class="glyphicon glyphicon-time"></span> 号源发布</a></li>
-                <li><a href="/doctor/patients"><span class="glyphicon glyphicon-user"></span> 我的就诊</a></li>
-                <li><a href="/doctor/prescriptions"><span class="glyphicon glyphicon-list-alt"></span> 处方管理</a></li>
-                <li><a href="/doctor/checkups"><span class="glyphicon glyphicon-stethoscope"></span> 检查管理</a></li>
+                <li><a href="/doctor/dashboard">首页</a></li>
+                <li><a href="/doctor/schedule">号源发布</a></li>
+                <li><a href="/doctor/patients">今日预约</a></li>
+                <li><a href="/doctor/appointments">我的就诊</a></li>
+                <li><a href="/doctor/prescriptions">处方管理</a></li>
+                <li><a href="/doctor/checkups">检查管理</a></li>
+                <li><a href="/doctor/profile">个人信息</a></li>
+                <li><a href="/logout">退出登录</a></li>
             </ul>
         </div>
-
-        <div class="col-md-10 main-content">
-            <h2>今日预约患者</h2>
-            <div class="stat-card" style="margin-top: 20px;">
-                <h4>今日就诊人数</h4>
-                <h1 th:text="${todayList.size()}">0</h1>
+        
+        <div class="main-content">
+            <h1>欢迎，医生</h1>
+            <div class="dashboard-cards">
+                <div class="card">
+                    <h3>📅 今日预约</h3>
+                    <p>查看今日预约的患者</p>
+                    <a href="/doctor/patients" class="btn btn-primary">查看患者</a>
+                </div>
+                <div class="card">
+                    <h3>🏥 号源发布</h3>
+                    <p>发布和管理您的号源</p>
+                    <a href="/doctor/schedule" class="btn btn-secondary">号源管理</a>
+                </div>
+                <div class="card">
+                    <h3>📝 处方管理</h3>
+                    <p>查看和管理您开具的处方</p>
+                    <a href="/doctor/prescriptions" class="btn btn-secondary">处方管理</a>
+                </div>
+                <div class="card">
+                    <h3>🔬 检查管理</h3>
+                    <p>管理您开具的检查项目</p>
+                    <a href="/doctor/checkups" class="btn btn-secondary">检查管理</a>
+                </div>
             </div>
-
-            <table class="table table-bordered" style="margin-top:20px;">
-                <thead>
-                <tr>
-                    <th>患者姓名</th>
-                    <th>性别</th>
-                    <th>年龄</th>
-                    <th>预约时间</th>
-                    <th>操作</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:if="${#lists.isEmpty(todayList)}">
-                    <td colspan="5" style="text-align:center; padding: 40px;">暂无今日预约患者</td>
-                </tr>
-                <tr th:each="patient : ${todayList}">
-                    <td th:text="${patient.name}"></td>
-                    <td th:text="${patient.gender == 'male' ? '男' : '女'}"></td>
-                    <td th:text="${patient.age}"></td>
-                    <td th:text="${#temporals.format(patient.appointmentTime, 'HH:mm')}"></td>
-                    <td>
-                        <a class="btn btn-info btn-sm" th:href="@{/doctor/appointment-detail(patientId=${patient.id})}">查看详情</a>
-                        <a class="btn btn-success btn-sm" th:href="@{/doctor/prescription-form(patientId=${patient.id})}">诊疗开方</a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+            
+            <h2 style="margin-top: 40px;">今日预约患者</h2>
+            <div class="appointments-list">
+                <div th:if="${#lists.isEmpty(todayList)}" style="text-align: center; padding: 40px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                    暂无今日预约患者
+                </div>
+                <div th:each="patient : ${todayList}" class="appointment-card">
+                    <div class="appointment-header">
+                        <h3 th:text="${patient.name}"></h3>
+                        <div class="status" th:text="${patient.status}"></div>
+                    </div>
+                    <div class="appointment-body">
+                        <p><strong>性别：</strong><span th:text="${patient.gender == 'male' ? '男' : '女'}"></span></p>
+                        <p><strong>年龄：</strong><span th:text="${patient.age}"></span></p>
+                        <p><strong>预约时间：</strong><span th:text="${#temporals.format(patient.appointmentTime, 'HH:mm')}"></span></p>
+                        <p><strong>症状：</strong><span th:text="${patient.symptoms}"></span></p>
+                    </div>
+                    <div class="actions">
+                        <a class="btn btn-primary" th:href="@{/doctor/appointment-detail(patientId=${patient.id})}">查看详情</a>
+                        <a class="btn btn-secondary" th:href="@{/doctor/prescription-form(patientId=${patient.id})}">诊疗开方</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
-
-<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -1,87 +1,32 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>个人信息</title>
-    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap/3.3.7/css/bootstrap.min.css">
-    <style>
-        body {
-            background-color: #f5f5f5;
-        }
-        .navbar {
-            margin-bottom: 0;
-            border-radius: 0;
-        }
-        .container-fluid {
-            padding-top: 20px;
-        }
-        .sidebar {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-        }
-        .sidebar li {
-            margin-bottom: 10px;
-        }
-        .sidebar a {
-            text-decoration: none;
-            color: #333;
-            display: block;
-            padding: 10px;
-            border-radius: 5px;
-            transition: all 0.3s;
-        }
-        .sidebar a:hover {
-            background: #10b981;
-            color: white;
-        }
-        .main-content {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .profile-container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人信息 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<nav class="navbar navbar-inverse">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="/doctor/dashboard">医院管理系统 - 医生端</a>
-        </div>
-        <ul class="nav navbar-nav navbar-right">
-            <li><a href="/doctor/profile"><span class="glyphicon glyphicon-user"></span> 个人信息</a></li>
-            <li><a href="/logout"><span class="glyphicon glyphicon-log-out"></span> 退出登录</a></li>
-        </ul>
-    </div>
-</nav>
-
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-2 sidebar">
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>医生中心</h3>
             <ul>
-                <li><a href="/doctor/dashboard"><span class="glyphicon glyphicon-home"></span> 医生首页</a></li>
-                <li><a href="/doctor/schedule"><span class="glyphicon glyphicon-time"></span> 号源发布</a></li>
-                <li><a href="/doctor/patients"><span class="glyphicon glyphicon-user"></span> 我的就诊</a></li>
-                <li><a href="/doctor/prescriptions"><span class="glyphicon glyphicon-list-alt"></span> 处方管理</a></li>
+                <li><a href="/doctor/dashboard">首页</a></li>
+                <li><a href="/doctor/schedule">号源发布</a></li>
+                <li><a href="/doctor/patients">今日预约</a></li>
+                <li><a href="/doctor/appointments">我的就诊</a></li>
+                <li><a href="/doctor/prescriptions">处方管理</a></li>
+                <li><a href="/doctor/checkups">检查管理</a></li>
+                <li><a href="/doctor/profile">个人信息</a></li>
+                <li><a href="/logout">退出登录</a></li>
             </ul>
         </div>
-
-        <div class="col-md-10 main-content">
-            <div class="profile-container">
-                <h2 style="margin-bottom: 30px;">个人信息</h2>
-
+        
+        <div class="main-content">
+            <h1>个人信息</h1>
+            <div style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); max-width: 800px; margin: 0 auto;">
                 <form method="post" th:action="@{/doctor/profile/update}">
-                    <h4 style="color: #10b981; margin-bottom: 20px;">基本信息</h4>
+                    <h3 style="color: #10b981; margin-bottom: 20px;">基本信息</h3>
                     <div class="form-group">
                         <label>姓名：</label>
                         <input type="text" class="form-control" name="name" th:value="${doctor.user.name}" required>
@@ -106,9 +51,9 @@
                         <input type="email" class="form-control" name="email" th:value="${doctor.user.email}">
                     </div>
 
-                    <hr>
+                    <hr style="margin: 30px 0;">
 
-                    <h4 style="color: #10b981; margin-bottom: 20px;">职业信息</h4>
+                    <h3 style="color: #10b981; margin-bottom: 20px;">职业信息</h3>
                     <div class="form-group">
                         <label>职称：</label>
                         <input type="text" class="form-control" name="title" th:value="${doctor.title}" required placeholder="例如：主任医师、副主任医师">
@@ -123,24 +68,20 @@
                                     th:selected="${dept.id == doctor.department.id}">
                             </option>
                         </select>
-                        <small class="text-muted">当前科室：<span th:text="${doctor.department.name}"></span></small>
+                        <small style="display: block; margin-top: 5px; color: #6c757d;">当前科室：<span th:text="${doctor.department.name}"></span></small>
                     </div>
                     <div class="form-group">
                         <label>排班信息：</label>
                         <textarea class="form-control" name="schedule" rows="3" th:text="${doctor.schedule}" required placeholder="例如：周一至周五 8:00-12:00, 14:00-17:00"></textarea>
                     </div>
 
-                    <div style="margin-top: 30px;">
+                    <div class="actions" style="margin-top: 30px;">
                         <button type="submit" class="btn btn-primary">保存修改</button>
-                        <a href="/doctor/dashboard" class="btn btn-default">返回主页</a>
+                        <a href="/doctor/dashboard" class="btn btn-secondary">返回工作台</a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-</div>
-
-<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </body>
 </html>

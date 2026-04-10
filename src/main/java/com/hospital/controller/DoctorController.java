@@ -196,8 +196,8 @@ public class DoctorController {
         if (doctorId == null) {
             return "redirect:/login";
         }
-        model.addAttribute("allAppointments", doctorService.getAllAppointments(doctorId).get("data"));
-        return "doctor/appointments";
+        model.addAttribute("allAppointments", doctorService.getTodayPatient(doctorId).get("data"));
+        return "doctor/today-appointments";
     }
 
     @GetMapping("/prescriptions")

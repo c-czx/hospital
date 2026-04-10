@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的就诊 - 医院挂号系统</title>
+    <title>今日预约 - 医院挂号系统</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -23,9 +23,9 @@
         </div>
         
         <div class="main-content">
-            <h1>我的就诊患者</h1>
+            <h1>今日预约患者</h1>
             <div th:if="${#lists.isEmpty(allAppointments)}" style="text-align: center; padding: 40px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
-                暂无就诊信息
+                暂无今日预约信息
             </div>
             <table th:unless="${#lists.isEmpty(allAppointments)}" class="data-table">
                 <thead>
@@ -44,7 +44,7 @@
                         <td th:text="${apt.name}"></td>
                         <td th:text="${apt.gender == 'male' ? '男' : '女'}"></td>
                         <td th:text="${apt.age}"></td>
-                        <td th:text="${#temporals.format(apt.appointmentTime, 'yyyy-MM-dd HH:mm')}"></td>
+                        <td th:text="${#temporals.format(apt.appointmentTime, 'HH:mm')}"></td>
                         <td th:text="${apt.symptoms}"></td>
                         <td>
                             <span th:if="${apt.status == '已预约'}" class="status" style="background-color: #17a2b8; color: white;">已预约</span>
@@ -54,7 +54,7 @@
                         <td>
                             <div class="action-buttons">
                                 <a class="btn btn-primary" th:href="@{/doctor/appointment-detail(patientId=${apt.id})}">查看病历</a>
-                                <a class="btn btn-secondary" th:href="@{/doctor/prescription-form(patientId=${apt.id})}">开具处方</a>
+                                <a class="btn btn-secondary" th:href="@{/doctor/prescription-form(patientId=${apt.id})}">诊疗开方</a>
                             </div>
                         </td>
                     </tr>
