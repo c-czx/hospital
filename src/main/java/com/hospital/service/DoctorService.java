@@ -175,28 +175,50 @@ public class DoctorService {
         return Map.of("code", 200, "data", data);
     }
     
-    // 【获取患者病历】
-    public MedicalRecord getMedicalRecord(Long patientId) {
+    // 【获取患者病历】当前医生维度下时间最新的一条（与医生端详情/保存逻辑一致）
+    public MedicalRecord getMedicalRecord(Long patientId, Long doctorId) {
         List<MedicalRecord> records = medicalRecordRepository.findByUserId(patientId);
-        return records.isEmpty() ? null : records.get(0);
+        return records.stream()
+                .filter(r -> r.getDoctor() != null && doctorId.equals(r.getDoctor().getId()))
+                .max(Comparator.comparing(this::medicalRecordSortTime))
+                .orElse(null);
+    }
+
+    private LocalDateTime medicalRecordSortTime(MedicalRecord r) {
+        if (r.getCreateTime() != null) {
+            return r.getCreateTime();
+        }
+        if (r.getDiagnosisTime() != null) {
+            return r.getDiagnosisTime();
+        }
+        return LocalDateTime.MIN;
     }
     
     // 【获取患者处方】
-    public Prescription getPrescription(Long patientId) {
+    public Prescription getPrescription(Long patientId, Long doctorId) {
         List<Prescription> prescriptions = prescriptionRepository.findByUserId(patientId);
-        return prescriptions.isEmpty() ? null : prescriptions.get(0);
+        return prescriptions.stream()
+                .filter(p -> p.getDoctor() != null && doctorId.equals(p.getDoctor().getId()))
+                .max(Comparator.comparing(p -> p.getCreateTime() != null ? p.getCreateTime() : LocalDateTime.MIN))
+                .orElse(null);
     }
     
     // 【获取患者医嘱】
-    public Advice getAdvice(Long patientId) {
+    public Advice getAdvice(Long patientId, Long doctorId) {
         List<Advice> advices = adviceRepository.findByUserId(patientId);
-        return advices.isEmpty() ? null : advices.get(0);
+        return advices.stream()
+                .filter(a -> a.getDoctor() != null && doctorId.equals(a.getDoctor().getId()))
+                .max(Comparator.comparing(a -> a.getCreateTime() != null ? a.getCreateTime() : LocalDateTime.MIN))
+                .orElse(null);
     }
     
     // 【获取患者检查记录】
-    public Checkup getCheckup(Long patientId) {
+    public Checkup getCheckup(Long patientId, Long doctorId) {
         List<Checkup> checkups = checkupRepository.findByUser_Id(patientId);
-        return checkups.isEmpty() ? null : checkups.get(0);
+        return checkups.stream()
+                .filter(c -> c.getDoctor() != null && doctorId.equals(c.getDoctor().getId()))
+                .max(Comparator.comparing(c -> c.getCreateTime() != null ? c.getCreateTime() : LocalDateTime.MIN))
+                .orElse(null);
     }
     
     // 【保存检查记录】

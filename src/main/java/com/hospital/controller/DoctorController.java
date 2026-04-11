@@ -29,8 +29,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/doctor")
@@ -119,7 +124,11 @@ public class DoctorController {
     }
 
     @GetMapping("/appointment-detail")
-    public String appointmentDetail(@RequestParam Long patientId, Model model, Authentication authentication) {
+    public String appointmentDetail(
+            @RequestParam Long patientId,
+            @RequestParam(required = false) Long appointmentId,
+            Model model,
+            Authentication authentication) {
         Long doctorId = getCurrentDoctorId(authentication);
         if (doctorId == null) {
             return "redirect:/login";
@@ -127,56 +136,87 @@ public class DoctorController {
         model.addAttribute("patient", doctorService.getPatientDetail(patientId).get("data"));
         model.addAttribute("adviceList", doctorService.getAdviceList(patientId).get("data"));
         model.addAttribute("appointmentList", appointmentService.findByUserId(patientId));
-        
-        // 获取病历、处方、医嘱和检查记录
-        // 这里获取患者的所有记录，然后根据创建时间选择最新的记录
-        List<MedicalRecord> medicalRecords = medicalRecordRepository.findByUserId(patientId);
-        MedicalRecord medicalRecord = null;
-        if (!medicalRecords.isEmpty()) {
-            // 按创建时间排序，获取最新的记录
-            medicalRecord = medicalRecords.stream()
-                .sorted((a1, a2) -> a2.getCreateTime().compareTo(a1.getCreateTime()))
-                .findFirst()
-                .orElse(null);
-        }
+
+        Appointment currentAppointment = resolveCurrentAppointment(appointmentId, patientId, doctorId);
+        model.addAttribute("currentAppointment", currentAppointment);
+
+        List<MedicalRecord> medicalRecords = medicalRecordRepository.findByUserId(patientId).stream()
+                .filter(r -> r.getDoctor() != null && doctorId.equals(r.getDoctor().getId()))
+                .collect(Collectors.toList());
+        MedicalRecord medicalRecord = pickRecordForVisit(medicalRecords, this::medicalRecordAnchorTime, currentAppointment);
         model.addAttribute("medicalRecord", medicalRecord);
-        
-        List<Prescription> prescriptions = prescriptionRepository.findByUserId(patientId);
-        Prescription prescription = null;
-        if (!prescriptions.isEmpty()) {
-            // 按创建时间排序，获取最新的记录
-            prescription = prescriptions.stream()
-                .sorted((a1, a2) -> a2.getCreateTime().compareTo(a1.getCreateTime()))
-                .findFirst()
-                .orElse(null);
-        }
+
+        List<Prescription> prescriptions = prescriptionRepository.findByUserId(patientId).stream()
+                .filter(p -> p.getDoctor() != null && doctorId.equals(p.getDoctor().getId()))
+                .collect(Collectors.toList());
+        Prescription prescription = pickRecordForVisit(prescriptions, Prescription::getCreateTime, currentAppointment);
         model.addAttribute("prescription", prescription);
-        
-        List<Advice> advices = adviceRepository.findByUserId(patientId);
-        Advice advice = null;
-        if (!advices.isEmpty()) {
-            // 按创建时间排序，获取最新的记录
-            advice = advices.stream()
-                .sorted((a1, a2) -> a2.getCreateTime().compareTo(a1.getCreateTime()))
-                .findFirst()
-                .orElse(null);
-        }
+
+        List<Advice> advices = adviceRepository.findByUserId(patientId).stream()
+                .filter(a -> a.getDoctor() != null && doctorId.equals(a.getDoctor().getId()))
+                .collect(Collectors.toList());
+        Advice advice = pickRecordForVisit(advices, Advice::getCreateTime, currentAppointment);
         model.addAttribute("advice", advice);
-        
-        List<Checkup> checkups = checkupRepository.findByUser_Id(patientId);
-        Checkup checkup = null;
-        if (!checkups.isEmpty()) {
-            // 按创建时间排序，获取最新的记录
-            checkup = checkups.stream()
-                .sorted((a1, a2) -> a2.getCreateTime().compareTo(a1.getCreateTime()))
-                .findFirst()
-                .orElse(null);
-        }
+
+        List<Checkup> checkups = checkupRepository.findByUser_Id(patientId).stream()
+                .filter(c -> c.getDoctor() != null && doctorId.equals(c.getDoctor().getId()))
+                .collect(Collectors.toList());
+        Checkup checkup = pickRecordForVisit(checkups, Checkup::getCreateTime, currentAppointment);
         model.addAttribute("checkup", checkup);
-        
+
         model.addAttribute("doctorId", doctorId);
         model.addAttribute("patientId", patientId);
+        model.addAttribute("appointmentId", appointmentId);
         return "doctor/appointment-detail";
+    }
+
+    private Appointment resolveCurrentAppointment(Long appointmentId, Long patientId, Long doctorId) {
+        if (appointmentId == null) {
+            return null;
+        }
+        Appointment apt = appointmentService.findById(appointmentId);
+        if (apt != null
+                && apt.getDoctor() != null && doctorId.equals(apt.getDoctor().getId())
+                && apt.getUser() != null && patientId.equals(apt.getUser().getId())) {
+            return apt;
+        }
+        return null;
+    }
+
+    private LocalDateTime medicalRecordAnchorTime(MedicalRecord r) {
+        if (r.getCreateTime() != null) {
+            return r.getCreateTime();
+        }
+        if (r.getDiagnosisTime() != null) {
+            return r.getDiagnosisTime();
+        }
+        return LocalDateTime.MIN;
+    }
+
+    /**
+     * 在「当前医生 + 患者」的多条记录中，选出与本次预约最相关的一条用于回显：
+     * 若带 appointmentId，则按记录时间与预约就诊时间的接近程度匹配；否则取时间最新的一条。
+     */
+    private <T> T pickRecordForVisit(
+            List<T> items,
+            Function<T, LocalDateTime> anchorTime,
+            Appointment appointment) {
+        if (items == null || items.isEmpty()) {
+            return null;
+        }
+        if (appointment == null || appointment.getAppointmentTime() == null) {
+            return items.stream()
+                    .max(Comparator.comparing(t -> nonNullTime(anchorTime.apply(t))))
+                    .orElse(null);
+        }
+        LocalDateTime ref = appointment.getAppointmentTime();
+        return items.stream()
+                .min(Comparator.comparing(t -> Duration.between(ref, nonNullTime(anchorTime.apply(t))).abs()))
+                .orElse(null);
+    }
+
+    private static LocalDateTime nonNullTime(LocalDateTime t) {
+        return t != null ? t : LocalDateTime.MIN;
     }
 
     @GetMapping("/prescription-form")
@@ -357,26 +397,34 @@ public class DoctorController {
     @PostMapping("/saveAll")
     public String saveAll(
             @RequestParam Long doctorId, 
-            @RequestParam Long patientId, 
+            @RequestParam Long patientId,
+            @RequestParam(required = false) Long appointmentId,
             @RequestParam String chiefComplaint, 
             @RequestParam String presentIllness, 
             @RequestParam String diagnosisResult, 
             @RequestParam String drugList, 
             @RequestParam String usage, 
             @RequestParam String content, 
-            @RequestParam String checkupType, 
+            @RequestParam(required = false) String checkupType, 
             Authentication authentication) {
-        
+        Long authDoctorId = getCurrentDoctorId(authentication);
+        if (authDoctorId == null || !authDoctorId.equals(doctorId)) {
+            return "redirect:/login";
+        }
+
         Doctor doctor = new Doctor();
         doctor.setId(doctorId);
         
         User user = new User();
         user.setId(patientId);
+
+        Appointment currentAppointment = resolveCurrentAppointment(appointmentId, patientId, doctorId);
         
-        // 检查是否已有病历记录
-        MedicalRecord record = doctorService.getMedicalRecord(patientId);
+        List<MedicalRecord> medicalRecords = medicalRecordRepository.findByUserId(patientId).stream()
+                .filter(r -> r.getDoctor() != null && doctorId.equals(r.getDoctor().getId()))
+                .collect(Collectors.toList());
+        MedicalRecord record = pickRecordForVisit(medicalRecords, this::medicalRecordAnchorTime, currentAppointment);
         if (record == null) {
-            // 创建新病历记录
             record = new MedicalRecord();
             record.setDoctor(doctor);
             record.setUser(user);
@@ -388,10 +436,11 @@ public class DoctorController {
         record.setDiagnosisTime(java.time.LocalDateTime.now());
         doctorService.saveRecord(record);
         
-        // 检查是否已有处方
-        Prescription prescription = doctorService.getPrescription(patientId);
+        List<Prescription> prescriptions = prescriptionRepository.findByUserId(patientId).stream()
+                .filter(p -> p.getDoctor() != null && doctorId.equals(p.getDoctor().getId()))
+                .collect(Collectors.toList());
+        Prescription prescription = pickRecordForVisit(prescriptions, Prescription::getCreateTime, currentAppointment);
         if (prescription == null) {
-            // 创建新处方
             prescription = new Prescription();
             prescription.setDoctor(doctor);
             prescription.setUser(user);
@@ -401,10 +450,11 @@ public class DoctorController {
         prescription.setUsage(usage);
         doctorService.createPrescription(prescription);
         
-        // 检查是否已有医嘱
-        Advice advice = doctorService.getAdvice(patientId);
+        List<Advice> advices = adviceRepository.findByUserId(patientId).stream()
+                .filter(a -> a.getDoctor() != null && doctorId.equals(a.getDoctor().getId()))
+                .collect(Collectors.toList());
+        Advice advice = pickRecordForVisit(advices, Advice::getCreateTime, currentAppointment);
         if (advice == null) {
-            // 创建新医嘱
             advice = new Advice();
             advice.setDoctor(doctor);
             advice.setUser(user);
@@ -415,30 +465,36 @@ public class DoctorController {
         advice.setUpdateTime(java.time.LocalDateTime.now());
         doctorService.createAdvice(advice);
         
-        // 检查是否已有检查记录
-        Checkup checkup = doctorService.getCheckup(patientId);
-        if (checkup == null) {
-            // 创建新检查记录
-            checkup = new Checkup();
-            checkup.setDoctor(doctor);
-            checkup.setUser(user);
-            checkup.setCreateTime(java.time.LocalDateTime.now());
-            checkup.setStatus(1); // 已完成
+        if (checkupType != null && !checkupType.isBlank()) {
+            List<Checkup> checkups = checkupRepository.findByUser_Id(patientId).stream()
+                    .filter(c -> c.getDoctor() != null && doctorId.equals(c.getDoctor().getId()))
+                    .collect(Collectors.toList());
+            Checkup checkup = pickRecordForVisit(checkups, Checkup::getCreateTime, currentAppointment);
+            if (checkup == null) {
+                checkup = new Checkup();
+                checkup.setDoctor(doctor);
+                checkup.setUser(user);
+                checkup.setCreateTime(java.time.LocalDateTime.now());
+                checkup.setStatus(1);
+            }
+            checkup.setType(checkupType.trim());
+            checkup.setUpdateTime(java.time.LocalDateTime.now());
+            doctorService.saveCheckup(checkup);
         }
-        checkup.setType(checkupType);
-        checkup.setUpdateTime(java.time.LocalDateTime.now());
-        doctorService.saveCheckup(checkup);
         
-        // 查找该患者的最新预约记录并更新状态为已完成
-        List<Appointment> appointments = appointmentService.findByUserId(patientId);
-        if (!appointments.isEmpty()) {
-            // 按创建时间排序，获取最新的预约
-            Appointment latestAppointment = appointments.stream()
-                .sorted((a1, a2) -> a2.getCreateTime().compareTo(a1.getCreateTime()))
-                .findFirst()
-                .orElse(null);
-            if (latestAppointment != null && ("已预约".equals(latestAppointment.getStatus()) || "叫号中".equals(latestAppointment.getStatus()))) {
-                appointmentService.updateAppointmentStatus(latestAppointment.getId(), "已完成");
+        if (currentAppointment != null
+                && ("已预约".equals(currentAppointment.getStatus()) || "叫号中".equals(currentAppointment.getStatus()))) {
+            appointmentService.updateAppointmentStatus(currentAppointment.getId(), "已完成");
+        } else {
+            List<Appointment> appointments = appointmentService.findByUserId(patientId);
+            if (!appointments.isEmpty()) {
+                Appointment latestAppointment = appointments.stream()
+                    .sorted((a1, a2) -> a2.getCreateTime().compareTo(a1.getCreateTime()))
+                    .findFirst()
+                    .orElse(null);
+                if (latestAppointment != null && ("已预约".equals(latestAppointment.getStatus()) || "叫号中".equals(latestAppointment.getStatus()))) {
+                    appointmentService.updateAppointmentStatus(latestAppointment.getId(), "已完成");
+                }
             }
         }
         

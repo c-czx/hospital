@@ -64,7 +64,7 @@
                         <p><strong>症状：</strong><span th:text="${patient.symptoms}"></span></p>
                     </div>
                     <div class="actions">
-                        <a class="btn btn-primary" th:href="@{/doctor/appointment-detail(patientId=${patient.id})}">查看详情</a>
+                        <a class="btn btn-primary" th:href="@{/doctor/appointment-detail(patientId=${patient.id}, appointmentId=${patient.appointmentId})}">查看详情</a>
                         <a class="btn btn-secondary" th:href="@{/doctor/prescription-form(patientId=${patient.id})}">诊疗开方</a>
                     </div>
                 </div>

@@ -72,11 +72,11 @@
                         </div>
                         <div class="form-group">
                             <label class="control-label">创建时间：</label>
-                            <span th:text="${checkup.createTime}"></span>
+                            <span th:text="${checkup.createTime != null ? #temporals.format(checkup.createTime, 'yyyy-MM-dd HH:mm') : '—'}"></span>
                         </div>
                         <div class="form-group">
                             <label class="control-label">更新时间：</label>
-                            <span th:text="${checkup.updateTime}"></span>
+                            <span th:text="${checkup.updateTime != null ? #temporals.format(checkup.updateTime, 'yyyy-MM-dd HH:mm') : '—'}"></span>
                         </div>
                     </div>
                 </div>
