@@ -2,6 +2,7 @@ package com.hospital.controller;
 
 import com.hospital.entity.*;
 import com.hospital.service.*;
+import com.hospital.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -287,12 +288,7 @@ public class PatientController {
         return "redirect:/patient/profile";
     }
     
-    @GetMapping("/available-slots")
-    public String availableSlots(Model model) {
-        List<Department> departments = departmentService.findAll();
-        model.addAttribute("departments", departments);
-        return "patient/available-slots";
-    }
+
     
     @GetMapping("/appointments")
     public String appointments(Authentication authentication, Model model) {
@@ -303,5 +299,65 @@ public class PatientController {
         List<Appointment> appointments = appointmentService.findByUserId(user.getId());
         model.addAttribute("appointments", appointments);
         return "patient/appointments";
+    }
+    
+    @Autowired
+    private BillingService billingService;
+    
+    @Autowired
+    private MedicalRecordRepository medicalRecordRepository;
+    
+    @Autowired
+    private PrescriptionRepository prescriptionRepository;
+    
+    @Autowired
+    private AdviceRepository adviceRepository;
+    
+    @GetMapping("/orders")
+    public String orders(Authentication authentication, Model model) {
+        User user = userService.findByPhone(authentication.getName());
+        if (user == null) {
+            return "redirect:/login";
+        }
+        
+        // 获取已就诊记录（状态为已完成的预约）
+        List<Appointment> completedAppointments = appointmentService.findByUserIdAndStatus(user.getId(), "已完成");
+        
+        // 获取缴费记录
+        List<Billing> billingRecords = billingService.findByUserId(user.getId());
+        
+        // 获取病历记录
+        List<MedicalRecord> medicalRecords = medicalRecordRepository.findByUserId(user.getId());
+        
+        // 获取处方记录
+        List<Prescription> prescriptions = prescriptionRepository.findByUserId(user.getId());
+        
+        // 获取医嘱记录
+        List<Advice> advices = adviceRepository.findByUserId(user.getId());
+        
+        model.addAttribute("completedAppointments", completedAppointments);
+        model.addAttribute("billingRecords", billingRecords);
+        model.addAttribute("medicalRecords", medicalRecords);
+        model.addAttribute("prescriptions", prescriptions);
+        model.addAttribute("advices", advices);
+        return "patient/orders";
+    }
+    
+    @PostMapping("/pay-billing")
+    public String payBilling(@RequestParam Long billingId, Authentication authentication) {
+        User user = userService.findByPhone(authentication.getName());
+        if (user == null) {
+            return "redirect:/login";
+        }
+        
+        // 获取缴费记录
+        Billing billing = billingService.findById(billingId);
+        if (billing != null && billing.getUser().getId().equals(user.getId())) {
+            // 更新缴费状态为已支付
+            billing.setStatus("已支付");
+            billingService.updateBilling(billing);
+        }
+        
+        return "redirect:/patient/orders";
     }
 }

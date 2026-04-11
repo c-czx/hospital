@@ -14,6 +14,7 @@
                 <li><a href="/patient/dashboard">首页</a></li>
                 <li><a href="/patient/book">预约挂号</a></li>
                 <li><a href="/patient/appointments">我的预约</a></li>
+                <li><a href="/patient/orders">我的订单</a></li>
                 <li><a href="/patient/departments">科室查询</a></li>
                 <li><a href="/patient/profile">个人信息</a></li>
                 <li><a href="/logout" onclick="return confirm('确定要退出登录吗？');">退出登录</a></li>
@@ -30,7 +31,7 @@
                     </div>
                     <div class="appointment-body">
                         <p><strong>医生：</strong><span th:text="${appointment.doctor.user.name}"></span></p>
-                        <p><strong>预约时间：</strong><span th:text="${#temporals.format(appointment.appointmentTime, 'yyyy-MM-dd HH:mm')}"></span></p>
+                        <p><strong>提交时间：</strong><span th:text="${#temporals.format(appointment.appointmentTime, 'yyyy-MM-dd HH:mm')}"></span></p>
                         <p><strong>症状：</strong><span th:text="${appointment.symptoms}"></span></p>
                         <p><strong>预约时间：</strong><span th:text="${#temporals.format(appointment.createTime, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
                     </div>

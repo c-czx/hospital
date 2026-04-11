@@ -13,10 +13,10 @@
             <ul>
                 <li><a href="/patient/dashboard">首页</a></li>
                 <li><a href="/patient/book">预约挂号</a></li>
-                <li><a href="/patient/appointments">我的订单</a></li>
-                <li><a href="/patient/departments">科室医生查询</a></li>
-                <li><a href="/patient/available-slots">号源查询</a></li>
-                <li><a href="/patient/profile">个人信息管理</a></li>
+                <li><a href="/patient/appointments">我的预约</a></li>
+                <li><a href="/patient/orders">我的订单</a></li>
+                <li><a href="/patient/departments">科室查询</a></li>
+                <li><a href="/patient/profile">个人信息</a></li>
                 <li><a href="/logout" onclick="return confirm('确定要退出登录吗？');">退出登录</a></li>
             </ul>
         </div>
@@ -30,22 +30,22 @@
                     <a href="/patient/book" class="btn btn-primary">立即预约</a>
                 </div>
                 <div class="card">
-                    <h3>📋 我的订单</h3>
-                    <p>查看预约记录、已就诊记录、缴费记录</p>
-                    <a href="/patient/appointments" class="btn btn-secondary">查看订单</a>
+                    <h3>📋 我的预约</h3>
+                    <p>查看您的预约记录和状态</p>
+                    <a href="/patient/appointments" class="btn btn-secondary">查看预约</a>
                 </div>
                 <div class="card">
-                    <h3>🏥 科室医生查询</h3>
+                    <h3>📊 我的订单</h3>
+                    <p>查看已就诊记录和缴费记录</p>
+                    <a href="/patient/orders" class="btn btn-secondary">查看订单</a>
+                </div>
+                <div class="card">
+                    <h3>🏥 科室查询</h3>
                     <p>查询医院所有科室和医生信息</p>
                     <a href="/patient/departments" class="btn btn-secondary">查询科室</a>
                 </div>
                 <div class="card">
-                    <h3>🎫 号源查询</h3>
-                    <p>查询剩余号源数量、挂号时间</p>
-                    <a href="/patient/available-slots" class="btn btn-secondary">查询号源</a>
-                </div>
-                <div class="card">
-                    <h3>👤 个人信息管理</h3>
+                    <h3>👤 个人信息</h3>
                     <p>修改姓名、性别、联系方式等</p>
                     <a href="/patient/profile" class="btn btn-secondary">管理信息</a>
                 </div>
