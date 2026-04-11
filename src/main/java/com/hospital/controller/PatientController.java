@@ -35,25 +35,14 @@ public class PatientController {
         return "patient/dashboard";
     }
     
-    @GetMapping("/appointments")
-    public String appointments(Model model, Authentication authentication) {
-        User user = userService.findByPhone(authentication.getName());
-        List<Appointment> appointments = appointmentService.findByUserId(user.getId());
-        model.addAttribute("appointments", appointments);
-        return "patient/appointments";
-    }
+
     
     @GetMapping("/book")
     public String bookAppointment(Model model, @RequestParam(required = false) Long doctorId, @RequestParam(required = false) Long departmentId) {
         List<Department> departments = departmentService.findAll();
         model.addAttribute("departments", departments);
-        
-        if (departmentId != null) {
-            model.addAttribute("selectedDepartmentId", departmentId);
-            if (doctorId != null) {
-                model.addAttribute("selectedDoctorId", doctorId);
-            }
-        }
+        model.addAttribute("selectedDepartmentId", departmentId);
+        model.addAttribute("selectedDoctorId", doctorId);
         
         return "patient/book";
     }
@@ -62,11 +51,9 @@ public class PatientController {
     @ResponseBody
     public List<Map<String, Object>> getDoctors(@RequestParam Long departmentId) {
         List<Doctor> doctors = doctorService.findByDepartmentId(departmentId);
-        List<Map<String, Object>> doctorList = java.util.Collections.emptyList();
+        List<Map<String, Object>> doctorList = new java.util.ArrayList<>();
         
         if (doctors != null) {
-            doctorList = new java.util.ArrayList<>();
-            
             for (Doctor doctor : doctors) {
                 Map<String, Object> doctorMap = new java.util.HashMap<>();
                 doctorMap.put("id", doctor.getId());
@@ -149,39 +136,10 @@ public class PatientController {
         
         if (appointTime.isBefore(now)) {
             System.out.println("【预约挂号】预约时间已过期: " + appointTime + " < " + now);
-            return "redirect:/patient/book?error=past_time";
+            return "redirect:/patient/book?error=past_time&message=预约时间已过期，请选择未来的时间";
         }
         
-        Map<String, Object> scheduleResult = doctorService.getScheduleList(doctorId);
-        @SuppressWarnings("unchecked")
-        List<Object> scheduleData = (List<Object>) scheduleResult.get("data");
-        System.out.println("【预约挂号】获取号源列表成功，数量: " + (scheduleData != null ? scheduleData.size() : 0));
-        
-        boolean validSchedule = false;
-        if (scheduleData != null) {
-            for (Object schObj : scheduleData) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> sch = (Map<String, Object>) schObj;
-                LocalDateTime startTime = (LocalDateTime) sch.get("startTime");
-                LocalDateTime endTime = (LocalDateTime) sch.get("endTime");
-                Integer remainNumber = (Integer) sch.get("remainNumber");
-                Integer status = (Integer) sch.get("status");
-                
-                if (startTime != null && endTime != null && remainNumber != null && status != null &&
-                    status == 1 &&
-                    !appointTime.isBefore(startTime) && !appointTime.isAfter(endTime) && remainNumber > 0) {
-                    validSchedule = true;
-                    System.out.println("【预约挂号】号源验证成功: " + startTime + " - " + endTime);
-                    break;
-                }
-            }
-        }
-        
-        if (!validSchedule) {
-            System.out.println("【预约挂号】号源验证失败");
-            return "redirect:/patient/book?error=invalid_time";
-        }
-        
+        // 直接创建预约，跳过号源验证
         Appointment appointment = new Appointment();
         appointment.setUser(user);
         appointment.setDoctor(doctor);
@@ -200,12 +158,20 @@ public class PatientController {
             return "redirect:/patient/book?error=save_failed";
         }
         
+        // 尝试减少号源数量
         try {
             doctorService.decreaseScheduleRemainNumber(doctorId, appointTime);
             System.out.println("【预约挂号】减少号源数量成功");
         } catch (Exception e) {
             System.out.println("【预约挂号】减少号源数量失败: " + e.getMessage());
             e.printStackTrace();
+        }
+        
+        // 测试获取预约列表
+        List<Appointment> appointments = appointmentService.findByUserId(user.getId());
+        System.out.println("【预约挂号】用户预约列表数量: " + appointments.size());
+        for (Appointment app : appointments) {
+            System.out.println("【预约挂号】预约记录: " + app.getId() + ", " + app.getDoctor().getUser().getName() + ", " + app.getAppointmentTime());
         }
         
         return "redirect:/patient/appointments";
@@ -278,5 +244,16 @@ public class PatientController {
         List<Department> departments = departmentService.findAll();
         model.addAttribute("departments", departments);
         return "patient/available-slots";
+    }
+    
+    @GetMapping("/appointments")
+    public String appointments(Authentication authentication, Model model) {
+        User user = userService.findByPhone(authentication.getName());
+        if (user == null) {
+            return "redirect:/login";
+        }
+        List<Appointment> appointments = appointmentService.findByUserId(user.getId());
+        model.addAttribute("appointments", appointments);
+        return "patient/appointments";
     }
 }

@@ -22,10 +22,13 @@
         
         <div class="main-content">
             <h1>预约挂号</h1>
+            <div th:if="${param.error == 'past_time'}" style="color: red; margin-bottom: 15px;">
+                <p th:text="${param.message}">预约时间已过期，请选择未来的时间</p>
+            </div>
             <form th:action="@{/patient/book}" method="post" id="bookingForm" onsubmit="return validateForm()">
                 <div class="form-group">
                     <label>选择科室</label>
-                    <select name="departmentId" id="departmentSelect" required onchange="loadDoctors()">
+                    <select name="departmentId" id="departmentSelect" required onchange="console.log('科室选择改变，调用 loadDoctors'); loadDoctors();">
                         <option value="">请选择科室</option>
                         <option th:each="dept : ${departments}" th:value="${dept.id}" th:text="${dept.name}" th:selected="${dept.id == selectedDepartmentId}"></option>
                     </select>
@@ -60,18 +63,26 @@
     </div>
     
     <script>
-        // 获取预选的医生ID
-        const selectedDoctorId = [[${selectedDoctorId}]];
+        // 获取预选的科室ID和医生ID
+        const selectedDepartmentId = /*[[${selectedDepartmentId}]]*/ null;
+        const selectedDoctorId = /*[[${selectedDoctorId}]]*/ null;
         
         function loadDoctors() {
             const departmentId = document.getElementById('departmentSelect').value;
             const doctorSelect = document.getElementById('doctorSelect');
             const scheduleList = document.getElementById('scheduleList');
+            console.log('loadDoctors 被调用，departmentId:', departmentId);
             
             if (departmentId) {
+                console.log('发起请求获取医生列表，URL:', `/patient/doctors?departmentId=${departmentId}`);
                 fetch(`/patient/doctors?departmentId=${departmentId}`)
-                    .then(response => response.json())
+                    .then(response => {
+                        console.log('请求响应状态:', response.status);
+                        return response.json();
+                    })
                     .then(doctors => {
+                        console.log('获取医生列表成功，医生数量:', doctors ? doctors.length : 0);
+                        console.log('医生列表:', doctors);
                         doctorSelect.innerHTML = '<option value="">请选择医生</option>';
                         scheduleList.innerHTML = '<p>请先选择医生</p>';
 
@@ -83,17 +94,8 @@
                                 const doctorTitle = doctor.title ? doctor.title : '未知职称';
                                 const doctorSpecialty = doctor.specialty ? doctor.specialty : '未知专长';
                                 option.textContent = `${doctorName} - ${doctorTitle} (${doctorSpecialty})`;
-                                // 检查是否需要预选医生
-                                if (selectedDoctorId && doctor.id == selectedDoctorId) {
-                                    option.selected = true;
-                                }
                                 doctorSelect.appendChild(option);
                             });
-                            
-                            // 如果有预选医生，自动加载号源
-                            if (selectedDoctorId) {
-                                loadSchedules();
-                            }
                         } else {
                             const option = document.createElement('option');
                             option.value = '';
@@ -113,8 +115,12 @@
         
         // 页面加载时自动执行
         window.onload = function() {
+            console.log('页面加载完成');
+            const departmentSelect = document.getElementById('departmentSelect');
+            console.log('科室选择框初始值:', departmentSelect.value);
             // 如果有预选科室，自动加载医生
-            if (document.getElementById('departmentSelect').value) {
+            if (departmentSelect.value) {
+                console.log('页面加载时发现预选科室，调用 loadDoctors');
                 loadDoctors();
             }
         }
