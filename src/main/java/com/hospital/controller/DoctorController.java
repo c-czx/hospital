@@ -470,7 +470,7 @@ public class DoctorController {
                 checkup.setDoctor(doctor);
                 checkup.setUser(user);
                 checkup.setCreateTime(java.time.LocalDateTime.now());
-                checkup.setStatus(1);
+                checkup.setStatus(0);
             }
             checkup.setType(checkupType.trim());
             checkup.setUpdateTime(java.time.LocalDateTime.now());
