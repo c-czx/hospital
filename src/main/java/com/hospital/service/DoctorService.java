@@ -57,15 +57,14 @@ public class DoctorService {
 
     public List<Doctor> findByDepartmentId(Long departmentId) {
         List<Doctor> doctors = doctorRepository.findByDepartmentId(departmentId);
-        System.out.println("【查询医生】科室ID: " + departmentId + "，找到医生数量: " + doctors.size());
         
         // 确保 user 属性被加载
-        for (Doctor doctor : doctors) {
-            System.out.println("【医生信息】ID: " + doctor.getId() + ", UserID: " + doctor.getUser().getId());
-            if (doctor.getUser() != null) {
-                // 访问 user 属性，触发懒加载
-                System.out.println("【医生姓名】" + doctor.getUser().getName());
-                doctor.getUser().getName();
+        if (doctors != null) {
+            for (Doctor doctor : doctors) {
+                if (doctor.getUser() != null) {
+                    // 访问 user 属性，触发懒加载
+                    doctor.getUser().getName();
+                }
             }
         }
         return doctors;
