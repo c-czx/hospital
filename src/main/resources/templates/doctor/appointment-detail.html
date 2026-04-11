@@ -91,29 +91,7 @@
                 </form>
             </div>
             
-            <div class="appointment-detail" style="margin-top: 30px;">
-                <h3>历史预约</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>预约时间</th>
-                            <th>状态</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="appointment : ${appointmentList}" th:if="${appointment.status == '已完成'}">
-                            <td th:text="${#temporals.format(appointment.appointmentTime, 'yyyy-MM-dd HH:mm')}"></td>
-                            <td>
-                                <span class="status" style="background-color: #4caf50; color: white;">已完成</span>
-                            </td>
-                            <td>
-                                <a th:href="@{/doctor/appointment-history?id=${appointment.id}}" class="btn btn-secondary">查看病历</a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+
             
             <div class="actions" style="margin-top: 30px;">
                 <a href="/doctor/dashboard" class="btn btn-secondary">返回工作台</a>
