@@ -29,6 +29,9 @@ public class AdminController {
     @Autowired
     private AppointmentService appointmentService;
     
+    @Autowired
+    private NurseService nurseService;
+    
     /**
      * 显示管理员首页
      */
@@ -263,5 +266,83 @@ public class AdminController {
         List<Appointment> appointments = appointmentService.findAll();
         model.addAttribute("appointments", appointments);
         return "admin/appointments";
+    }
+    
+    /**
+     * 显示护士列表
+     */
+    @GetMapping("/nurses")
+    public String nurses(Model model) {
+        List<Nurse> nurses = nurseService.findAll();
+        model.addAttribute("nurses", nurses);
+        return "admin/nurses";
+    }
+    
+    /**
+     * 显示添加护士表单
+     */
+    @GetMapping("/nurse/create")
+    public String createNurseForm(Model model) {
+        model.addAttribute("nurse", new Nurse());
+        List<User> nurses = userService.findByRole("NURSE");
+        model.addAttribute("users", nurses);
+        return "admin/nurse-form";
+    }
+    
+    /**
+     * 处理添加护士请求
+     */
+    @PostMapping("/nurse/create")
+    public String createNurse(@RequestParam Long userId, @RequestParam String nurseName,
+                             @RequestParam String phone, @RequestParam String department) {
+        User user = userService.findById(userId);
+        
+        Nurse nurse = new Nurse();
+        nurse.setUser(user);
+        nurse.setNurseName(nurseName);
+        nurse.setPhone(phone);
+        nurse.setDepartment(department);
+        
+        nurseService.saveNurse(nurse);
+        return "redirect:/admin/nurses";
+    }
+    
+    /**
+     * 显示编辑护士表单
+     */
+    @GetMapping("/nurse/edit/{id}")
+    public String editNurse(@PathVariable Integer id, Model model) {
+        Nurse nurse = nurseService.findById(id);
+        List<User> nurses = userService.findByRole("NURSE");
+        model.addAttribute("nurse", nurse);
+        model.addAttribute("users", nurses);
+        return "admin/nurse-form";
+    }
+    
+    /**
+     * 处理编辑护士请求
+     */
+    @PostMapping("/nurse/edit/{id}")
+    public String updateNurse(@PathVariable Integer id, @RequestParam Long userId, @RequestParam String nurseName,
+                             @RequestParam String phone, @RequestParam String department) {
+        User user = userService.findById(userId);
+        
+        Nurse nurse = nurseService.findById(id);
+        nurse.setUser(user);
+        nurse.setNurseName(nurseName);
+        nurse.setPhone(phone);
+        nurse.setDepartment(department);
+        
+        nurseService.updateNurse(nurse);
+        return "redirect:/admin/nurses";
+    }
+    
+    /**
+     * 删除护士
+     */
+    @GetMapping("/nurse/delete/{id}")
+    public String deleteNurse(@PathVariable Integer id) {
+        nurseService.deleteNurse(id);
+        return "redirect:/admin/nurses";
     }
 }

@@ -10,8 +10,9 @@ public class Nurse {
     @Column(name = "nurse_id")
     private Integer nurseId;
 
-    @Column(name = "user_id", unique = true, nullable = false)
-    private Integer userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(name = "nurse_name", nullable = false, length = 50)
     private String nurseName;
@@ -26,8 +27,8 @@ public class Nurse {
     public Integer getNurseId() { return nurseId; }
     public void setNurseId(Integer nurseId) { this.nurseId = nurseId; }
 
-    public Integer getUserId() { return userId; }
-    public void setUserId(Integer userId) { this.userId = userId; }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
     public String getNurseName() { return nurseName; }
     public void setNurseName(String nurseName) { this.nurseName = nurseName; }
