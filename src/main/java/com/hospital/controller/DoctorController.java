@@ -465,7 +465,7 @@ public class DoctorController {
         advice.setUpdateTime(java.time.LocalDateTime.now());
         doctorService.createAdvice(advice);
         
-        if (checkupType != null && !checkupType.isBlank()) {
+        if (checkupType != null && !checkupType.trim().isEmpty()) {
             List<Checkup> checkups = checkupRepository.findByUser_Id(patientId).stream()
                     .filter(c -> c.getDoctor() != null && doctorId.equals(c.getDoctor().getId()))
                     .collect(Collectors.toList());
@@ -498,7 +498,7 @@ public class DoctorController {
             }
         }
         
-        return "redirect:/doctor/patients";
+        return "redirect:/doctor/appointments";
     }
     
     @PostMapping("/updateAdvice")
@@ -608,7 +608,7 @@ public class DoctorController {
             return "redirect:/login";
         }
         appointmentService.updateAppointmentStatus(appointmentId, "叫号中");
-        return "redirect:/doctor/patients";
+        return "redirect:/doctor/appointments";
     }
     
     @PostMapping("/completeAppointment")
@@ -618,7 +618,7 @@ public class DoctorController {
             return "redirect:/login";
         }
         appointmentService.updateAppointmentStatus(appointmentId, "已完成");
-        return "redirect:/doctor/patients";
+        return "redirect:/doctor/appointments";
     }
     
     @GetMapping("/checkups")
