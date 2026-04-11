@@ -71,15 +71,16 @@
                 z-index: 1;
                 background-color: transparent !important;
 
-                &::after {
+                /* &::after {
                     content: '';
                     position: absolute;
                     top: 0;
                     left: 0;
                     width: 100%;
                     height: 100%;
+                    background: rgba(0, 0, 0, 0.3);
                     z-index: 2;
-                }
+                } */
             }
 
             .login-container {
@@ -97,7 +98,7 @@
                     text-align: right;
                     margin-top: 30px;
                     margin-bottom: 40px;
-                    margin-left: 50px;
+                    margin-left: 300px;
                     color: rgb(8, 86, 5);
                     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
                     width: 80%;
@@ -118,16 +119,19 @@
                 .login-content {
                     display: flex;
                     align-items: flex-start;
-                    gap: 40px;
+                    gap: 340px;
                     width: 100%;
                     max-width: 1200px;
                     flex-wrap: wrap;
                     justify-content: center;
+                    margin-left:290px;
+
 
                     .login-description {
                         flex: 1;
                         min-width: 140px;
-                        max-width: 200px;
+                        max-width: 250px;
+                    
 
                         div {
                             margin-top: 30px;
@@ -135,6 +139,7 @@
                             padding: 10px;
                             border-radius: 8px;
                             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                        
 
                             p {
                                 font-size: clamp(12px, 2vw, 16px);
@@ -149,6 +154,7 @@
                         width: 90%;
                         max-width: 280px;
                         margin-top: -30px;
+                      
 
                         .login-box {
                             background: rgba(255, 255, 255, 0.5);

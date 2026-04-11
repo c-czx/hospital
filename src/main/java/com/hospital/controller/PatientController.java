@@ -139,16 +139,45 @@ public class PatientController {
         Map<String, Object> scheduleResult = doctorService.getScheduleList(doctorId);
         @SuppressWarnings("unchecked")
         List<Object> schedules = (List<Object>) scheduleResult.get("data");
-        for (Object obj : schedules) {
-            Map<String, Object> schMap = (Map<String, Object>) obj;
-            LocalDateTime startTime = (LocalDateTime) schMap.get("startTime");
-            LocalDateTime endTime = (LocalDateTime) schMap.get("endTime");
-            
-            if (appointTime.isAfter(startTime) && appointTime.isBefore(endTime)) {
-                // 检查当前时间是否在排班的结束时间之前
-                if (now.isBefore(endTime)) {
-                    isWithinSchedule = true;
-                    break;
+        if (schedules != null) {
+            for (Object obj : schedules) {
+                Map<String, Object> schMap = (Map<String, Object>) obj;
+                LocalDateTime startTime = null;
+                LocalDateTime endTime = null;
+                
+                // 处理日期时间字符串转换
+                if (schMap.get("startTime") != null) {
+                    if (schMap.get("startTime") instanceof String) {
+                        try {
+                            startTime = LocalDateTime.parse((String) schMap.get("startTime"));
+                        } catch (Exception e) {
+                            System.out.println("【预约挂号】解析 startTime 失败: " + e.getMessage());
+                        }
+                    } else if (schMap.get("startTime") instanceof LocalDateTime) {
+                        startTime = (LocalDateTime) schMap.get("startTime");
+                    }
+                }
+                
+                if (schMap.get("endTime") != null) {
+                    if (schMap.get("endTime") instanceof String) {
+                        try {
+                            endTime = LocalDateTime.parse((String) schMap.get("endTime"));
+                        } catch (Exception e) {
+                            System.out.println("【预约挂号】解析 endTime 失败: " + e.getMessage());
+                        }
+                    } else if (schMap.get("endTime") instanceof LocalDateTime) {
+                        endTime = (LocalDateTime) schMap.get("endTime");
+                    }
+                }
+                
+                if (startTime != null && endTime != null) {
+                    if (!appointTime.isBefore(startTime) && !appointTime.isAfter(endTime)) {
+                        // 检查当前时间是否在排班的结束时间之前
+                        if (now.isBefore(endTime)) {
+                            isWithinSchedule = true;
+                            break;
+                        }
+                    }
                 }
             }
         }
