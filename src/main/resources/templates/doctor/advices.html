@@ -41,9 +41,9 @@
                     </thead>
                     <tbody>
                         <tr th:each="prescription : ${prescriptions}">
-                            <td th:text="${prescription.user.name}"></td>
+                            <td th:text="${prescription.user != null ? prescription.user.name : '未知患者'}"></td>
                             <td th:text="${prescription.drugList}"></td>
-                            <td th:text="${#temporals.format(prescription.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+                            <td th:text="${prescription.createTime != null ? #temporals.format(prescription.createTime, 'yyyy-MM-dd HH:mm') : '—'}"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -73,9 +73,13 @@
                                 <span th:if="${advice.status == 1}" class="status" style="background-color: #4caf50; color: white;">有效</span>
                                 <span th:if="${advice.status == 0}" class="status" style="background-color: #e9ecef; color: #333;">无效</span>
                             </td>
-                            <td th:text="${#temporals.format(advice.createTime, 'yyyy-MM-dd HH:mm')}"></td>
+                            <td th:text="${advice.createTime != null ? #temporals.format(advice.createTime, 'yyyy-MM-dd HH:mm') : '—'}"></td>
                             <td>
-                                <button class="btn btn-primary" th:onclick="'editAdvice(' + ${advice.id} + ')'">修改</button>
+                                <button class="btn btn-primary" 
+                                        th:data-id="${advice.id}" 
+                                        th:data-content="${advice.content}" 
+                                        th:data-status="${advice.status}" 
+                                        onclick="prepareEdit(this)">修改</button>
                             </td>
                         </tr>
                     </tbody>
@@ -88,10 +92,55 @@
         </div>
     </div>
     
+    <!-- 修改医嘱模态框 -->
+    <div id="editModal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-content" style="background-color: white; margin: 15% auto; padding: 20px; border-radius: 10px; width: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <h2 style="margin-top: 0;">修改医嘱</h2>
+            <form id="editForm" method="post" th:action="@{/doctor/updateAdvice}">
+                <input type="hidden" id="editAdviceId" name="id">
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px;">医嘱内容：</label>
+                    <textarea id="editContent" name="content" class="form-control" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" required></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px;">状态：</label>
+                    <select id="editStatus" name="status" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        <option value="1">有效</option>
+                        <option value="0">无效</option>
+                    </select>
+                </div>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
     <script>
-        function editAdvice(id) {
-            // TODO: 实现医嘱编辑功能
-            alert('医嘱编辑功能开发中...');
+        function prepareEdit(btn) {
+            const id = btn.getAttribute('data-id');
+            const content = btn.getAttribute('data-content');
+            const status = btn.getAttribute('data-status');
+            editAdvice(id, content, status);
+        }
+
+        function editAdvice(id, content, status) {
+            document.getElementById('editAdviceId').value = id;
+            document.getElementById('editContent').value = content;
+            document.getElementById('editStatus').value = status;
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        // 点击模态框以外的地方关闭
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('editModal')) {
+                closeModal();
+            }
         }
     </script>
 </body>

@@ -43,7 +43,12 @@
             
             <div class="appointment-detail" style="margin-top: 30px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
                 <h3>病历与诊疗信息</h3>
-                <form method="post" th:action="@{/doctor/saveAll}">
+                
+                <div th:if="${currentAppointment != null and currentAppointment.status != '叫号中'}" class="alert alert-warning" style="background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                    当前患者状态为 <strong th:text="${currentAppointment.status}"></strong>，请先进行“叫号”后再开具处方。
+                </div>
+
+                <form method="post" th:action="@{/doctor/saveAll}" th:if="${currentAppointment == null or currentAppointment.status == '叫号中'}">
                     <input type="hidden" name="doctorId" th:value="${doctorId}">
                     <input type="hidden" name="patientId" th:value="${patientId}">
                     <input type="hidden" name="appointmentId" th:if="${appointmentId != null}" th:value="${appointmentId}">
@@ -97,6 +102,27 @@
                         <a href="/doctor/appointments" class="btn btn-secondary">取消</a>
                     </div>
                 </form>
+
+                <div th:if="${currentAppointment != null and currentAppointment.status != '叫号中'}" class="read-only-view">
+                    <h4>病历记录</h4>
+                    <p><strong>主诉：</strong><span th:text="${medicalRecord != null ? medicalRecord.chiefComplaint : '—'}"></span></p>
+                    <p><strong>现病史：</strong><span th:text="${medicalRecord != null ? medicalRecord.presentIllness : '—'}"></span></p>
+                    <p><strong>诊断结果：</strong><span th:text="${medicalRecord != null ? medicalRecord.diagnosisResult : '—'}"></span></p>
+
+                    <h4 style="margin-top: 20px;">处方</h4>
+                    <p><strong>药品列表：</strong><span th:text="${prescription != null ? prescription.drugList : '—'}"></span></p>
+                    <p><strong>用法用量：</strong><span th:text="${prescription != null ? prescription.usage : '—'}"></span></p>
+
+                    <h4 style="margin-top: 20px;">医嘱</h4>
+                    <p><strong>医嘱内容：</strong><span th:text="${advice != null ? advice.content : '—'}"></span></p>
+
+                    <h4 style="margin-top: 20px;">检查</h4>
+                    <p><strong>检查类型：</strong><span th:text="${checkup != null ? checkup.type : '—'}"></span></p>
+                    
+                    <div class="actions" style="margin-top: 30px;">
+                        <a href="/doctor/appointments" class="btn btn-secondary">返回列表</a>
+                    </div>
+                </div>
             </div>
             
 
