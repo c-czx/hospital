@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>医生管理 - 医院挂号系统</title>
+    <title>护士管理 - 医院挂号系统</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -24,29 +24,27 @@
         </div>
         
         <div class="main-content">
-            <h1>医生管理</h1>
-            <a href="/admin/doctor/create" class="btn btn-primary">添加医生</a>
+            <h1>护士管理</h1>
+            <a href="/admin/nurse/create" class="btn btn-primary">添加护士</a>
             <table class="data-table">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>姓名</th>
                         <th>科室</th>
-                        <th>职称</th>
-                        <th>专长</th>
+                        <th>电话</th>
                         <th>操作</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="doctor : ${doctors}">
-                        <td th:text="${doctor.id}"></td>
-                        <td th:text="${doctor.user.name}"></td>
-                        <td th:text="${doctor.department.name}"></td>
-                        <td th:text="${doctor.title}"></td>
-                        <td th:text="${doctor.specialty}"></td>
+                    <tr th:each="nurse : ${nurses}">
+                        <td th:text="${nurse.nurseId}"></td>
+                        <td th:text="${nurse.nurseName}"></td>
+                        <td th:text="${nurse.department}"></td>
+                        <td th:text="${nurse.phone}"></td>
                         <td>
-                            <a th:href="@{/admin/doctor/edit/{id}(id=${doctor.id})}" class="btn btn-secondary">编辑</a>
-                            <a th:href="@{/admin/doctor/delete/{id}(id=${doctor.id})}" class="btn btn-danger">删除</a>
+                            <a th:href="@{/admin/nurse/edit/{id}(id=${nurse.nurseId})}" class="btn btn-secondary">编辑</a>
+                            <a th:href="@{/admin/nurse/delete/{id}(id=${nurse.nurseId})}" class="btn btn-danger">删除</a>
                         </td>
                     </tr>
                 </tbody>

@@ -25,6 +25,34 @@ public class NurseService {
     @Autowired
     private NurseRepository nurseRepository;
 
+    // 获取所有护士列表
+    public List<Nurse> findAll() {
+        return nurseRepository.findAll();
+    }
+
+    // 根据 ID 查找护士
+    public Nurse findById(Integer id) {
+        return nurseRepository.findById(id).orElse(null);
+    }
+
+    // 保存护士信息
+    @Transactional
+    public void saveNurse(Nurse nurse) {
+        nurseRepository.save(nurse);
+    }
+
+    // 更新护士信息
+    @Transactional
+    public void updateNurse(Nurse nurse) {
+        nurseRepository.save(nurse);
+    }
+
+    // 删除护士
+    @Transactional
+    public void deleteNurse(Integer id) {
+        nurseRepository.deleteById(id);
+    }
+
     // 1. 护士：查询待处理队列 (例如：状态为 "挂号成功" 且未缴费的记录)
     public List<Map<String, Object>> getPendingQueue() {
         List<Registration> list = registrationRepository.findByStatus("挂号成功");
