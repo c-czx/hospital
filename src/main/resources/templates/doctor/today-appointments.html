@@ -48,13 +48,19 @@
                         <td th:text="${apt.symptoms}"></td>
                         <td>
                             <span th:if="${apt.status == '已预约'}" class="status" style="background-color: #17a2b8; color: white;">已预约</span>
+                            <span th:if="${apt.status == '叫号中'}" class="status" style="background-color: #ffc107; color: #333;">叫号中</span>
                             <span th:if="${apt.status == '已完成'}" class="status" style="background-color: #4caf50; color: white;">已完成</span>
                             <span th:if="${apt.status == '已取消'}" class="status" style="background-color: #dc3545; color: white;">已取消</span>
                         </td>
                         <td>
                             <div class="action-buttons">
                                 <a class="btn btn-primary" th:href="@{/doctor/appointment-detail(patientId=${apt.id})}">查看病历</a>
-                                <a class="btn btn-secondary" th:href="@{/doctor/prescription-form(patientId=${apt.id})}">诊疗开方</a>
+                                <a th:if="${apt.status == '已预约' || apt.status == '叫号中'}" class="btn btn-secondary" th:href="@{/doctor/prescription-form(patientId=${apt.id})}">诊疗开方</a>
+                                <form th:if="${apt.status == '已预约'}" th:action="@{/doctor/callPatient}" method="post" style="display: inline;">
+                                    <input type="hidden" th:name="appointmentId" th:value="${apt.appointmentId}" />
+                                    <button type="submit" class="btn btn-warning">叫号</button>
+                                </form>
+
                             </div>
                         </td>
                     </tr>

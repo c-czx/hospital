@@ -51,6 +51,15 @@ public class AppointmentService {
         return appointmentRepository.save(appointment);
     }
     
+    public Appointment updateAppointmentStatus(Long appointmentId, String status) {
+        Appointment appointment = findById(appointmentId);
+        if (appointment != null) {
+            appointment.setStatus(status);
+            return appointmentRepository.save(appointment);
+        }
+        return null;
+    }
+    
     public void deleteAppointment(Long id) {
         appointmentRepository.deleteById(id);
     }

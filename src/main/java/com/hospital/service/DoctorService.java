@@ -7,6 +7,7 @@ import com.hospital.entity.Prescription;
 import com.hospital.entity.Schedule;
 import com.hospital.entity.User;
 import com.hospital.entity.Appointment;
+import com.hospital.entity.Checkup;
 import com.hospital.repository.DoctorRepository;
 import com.hospital.repository.AdviceRepository;
 import com.hospital.repository.MedicalRecordRepository;
@@ -14,6 +15,7 @@ import com.hospital.repository.PrescriptionRepository;
 import com.hospital.repository.AppointmentRepository;
 import com.hospital.repository.UserRepository;
 import com.hospital.repository.ScheduleRepository;
+import com.hospital.repository.CheckupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -42,6 +44,9 @@ public class DoctorService {
     
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private CheckupRepository checkupRepository;
 
     public Doctor saveDoctor(Doctor doctor) {
         return doctorRepository.save(doctor);
@@ -93,7 +98,7 @@ public class DoctorService {
         List<Object> data = new ArrayList<>();
         if (appointments != null) {
             for (Appointment apt : appointments) {
-                if ("已预约".equals(apt.getStatus()) || "已完成".equals(apt.getStatus())) {
+                if ("已预约".equals(apt.getStatus()) || "叫号中".equals(apt.getStatus()) || "已完成".equals(apt.getStatus())) {
                     Map<String, Object> patientMap = new HashMap<>();
                     User patient = apt.getUser();
                     if (patient != null) {
@@ -169,6 +174,35 @@ public class DoctorService {
         }
         return Map.of("code", 200, "data", data);
     }
+    
+    // 【获取患者病历】
+    public MedicalRecord getMedicalRecord(Long patientId) {
+        List<MedicalRecord> records = medicalRecordRepository.findByUserId(patientId);
+        return records.isEmpty() ? null : records.get(0);
+    }
+    
+    // 【获取患者处方】
+    public Prescription getPrescription(Long patientId) {
+        List<Prescription> prescriptions = prescriptionRepository.findByUserId(patientId);
+        return prescriptions.isEmpty() ? null : prescriptions.get(0);
+    }
+    
+    // 【获取患者医嘱】
+    public Advice getAdvice(Long patientId) {
+        List<Advice> advices = adviceRepository.findByUserId(patientId);
+        return advices.isEmpty() ? null : advices.get(0);
+    }
+    
+    // 【获取患者检查记录】
+    public Checkup getCheckup(Long patientId) {
+        List<Checkup> checkups = checkupRepository.findByUser_Id(patientId);
+        return checkups.isEmpty() ? null : checkups.get(0);
+    }
+    
+    // 【保存检查记录】
+    public void saveCheckup(Checkup checkup) {
+        checkupRepository.save(checkup);
+    }
 
     // 【排班列表】
     public Map<String, Object> getScheduleList(Long doctorId) {
@@ -227,10 +261,23 @@ public class DoctorService {
     
     // 【新增】创建医嘱
     public Map<String, Object> createAdvice(Advice advice) {
-        advice.setCreateTime(LocalDateTime.now());
-        advice.setStatus(1);
-        adviceRepository.save(advice);
-        return Map.of("code", 200, "msg", "创建成功");
+        // 检查是否已有医嘱
+        List<Advice> existingAdvices = adviceRepository.findByUserId(advice.getUser().getId());
+        if (!existingAdvices.isEmpty()) {
+            // 更新现有医嘱
+            Advice existingAdvice = existingAdvices.get(0);
+            existingAdvice.setContent(advice.getContent());
+            existingAdvice.setStatus(advice.getStatus());
+            existingAdvice.setUpdateTime(LocalDateTime.now());
+            adviceRepository.save(existingAdvice);
+            return Map.of("code", 200, "msg", "更新成功");
+        } else {
+            // 创建新医嘱
+            advice.setCreateTime(LocalDateTime.now());
+            advice.setStatus(1);
+            adviceRepository.save(advice);
+            return Map.of("code", 200, "msg", "创建成功");
+        }
     }
 
     // 【新增】减少号源剩余数量

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>患者详情 - 医院挂号系统</title>
+    <title>历史预约病历 - 医院挂号系统</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -23,7 +23,7 @@
         </div>
         
         <div class="main-content">
-            <h1>患者详情</h1>
+            <h1>历史预约病历</h1>
             
             <div class="appointment-detail">
                 <h3>患者信息</h3>
@@ -32,6 +32,16 @@
                 <p><strong>年龄：</strong><span th:text="${patient.age}"></span></p>
                 <p><strong>电话：</strong><span th:text="${patient.phone}"></span></p>
                 <p><strong>邮箱：</strong><span th:text="${patient.email}"></span></p>
+            </div>
+            
+            <div class="appointment-detail" style="margin-top: 30px;">
+                <h3>预约信息</h3>
+                <p><strong>预约时间：</strong><span th:text="${#temporals.format(appointment.appointmentTime, 'yyyy-MM-dd HH:mm')}"></span></p>
+                <p><strong>状态：</strong>
+                    <span th:if="${appointment.status == '已预约'}" class="status" style="background-color: #ffc107; color: #333;">已预约</span>
+                    <span th:elif="${appointment.status == '叫号中'}" class="status" style="background-color: #17a2b8; color: white;">叫号中</span>
+                    <span th:elseif="${appointment.status == '已完成'}" class="status" style="background-color: #4caf50; color: white;">已完成</span>
+                </p>
             </div>
             
             <div class="appointment-detail" style="margin-top: 30px; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
@@ -86,37 +96,13 @@
 
                     <div class="actions" style="margin-top: 30px;">
                         <button type="submit" class="btn btn-primary">保存</button>
-                        <a href="/doctor/patients" class="btn btn-secondary">取消</a>
+                        <a href="/doctor/appointments" class="btn btn-secondary">取消</a>
                     </div>
                 </form>
             </div>
             
-            <div class="appointment-detail" style="margin-top: 30px;">
-                <h3>历史预约</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>预约时间</th>
-                            <th>状态</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="appointment : ${appointmentList}" th:if="${appointment.status == '已完成'}">
-                            <td th:text="${#temporals.format(appointment.appointmentTime, 'yyyy-MM-dd HH:mm')}"></td>
-                            <td>
-                                <span class="status" style="background-color: #4caf50; color: white;">已完成</span>
-                            </td>
-                            <td>
-                                <a th:href="@{/doctor/appointment-history?id=${appointment.id}}" class="btn btn-secondary">查看病历</a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
             <div class="actions" style="margin-top: 30px;">
-                <a href="/doctor/dashboard" class="btn btn-secondary">返回工作台</a>
+                <a href="/doctor/appointments" class="btn btn-secondary">返回我的就诊</a>
             </div>
         </div>
     </div>
