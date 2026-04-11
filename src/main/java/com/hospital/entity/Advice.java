@@ -3,6 +3,10 @@ package com.hospital.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * 留言实体类
+ * 用于表示患者给医生的留言信息，包括留言内容、状态等
+ */
 @Entity
 @Table(name = "advices")
 public class Advice {

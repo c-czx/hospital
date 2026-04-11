@@ -38,13 +38,13 @@
                 </thead>
                 <tbody>
                     <tr th:each="nurse : ${nurses}">
-                        <td th:text="${nurse.nurseId}"></td>
+                        <td th:text="${nurse.id}"></td>
                         <td th:text="${nurse.nurseName}"></td>
                         <td th:text="${nurse.department}"></td>
                         <td th:text="${nurse.phone}"></td>
                         <td>
-                            <a th:href="@{/admin/nurse/edit/{id}(id=${nurse.nurseId})}" class="btn btn-secondary">编辑</a>
-                            <a th:href="@{/admin/nurse/delete/{id}(id=${nurse.nurseId})}" class="btn btn-danger">删除</a>
+                            <a th:href="@{/admin/nurse/edit/{id}(id=${nurse.id})}" class="btn btn-secondary">编辑</a>
+                            <a th:href="@{/admin/nurse/delete/{id}(id=${nurse.id})}" class="btn btn-danger">删除</a>
                         </td>
                     </tr>
                 </tbody>

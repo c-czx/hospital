@@ -3,6 +3,10 @@ package com.hospital.entity;
 import jakarta.persistence.*;
 import java.util.List;
 
+/**
+ * 医生实体类
+ * 用于表示医院系统中的医生信息，包括所属科室、职称、专长等
+ */
 @Entity
 @Table(name = "doctors")
 public class Doctor {

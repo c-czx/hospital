@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 /**
  * 处方实体类
+ * 用于表示医生为患者开具的处方信息，包括药品清单、用法用量等
  */
 @Entity
 @Table(name = "prescriptions")

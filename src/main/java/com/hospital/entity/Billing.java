@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * 缴费实体类
+ * 用于表示患者的缴费记录，包括缴费类型、金额、状态等
+ */
 @Entity
 @Table(name = "billing")
 public class Billing {

@@ -24,8 +24,8 @@
         </div>
         
         <div class="main-content">
-            <h1 th:text="${nurse.nurseId != null ? '编辑护士' : '添加护士'}"></h1>
-            <form th:action="${nurse.nurseId != null ? '/admin/nurse/edit/' + nurse.nurseId : '/admin/nurse/create'}" method="post">
+            <h1 th:text="${nurse.id != null ? '编辑护士' : '添加护士'}"></h1>
+            <form th:action="${nurse.id != null ? '/admin/nurse/edit/' + nurse.id : '/admin/nurse/create'}" method="post">
                 <div class="form-group">
                     <label>用户</label>
                     <select name="userId" required>

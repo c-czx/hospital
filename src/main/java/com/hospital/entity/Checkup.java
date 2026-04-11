@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 /**
  * 检查项目实体类
+ * 用于表示医生为患者开具的检查项目，包括检查类型、结果、状态等
  */
 @Entity
 @Table(name = "checkups")

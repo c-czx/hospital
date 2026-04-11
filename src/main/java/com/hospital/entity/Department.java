@@ -3,6 +3,10 @@ package com.hospital.entity;
 import jakarta.persistence.*;
 import java.util.List;
 
+/**
+ * 科室实体类
+ * 用于表示医院中的各个科室，如内科、外科、妇产科等
+ */
 @Entity
 @Table(name = "departments")
 public class Department {

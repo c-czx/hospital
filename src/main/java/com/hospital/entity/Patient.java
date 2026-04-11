@@ -1,16 +1,19 @@
 package com.hospital.entity;
 
 import jakarta.persistence.*;
-        import java.time.LocalDateTime;
+import java.time.LocalDateTime;
 
+/**
+ * 患者实体类
+ * 用于表示医院系统中的患者信息，包括病历号、过敏史、紧急联系人等
+ */
 @Entity
-@Table(name = "patients") // 对应数据库表名  患者
+@Table(name = "patients")
 public class Patient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "patient_id")
-    private Long patientId;
+    private Long id;
 
     // 关联用户表，确保这个患者对应系统中的一个用户账号
     @OneToOne
@@ -37,13 +40,12 @@ public class Patient {
         this.medicalRecordNumber = "MR" + System.currentTimeMillis(); // 简单生成病历号
     }
 
-    // Getters and Setters
-    public Long getPatientId() {
-        return patientId;
+    public Long getId() {
+        return id;
     }
 
-    public void setPatientId(Long patientId) {
-        this.patientId = patientId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public User getUser() {

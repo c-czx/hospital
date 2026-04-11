@@ -205,7 +205,7 @@ public class DataInitializer implements CommandLineRunner {
             for (Nurse nurse : existingNurses) {
                 if (nurse.getUser() != null && nurse.getUser().getId().equals(user.getId())) {
                     exists = true;
-                    System.out.println("【已存在】用户：" + user.getName() + ", 护士 ID: " + nurse.getNurseId());
+                    System.out.println("【已存在】用户：" + user.getName() + ", 护士 ID: " + nurse.getId());
                     break;
                 }
             }
@@ -220,7 +220,7 @@ public class DataInitializer implements CommandLineRunner {
                 nurse.setDepartment("护理部");
                 nurseService.saveNurse(nurse);
                 
-                System.out.println("【创建成功】护士 ID: " + nurse.getNurseId() + ", 科室：护理部");
+                System.out.println("【创建成功】护士 ID: " + nurse.getId() + ", 科室：护理部");
             }
         }
         

@@ -3,6 +3,10 @@ package com.hospital.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * 病历实体类
+ * 用于表示患者的病历记录，包括主诉、现病史、诊断结果等
+ */
 @Entity
 @Table(name = "medical_records")
 public class MedicalRecord {

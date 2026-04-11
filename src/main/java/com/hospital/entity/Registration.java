@@ -4,14 +4,17 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * 挂号实体类
+ * 用于表示患者的挂号记录，包括挂号科室、医生、时间、状态、费用等
+ */
 @Entity
-@Table(name = "registrations") // 对应数据库表名  挂号记录
+@Table(name = "registrations")
 public class Registration {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "reg_id")
-    private Long regId;
+    private Long id;
 
     // 关联患者
     @ManyToOne
@@ -48,13 +51,12 @@ public class Registration {
     // Constructors
     public Registration() {}
 
-    // Getters and Setters
-    public Long getRegId() {
-        return regId;
+    public Long getId() {
+        return id;
     }
 
-    public void setRegId(Long regId) {
-        this.regId = regId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Patient getPatient() {

@@ -3,6 +3,10 @@ package com.hospital.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * 排班实体类
+ * 用于表示医生的排班信息，包括开始时间、结束时间、号源数量等
+ */
 @Entity
 @Table(name = "schedules")
 public class Schedule {

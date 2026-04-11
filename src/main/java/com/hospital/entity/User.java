@@ -2,6 +2,10 @@ package com.hospital.entity;
 
 import jakarta.persistence.*;
 
+/**
+ * 用户实体类
+ * 用于表示医院系统中的用户账号信息，包括管理员、医生、护士和患者
+ */
 @Entity
 @Table(name = "users")
 public class User {

@@ -3,6 +3,10 @@ package com.hospital.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * 预约实体类
+ * 用于表示患者的预约信息，包括预约医生、科室、时间等
+ */
 @Entity
 @Table(name = "appointments")
 public class Appointment {

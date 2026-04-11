@@ -100,7 +100,7 @@ public class NurseService {
         List<Map<String, Object>> dtos = new ArrayList<>();
         for (Registration reg : list) {
             Map<String, Object> map = new HashMap<>();
-            map.put("regId", reg.getRegId());
+            map.put("regId", reg.getId());
             map.put("patientName", reg.getPatient().getUser().getName());
             map.put("dept", reg.getDepartment().getName());
             map.put("time", reg.getRegTime());
