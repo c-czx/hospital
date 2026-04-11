@@ -1,8 +1,3 @@
-/**
-*本代码由Muyvge编写，仅用于学习交流，不得用于商业用途
-*本代码的使用、复制、修改、合并、发布、分发、再许可、销售等行为均受到法律的严格限制。
-*/
-
 package com.hospital.controller;
 
 import com.hospital.entity.User;

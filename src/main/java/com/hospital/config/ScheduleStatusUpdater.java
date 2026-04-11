@@ -9,6 +9,10 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 定时任务：更新过期号源状态为已过期
+ * 每小时执行一次
+ */
 @Component
 public class ScheduleStatusUpdater {
     

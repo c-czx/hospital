@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 数据初始化器
@@ -19,13 +20,16 @@ public class DataInitializer implements CommandLineRunner {
     private final DepartmentService departmentService;
     private final DoctorService doctorService;
     private final PasswordEncoder passwordEncoder;
+    private final NurseService nurseService;
     
     public DataInitializer(UserService userService, DepartmentService departmentService, 
-                         DoctorService doctorService, PasswordEncoder passwordEncoder) {
+                         DoctorService doctorService, PasswordEncoder passwordEncoder,
+                         NurseService nurseService) {
         this.userService = userService;
         this.departmentService = departmentService;
         this.doctorService = doctorService;
         this.passwordEncoder = passwordEncoder;
+        this.nurseService = nurseService;
     }
     
     @Override
@@ -33,6 +37,7 @@ public class DataInitializer implements CommandLineRunner {
         initializeUsers();
         initializeDepartments();
         initializeDoctors();
+        initializeNurses();
     }
     
     /**
@@ -182,4 +187,46 @@ public class DataInitializer implements CommandLineRunner {
         
         System.out.println("========================================");
     }
+    
+    /**
+     * 初始化护士数据
+     */
+    private void initializeNurses() {
+        System.out.println("========================================");
+        System.out.println("【初始化护士数据】开始检查...");
+        
+        List<User> nurseUsers = userService.findByRole("NURSE");
+        System.out.println("【护士用户数量】" + nurseUsers.size());
+        
+        for (User user : nurseUsers) {
+            // 检查是否已存在护士记录
+            boolean exists = false;
+            List<Nurse> existingNurses = nurseService.findAll();
+            for (Nurse nurse : existingNurses) {
+                if (nurse.getUser() != null && nurse.getUser().getId().equals(user.getId())) {
+                    exists = true;
+                    System.out.println("【已存在】用户：" + user.getName() + ", 护士 ID: " + nurse.getNurseId());
+                    break;
+                }
+            }
+            
+            if (!exists) {
+                System.out.println("【创建护士记录】用户：" + user.getName() + ", ID: " + user.getId());
+                
+                Nurse nurse = new Nurse();
+                nurse.setUser(user);
+                nurse.setNurseName(user.getName());
+                nurse.setPhone(user.getPhone());
+                nurse.setDepartment("护理部");
+                nurseService.saveNurse(nurse);
+                
+                System.out.println("【创建成功】护士 ID: " + nurse.getNurseId() + ", 科室：护理部");
+            }
+        }
+        
+        System.out.println("========================================");
+        System.out.println("【护士初始化完成】");
+        System.out.println("========================================");
+    }
 }
+
