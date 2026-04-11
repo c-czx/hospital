@@ -27,10 +27,10 @@ public class AdviceService {
         for (Advice advice : advices) {
             Map<String, Object> map = new HashMap<>();
             map.put("id", advice.getId());
-            map.put("content", advice.getContent());
-            map.put("status", advice.getStatus());
+            map.put("content", advice.getContent() != null ? advice.getContent() : "");
+            map.put("status", advice.getStatus() != null ? advice.getStatus() : 0);
             map.put("createTime", advice.getCreateTime());
-            map.put("patientName", advice.getUser().getName());
+            map.put("patientName", (advice.getUser() != null && advice.getUser().getName() != null) ? advice.getUser().getName() : "未知患者");
             result.add(map);
         }
 

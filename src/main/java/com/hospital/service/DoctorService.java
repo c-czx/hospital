@@ -116,7 +116,10 @@ public class DoctorService {
                 }
             }
         }
-        return Map.of("code", 200, "data", data);
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 200);
+        result.put("data", data);
+        return result;
     }
 
     // 【全部预约】
@@ -127,25 +130,33 @@ public class DoctorService {
         for (Appointment apt : appointments) {
             Map<String, Object> aptMap = new HashMap<>();
             User patient = apt.getUser();
-            aptMap.put("id", patient.getId());
-            aptMap.put("name", patient.getName());
-            aptMap.put("gender", patient.getGender());
-            aptMap.put("age", patient.getAge());
-            aptMap.put("phone", patient.getPhone());
-            aptMap.put("appointmentId", apt.getId());
-            aptMap.put("appointmentTime", apt.getAppointmentTime());
-            aptMap.put("status", apt.getStatus());
-            aptMap.put("symptoms", apt.getSymptoms());
-            data.add(aptMap);
+            if (patient != null) {
+                aptMap.put("id", patient.getId());
+                aptMap.put("name", patient.getName());
+                aptMap.put("gender", patient.getGender());
+                aptMap.put("age", patient.getAge());
+                aptMap.put("phone", patient.getPhone());
+                aptMap.put("appointmentId", apt.getId());
+                aptMap.put("appointmentTime", apt.getAppointmentTime());
+                aptMap.put("status", apt.getStatus());
+                aptMap.put("symptoms", apt.getSymptoms());
+                data.add(aptMap);
+            }
         }
-        return Map.of("code", 200, "data", data);
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 200);
+        result.put("data", data);
+        return result;
     }
 
     // 【患者详情】
     public Map<String, Object> getPatientDetail(Long patientId) {
         User patient = userRepository.findById(patientId).orElse(null);
         if (patient == null) {
-            return Map.of("code", 404, "msg", "患者不存在");
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("code", 404);
+            errorResult.put("msg", "患者不存在");
+            return errorResult;
         }
         
         Map<String, Object> data = new HashMap<>();
@@ -156,7 +167,10 @@ public class DoctorService {
         data.put("phone", patient.getPhone());
         data.put("email", patient.getEmail());
         
-        return Map.of("code", 200, "data", data);
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 200);
+        result.put("data", data);
+        return result;
     }
 
     // 【医嘱列表】
@@ -172,7 +186,10 @@ public class DoctorService {
             adviceMap.put("status", advice.getStatus());
             data.add(adviceMap);
         }
-        return Map.of("code", 200, "data", data);
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 200);
+        result.put("data", data);
+        return result;
     }
     
     // 【获取患者病历】当前医生维度下时间最新的一条（与医生端详情/保存逻辑一致）
@@ -241,7 +258,10 @@ public class DoctorService {
             schMap.put("status", sch.getStatus());
             data.add(schMap);
         }
-        return Map.of("code", 200, "data", data);
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 200);
+        result.put("data", data);
+        return result;
     }
 
     // 【发布号源】
@@ -249,7 +269,10 @@ public class DoctorService {
         schedule.setStatus(1);
         schedule.setRemainNumber(schedule.getTotalNumber());
         scheduleRepository.save(schedule);
-        return Map.of("code", 200, "msg", "发布成功");
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 200);
+        result.put("msg", "发布成功");
+        return result;
     }
 
     // 【保存病历】
@@ -257,28 +280,40 @@ public class DoctorService {
         record.setCreateTime(LocalDateTime.now());
         record.setDiagnosisTime(LocalDateTime.now());
         medicalRecordRepository.save(record);
-        return Map.of("code", 200, "msg", "保存成功");
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 200);
+        result.put("msg", "保存成功");
+        return result;
     }
 
     // 【开具处方】
     public Map<String, Object> createPrescription(Prescription prescription) {
         prescription.setCreateTime(LocalDateTime.now());
         prescriptionRepository.save(prescription);
-        return Map.of("code", 200, "msg", "开具成功");
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 200);
+        result.put("msg", "开具成功");
+        return result;
     }
 
     // 【修改医嘱】
     public Map<String, Object> updateAdvice(Advice advice) {
         Advice existingAdvice = adviceRepository.findById(advice.getId()).orElse(null);
         if (existingAdvice == null) {
-            return Map.of("code", 404, "msg", "医嘱不存在");
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("code", 404);
+            errorResult.put("msg", "医嘱不存在");
+            return errorResult;
         }
         
         existingAdvice.setContent(advice.getContent());
         existingAdvice.setStatus(advice.getStatus());
         existingAdvice.setUpdateTime(LocalDateTime.now());
         adviceRepository.save(existingAdvice);
-        return Map.of("code", 200, "msg", "修改成功");
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 200);
+        result.put("msg", "修改成功");
+        return result;
     }
     
     // 【新增】创建医嘱
@@ -292,13 +327,19 @@ public class DoctorService {
             existingAdvice.setStatus(advice.getStatus());
             existingAdvice.setUpdateTime(LocalDateTime.now());
             adviceRepository.save(existingAdvice);
-            return Map.of("code", 200, "msg", "更新成功");
+            Map<String, Object> result = new HashMap<>();
+            result.put("code", 200);
+            result.put("msg", "更新成功");
+            return result;
         } else {
             // 创建新医嘱
             advice.setCreateTime(LocalDateTime.now());
             advice.setStatus(1);
             adviceRepository.save(advice);
-            return Map.of("code", 200, "msg", "创建成功");
+            Map<String, Object> result = new HashMap<>();
+            result.put("code", 200);
+            result.put("msg", "创建成功");
+            return result;
         }
     }
 

@@ -78,18 +78,18 @@ public class DoctorController {
         try {
             String phone = authentication.getName();
             System.out.println("【调试】获取当前医生ID，电话：" + phone);
-            
+
             User user = userService.findByPhone(phone);
             System.out.println("【调试】用户信息：" + (user != null ? user.getId() + " - " + user.getName() : "null"));
-            
+
             if (user == null) {
                 System.out.println("【调试】用户不存在，返回null");
                 return null;
             }
-            
+
             Doctor doctor = doctorService.findByUserId(user.getId());
             System.out.println("【调试】医生信息：" + (doctor != null ? doctor.getId() + " - " + doctor.getTitle() : "null"));
-            
+
             return doctor != null ? doctor.getId() : null;
         } catch (Exception e) {
             System.out.println("【调试】获取医生ID异常：" + e.getMessage());
@@ -104,11 +104,11 @@ public class DoctorController {
         if (doctorId == null) {
             return "redirect:/login";
         }
-        
+
         Map<String, Object> result = doctorService.getTodayPatient(doctorId);
         @SuppressWarnings("unchecked")
         List<Object> todayList = (List<Object>) result.get("data");
-        
+
         model.addAttribute("todayList", todayList);
         return "doctor/dashboard";
     }
@@ -239,7 +239,7 @@ public class DoctorController {
         model.addAttribute("scheduleList", doctorService.getScheduleList(doctorId).get("data"));
         return "doctor/schedule";
     }
-    
+
     @GetMapping("/profile")
     public String profile(Model model, Authentication authentication) {
         Long doctorId = getCurrentDoctorId(authentication);
@@ -252,7 +252,7 @@ public class DoctorController {
         model.addAttribute("departments", departments);
         return "doctor/profile";
     }
-    
+
     @PostMapping("/profile/update")
     public String updateProfile(@RequestParam String name, @RequestParam String gender,
                                @RequestParam Integer age, @RequestParam String phone,
@@ -264,35 +264,30 @@ public class DoctorController {
         if (doctorId == null) {
             return "redirect:/login";
         }
-        
+
         Doctor doctor = doctorService.findById(doctorId);
         User user = doctor.getUser();
         Department department = departmentService.findById(departmentId);
-        
+
         user.setName(name);
         user.setGender(gender);
         user.setAge(age);
         user.setPhone(phone);
         user.setEmail(email);
         userService.updateUser(user);
-        
+
         doctor.setTitle(title);
         doctor.setDepartment(department);
         doctor.setSpecialty(department.getName());
         doctor.setSchedule(schedule);
         doctorService.updateDoctor(doctor);
-        
+
         return "redirect:/doctor/profile";
     }
-    
+
     @GetMapping("/advices")
     public String advices(Model model, Authentication authentication) {
-        Long doctorId = getCurrentDoctorId(authentication);
-        if (doctorId == null) {
-            return "redirect:/login";
-        }
-        model.addAttribute("advices", adviceService.getAdvicesWithPatientName(doctorId));
-        return "doctor/advices";
+        return prescriptions(model, authentication);
     }
 
     @GetMapping("/patients")
@@ -475,7 +470,7 @@ public class DoctorController {
                 checkup.setDoctor(doctor);
                 checkup.setUser(user);
                 checkup.setCreateTime(java.time.LocalDateTime.now());
-                checkup.setStatus(1);
+                checkup.setStatus(0);
             }
             checkup.setType(checkupType.trim());
             checkup.setUpdateTime(java.time.LocalDateTime.now());
@@ -504,7 +499,7 @@ public class DoctorController {
     @PostMapping("/updateAdvice")
     public String updateAdvice(Advice advice, Authentication authentication) {
         doctorService.updateAdvice(advice);
-        return "redirect:/doctor/appointments";
+        return "redirect:/doctor/advices";
     }
     
     @GetMapping("/appointment-history")
@@ -642,24 +637,4 @@ public class DoctorController {
         return "doctor/checkup-detail";
     }
     
-    @GetMapping("/update-checkup")
-    public String updateCheckup(@RequestParam Long id, Model model, Authentication authentication) {
-        Long doctorId = getCurrentDoctorId(authentication);
-        if (doctorId == null) {
-            return "redirect:/login";
-        }
-        Checkup checkup = checkupService.findById(id);
-        model.addAttribute("checkup", checkup);
-        return "doctor/checkup-update";
-    }
-    
-    @PostMapping("/update-checkup")
-    public String updateCheckup(Checkup checkup, Authentication authentication) {
-        Long doctorId = getCurrentDoctorId(authentication);
-        if (doctorId == null) {
-            return "redirect:/login";
-        }
-        checkupService.save(checkup);
-        return "redirect:/doctor/checkups";
-    }
 }

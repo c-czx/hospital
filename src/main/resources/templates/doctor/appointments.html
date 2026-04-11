@@ -55,7 +55,7 @@
                         <td>
                             <div class="action-buttons">
                                 <a class="btn btn-primary" th:href="@{/doctor/appointment-detail(patientId=${apt.id}, appointmentId=${apt.appointmentId})}">查看病历</a>
-                                <a th:if="${apt.status == '已预约' || apt.status == '叫号中'}" class="btn btn-secondary" th:href="@{/doctor/prescription-form(patientId=${apt.id})}">开具处方</a>
+                                <a th:if="${apt.status == '叫号中'}" class="btn btn-secondary" th:href="@{/doctor/prescription-form(patientId=${apt.id})}">开具处方</a>
                                 <form th:if="${apt.status == '已预约'}" th:action="@{/doctor/callPatient}" method="post" style="display: inline;">
                                     <input type="hidden" th:name="appointmentId" th:value="${apt.appointmentId}" />
                                     <button type="submit" class="btn btn-warning">叫号</button>
