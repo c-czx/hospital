@@ -9,7 +9,7 @@ import java.util.List;
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
 
     // 1. 查询某个患者的所有挂号记录
-    @Query("SELECT r FROM Registration r WHERE r.patient.patientId = :patientId")
+    @Query("SELECT r FROM Registration r WHERE r.patient.id = :patientId")
     List<Registration> findByPatientId(@Param("patientId") Long patientId);
 
     // 2. 查询某个科室当天的挂号列表（护士分诊台需要看这个）
