@@ -134,9 +134,28 @@ public class PatientController {
         }
         LocalDateTime now = LocalDateTime.now();
         
-        if (appointTime.isBefore(now)) {
-            System.out.println("【预约挂号】预约时间已过期: " + appointTime + " < " + now);
-            return "redirect:/patient/book?error=past_time&message=预约时间已过期，请选择未来的时间";
+        // 检查预约时间是否在排班的时间范围内
+        boolean isWithinSchedule = false;
+        Map<String, Object> scheduleResult = doctorService.getScheduleList(doctorId);
+        @SuppressWarnings("unchecked")
+        List<Object> schedules = (List<Object>) scheduleResult.get("data");
+        for (Object obj : schedules) {
+            Map<String, Object> schMap = (Map<String, Object>) obj;
+            LocalDateTime startTime = (LocalDateTime) schMap.get("startTime");
+            LocalDateTime endTime = (LocalDateTime) schMap.get("endTime");
+            
+            if (appointTime.isAfter(startTime) && appointTime.isBefore(endTime)) {
+                // 检查当前时间是否在排班的结束时间之前
+                if (now.isBefore(endTime)) {
+                    isWithinSchedule = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!isWithinSchedule) {
+            System.out.println("【预约挂号】预约时间不在有效的排班时间范围内: " + appointTime);
+            return "redirect:/patient/book?error=invalid_time&message=预约时间不在有效的排班时间范围内";
         }
         
         // 直接创建预约，跳过号源验证
