@@ -26,11 +26,16 @@
         <div class="main-content">
             <h1 th:text="${doctor.id != null ? '编辑医生' : '添加医生'}"></h1>
             <form th:action="${doctor.id != null ? '/admin/doctor/edit/' + doctor.id : '/admin/doctor/create'}" method="post">
-                <div class="form-group">
-                    <label>用户</label>
+                <div class="form-group" th:if="${doctor.id != null}">
+                    <label>姓名</label>
+                    <input type="text" th:value="${doctor.user != null ? doctor.user.name : ''}" readonly>
+                    <input type="hidden" name="userId" th:value="${doctor.user != null ? doctor.user.id : ''}">
+                </div>
+                <div class="form-group" th:if="${doctor.id == null}">
+                    <label>姓名</label>
                     <select name="userId" required>
                         <option value="">请选择用户</option>
-                        <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.name}" th:selected="${doctor.user != null and doctor.user.id == user.id}"></option>
+                        <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.name} + ' (' + ${user.role} + ')'"></option>
                     </select>
                 </div>
                 <div class="form-group">

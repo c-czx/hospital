@@ -26,24 +26,24 @@
         <div class="main-content">
             <h1 th:text="${nurse.id != null ? '编辑护士' : '添加护士'}"></h1>
             <form th:action="${nurse.id != null ? '/admin/nurse/edit/' + nurse.id : '/admin/nurse/create'}" method="post">
-                <div class="form-group">
-                    <label>用户</label>
+                <!-- 编辑模式：隐藏用户字段 -->
+                <input type="hidden" name="userId" th:if="${nurse.id != null}" th:value="${nurse.user != null ? nurse.user.id : ''}">
+                <!-- 添加模式：显示用户选择框 -->
+                <div class="form-group" th:if="${nurse.id == null}">
+                    <label>姓名</label>
                     <select name="userId" required>
                         <option value="">请选择用户</option>
-                        <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.name}" th:selected="${nurse.user != null and nurse.user.id == user.id}"></option>
+                        <option th:each="user : ${users}" th:value="${user.id}" th:text="${user.name} + ' (' + ${user.role} + ')'"></option>
                     </select>
                 </div>
-                <div class="form-group">
+                <!-- 编辑模式：显示只读姓名（用户姓名） -->
+                <div class="form-group" th:if="${nurse.id != null}">
                     <label>姓名</label>
-                    <input type="text" name="nurseName" th:value="${nurse.nurseName}" required>
+                    <input type="text" th:value="${nurse.user != null ? nurse.user.name : ''}" readonly>
                 </div>
                 <div class="form-group">
                     <label>电话</label>
                     <input type="text" name="phone" th:value="${nurse.phone}" required>
-                </div>
-                <div class="form-group">
-                    <label>科室</label>
-                    <input type="text" name="department" th:value="${nurse.department}" required>
                 </div>
                 <button type="submit" class="btn btn-primary">保存</button>
                 <a th:href="@{/admin/nurses}" class="btn btn-secondary">取消</a>
