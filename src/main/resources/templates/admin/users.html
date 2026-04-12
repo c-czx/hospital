@@ -13,7 +13,6 @@
             <ul>
                 <li><a href="/admin/dashboard">首页</a></li>
                 <li><a href="/admin/users">用户管理</a></li>
-                <li><a href="/admin/permissions">权限管理</a></li>
                 <li><a href="/admin/departments">科室管理</a></li>
                 <li><a href="/admin/doctors">医生管理</a></li>
                 <li><a href="/admin/nurses">护士管理</a></li>
@@ -41,7 +40,12 @@
                     <tr th:each="user : ${users}">
                         <td th:text="${user.id}"></td>
                         <td th:text="${user.name}"></td>
-                        <td th:text="${user.role}"></td>
+                        <td>
+                            <span th:if="${user.role == 'PATIENT'}">患者</span>
+                            <span th:if="${user.role == 'DOCTOR'}">医生</span>
+                            <span th:if="${user.role == 'NURSE'}">护士</span>
+                            <span th:if="${user.role == 'ADMIN'}">管理员</span>
+                        </td>
                         <td th:text="${user.gender == 'male' ? '男' : '女'}"></td>
                         <td th:text="${user.phone}"></td>
                         <td>

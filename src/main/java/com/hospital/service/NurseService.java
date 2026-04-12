@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -31,8 +30,13 @@ public class NurseService {
     }
 
     // 根据 ID 查找护士
-    public Nurse findById(Integer id) {
+    public Nurse findById(Long id) {
         return nurseRepository.findById(id).orElse(null);
+    }
+
+    // 根据用户查找护士
+    public Nurse findByUser(User user) {
+        return nurseRepository.findByUserId(user.getId()).orElse(null);
     }
 
     // 保存护士信息
@@ -49,7 +53,7 @@ public class NurseService {
 
     // 删除护士
     @Transactional
-    public void deleteNurse(Integer id) {
+    public void deleteNurse(Long id) {
         nurseRepository.deleteById(id);
     }
 

@@ -18,6 +18,7 @@ import com.hospital.repository.ScheduleRepository;
 import com.hospital.repository.CheckupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -80,12 +81,28 @@ public class DoctorService {
         return doctors.isEmpty() ? null : doctors.get(0);
     }
 
+    /**
+     * 根据用户查找医生
+     */
+    public Doctor findByUser(User user) {
+        List<Doctor> doctors = doctorRepository.findByUserId(user.getId());
+        return doctors.isEmpty() ? null : doctors.get(0);
+    }
+
     public Doctor updateDoctor(Doctor doctor) {
         return doctorRepository.save(doctor);
     }
 
     public void deleteDoctor(Long id) {
         doctorRepository.deleteById(id);
+    }
+
+    /**
+     * 删除医生
+     */
+    @Transactional
+    public void deleteDoctor(Doctor doctor) {
+        doctorRepository.delete(doctor);
     }
 
     // 【今日预约患者】

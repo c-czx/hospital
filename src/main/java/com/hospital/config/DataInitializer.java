@@ -6,7 +6,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -21,29 +20,33 @@ public class DataInitializer implements CommandLineRunner {
     private final DoctorService doctorService;
     private final PasswordEncoder passwordEncoder;
     private final NurseService nurseService;
+    private final PatientService patientService;
     
     public DataInitializer(UserService userService, DepartmentService departmentService, 
                          DoctorService doctorService, PasswordEncoder passwordEncoder,
-                         NurseService nurseService) {
+                         NurseService nurseService, PatientService patientService) {
         this.userService = userService;
         this.departmentService = departmentService;
         this.doctorService = doctorService;
         this.passwordEncoder = passwordEncoder;
         this.nurseService = nurseService;
+        this.patientService = patientService;
     }
     
     @Override
     public void run(String... args) throws Exception {
-        initializeUsers();
-        initializeDepartments();
-        initializeDoctors();
-        initializeNurses();
+        System.out.println("========== 开始初始化数据 ==========");
+        initializeDepartments();  // 先初始化科室，因为医生创建需要科室
+        initializeUsers();        // 再初始化用户（会自动创建角色表）
+        System.out.println("========== 数据初始化完成 ==========");
     }
     
     /**
-     * 初始化用户数据
+     * 初始化用户数据（会自动创建对应的角色表记录）
      */
     private void initializeUsers() {
+        System.out.println("【开始初始化用户数据】");
+        
         if (userService.findByPhone("13800000000") == null) {
             User admin = new User();
             admin.setPassword("admin123");  // 不要预先加密，saveUser 方法会加密
@@ -53,6 +56,7 @@ public class DataInitializer implements CommandLineRunner {
             admin.setPhone("13800000000");
             admin.setEmail("admin@hospital.com");
             userService.saveUser(admin);
+            System.out.println("  - 已创建管理员：系统管理员");
         }
         
         if (userService.findByPhone("13800000001") == null) {
@@ -64,6 +68,21 @@ public class DataInitializer implements CommandLineRunner {
             doctor1.setPhone("13800000001");
             doctor1.setEmail("doctor1@hospital.com");
             userService.saveUser(doctor1);
+            
+            // 补充医生角色表详细信息
+            User savedDoctor = userService.findByPhone("13800000001");
+            if (savedDoctor != null) {
+                Doctor doctor = doctorService.findByUserId(savedDoctor.getId());
+                if (doctor != null) {
+                    Department dept = departmentService.findByNameContaining("内科").get(0);
+                    doctor.setDepartment(dept);
+                    doctor.setTitle("主任医师");
+                    doctor.setSpecialty("心血管疾病");
+                    doctor.setSchedule("周一至周五 8:00-12:00");
+                    doctorService.saveDoctor(doctor);
+                    System.out.println("  - 已创建医生用户：张医生，同步创建医生角色表记录（内科/主任医师）");
+                }
+            }
         }
         
         if (userService.findByPhone("13800000002") == null) {
@@ -75,6 +94,17 @@ public class DataInitializer implements CommandLineRunner {
             nurse1.setPhone("13800000002");
             nurse1.setEmail("nurse1@hospital.com");
             userService.saveUser(nurse1);
+            
+            // 补充护士角色表详细信息
+            User savedNurse = userService.findByPhone("13800000002");
+            if (savedNurse != null) {
+                Nurse nurse = nurseService.findByUser(savedNurse);
+                if (nurse != null) {
+                    nurse.setPhone("13800000002");
+                    nurseService.saveNurse(nurse);
+                    System.out.println("  - 已创建护士用户：李护士，同步创建护士角色表记录");
+                }
+            }
         }
         
         if (userService.findByPhone("13800000003") == null) {
@@ -86,7 +116,10 @@ public class DataInitializer implements CommandLineRunner {
             patient1.setPhone("13800000003");
             patient1.setEmail("patient1@hospital.com");
             userService.saveUser(patient1);
+            System.out.println("  - 已创建患者用户：王患者，同步创建患者角色表记录");
         }
+        
+        System.out.println("【用户数据初始化完成】");
     }
     
     /**
@@ -154,8 +187,10 @@ public class DataInitializer implements CommandLineRunner {
     }
     
     /**
-     * 初始化医生数据
+     * 初始化医生数据（备用方法，现已由 saveUser 自动完成）
+     * 此方法保留用于手动修复医生角色表数据的情况
      */
+    @SuppressWarnings("unused")
     private void initializeDoctors() {
         System.out.println("========================================");
         System.out.println("【初始化医生数据】开始检查...");
@@ -189,8 +224,10 @@ public class DataInitializer implements CommandLineRunner {
     }
     
     /**
-     * 初始化护士数据
+     * 初始化护士数据（备用方法，现已由 saveUser 自动完成）
+     * 此方法保留用于手动修复护士角色表数据的情况
      */
+    @SuppressWarnings("unused")
     private void initializeNurses() {
         System.out.println("========================================");
         System.out.println("【初始化护士数据】开始检查...");

@@ -1,7 +1,6 @@
 package com.hospital.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
 /**
  * 患者实体类

@@ -32,6 +32,9 @@ public class AdminController {
     @Autowired
     private NurseService nurseService;
     
+    @Autowired
+    private PatientService patientService;
+    
     /**
      * 显示管理员首页
      */
@@ -110,6 +113,19 @@ public class AdminController {
     @GetMapping("/user/delete/{id}")
     public String deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
+        return "redirect:/admin/users";
+    }
+    
+    /**
+     * 更新用户角色
+     */
+    @GetMapping("/user/update-role/{id}")
+    public String updateUserRole(@PathVariable Long id, @RequestParam String role) {
+        User user = userService.findById(id);
+        if (user != null) {
+            user.setRole(role);
+            userService.updateUser(user);
+        }
         return "redirect:/admin/users";
     }
     
@@ -208,6 +224,17 @@ public class AdminController {
         // 同步更新用户角色为 DOCTOR
         user.setRole("DOCTOR");
         userService.updateUser(user);
+        
+        // 如果用户之前是患者，从患者表中删除
+        Patient oldPatient = patientService.findByUser(user);
+        if (oldPatient != null) {
+            patientService.deletePatient(oldPatient);
+        }
+        // 如果用户之前是护士，从护士表中删除
+        Nurse oldNurse = nurseService.findByUser(user);
+        if (oldNurse != null) {
+            nurseService.deleteNurse(oldNurse.getId());
+        }
         
         Department department = departmentService.findById(departmentId);
         
@@ -311,6 +338,17 @@ public class AdminController {
         user.setRole("NURSE");
         userService.updateUser(user);
         
+        // 如果用户之前是患者，从患者表中删除
+        Patient oldPatient = patientService.findByUser(user);
+        if (oldPatient != null) {
+            patientService.deletePatient(oldPatient);
+        }
+        // 如果用户之前是医生，从医生表中删除
+        Doctor oldDoctor = doctorService.findByUser(user);
+        if (oldDoctor != null) {
+            doctorService.deleteDoctor(oldDoctor);
+        }
+        
         Nurse nurse = new Nurse();
         nurse.setUser(user);
         nurse.setPhone(phone);
@@ -323,7 +361,7 @@ public class AdminController {
      * 显示编辑护士表单
      */
     @GetMapping("/nurse/edit/{id}")
-    public String editNurse(@PathVariable Integer id, Model model) {
+    public String editNurse(@PathVariable Long id, Model model) {
         Nurse nurse = nurseService.findById(id);
         model.addAttribute("nurse", nurse);
         model.addAttribute("users", null); // 编辑时不需要用户列表
@@ -334,7 +372,7 @@ public class AdminController {
      * 处理编辑护士请求
      */
     @PostMapping("/nurse/edit/{id}")
-    public String updateNurse(@PathVariable Integer id, @RequestParam Long userId,
+    public String updateNurse(@PathVariable Long id, @RequestParam Long userId,
                              @RequestParam String phone) {
         User user = userService.findById(userId);
         
@@ -350,7 +388,7 @@ public class AdminController {
      * 删除护士
      */
     @GetMapping("/nurse/delete/{id}")
-    public String deleteNurse(@PathVariable Integer id) {
+    public String deleteNurse(@PathVariable Long id) {
         nurseService.deleteNurse(id);
         return "redirect:/admin/nurses";
     }

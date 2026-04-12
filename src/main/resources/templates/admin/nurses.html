@@ -13,7 +13,6 @@
             <ul>
                 <li><a href="/admin/dashboard">首页</a></li>
                 <li><a href="/admin/users">用户管理</a></li>
-                <li><a href="/admin/permissions">权限管理</a></li>
                 <li><a href="/admin/departments">科室管理</a></li>
                 <li><a href="/admin/doctors">医生管理</a></li>
                 <li><a href="/admin/nurses">护士管理</a></li>
@@ -31,7 +30,6 @@
                     <tr>
                         <th>ID</th>
                         <th>姓名</th>
-                        <th>科室</th>
                         <th>电话</th>
                         <th>操作</th>
                     </tr>
@@ -39,8 +37,7 @@
                 <tbody>
                     <tr th:each="nurse : ${nurses}">
                         <td th:text="${nurse.id}"></td>
-                        <td th:text="${nurse.nurseName}"></td>
-                        <td th:text="${nurse.department}"></td>
+                        <td th:text="${nurse.user != null ? nurse.user.name : '未知'}"></td>
                         <td th:text="${nurse.phone}"></td>
                         <td>
                             <a th:href="@{/admin/nurse/edit/{id}(id=${nurse.id})}" class="btn btn-secondary">编辑</a>
