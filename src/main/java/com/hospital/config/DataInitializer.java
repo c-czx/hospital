@@ -116,7 +116,19 @@ public class DataInitializer implements CommandLineRunner {
             patient1.setPhone("13800000003");
             patient1.setEmail("patient1@hospital.com");
             userService.saveUser(patient1);
-            System.out.println("  - 已创建患者用户：王患者，同步创建患者角色表记录");
+            
+            // 补充患者角色表详细信息
+            User savedPatient = userService.findByPhone("13800000003");
+            if (savedPatient != null) {
+                Patient patient = patientService.findByUser(savedPatient);
+                if (patient != null) {
+                    patient.setAllergies("青霉素过敏");
+                    patient.setEmergencyContact("张小花");
+                    patient.setEmergencyPhone("13900000003");
+                    patientService.savePatient(patient);
+                    System.out.println("  - 已创建患者用户：王患者，同步创建患者角色表记录（青霉素过敏）");
+                }
+            }
         }
         
         System.out.println("【用户数据初始化完成】");
