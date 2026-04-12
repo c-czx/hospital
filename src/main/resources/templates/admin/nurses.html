@@ -30,7 +30,9 @@
                     <tr>
                         <th>ID</th>
                         <th>姓名</th>
-                        <th>电话</th>
+                        <th>科室</th>
+                        <th>病区</th>
+                        <th>职称</th>
                         <th>操作</th>
                     </tr>
                 </thead>
@@ -38,7 +40,9 @@
                     <tr th:each="nurse : ${nurses}">
                         <td th:text="${nurse.id}"></td>
                         <td th:text="${nurse.user != null ? nurse.user.name : '未知'}"></td>
-                        <td th:text="${nurse.phone}"></td>
+                        <td th:text="${nurse.department != null ? nurse.department.name : '无'}"></td>
+                        <td th:text="${nurse.ward != null ? nurse.ward : '无'}"></td>
+                        <td th:text="${nurse.title != null ? nurse.title : '无'}"></td>
                         <td>
                             <a th:href="@{/admin/nurse/edit/{id}(id=${nurse.id})}" class="btn btn-secondary">编辑</a>
                             <a th:href="@{/admin/nurse/delete/{id}(id=${nurse.id})}" class="btn btn-danger">删除</a>

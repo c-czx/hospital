@@ -100,7 +100,6 @@ public class DataInitializer implements CommandLineRunner {
             if (savedNurse != null) {
                 Nurse nurse = nurseService.findByUser(savedNurse);
                 if (nurse != null) {
-                    nurse.setPhone("13800000002");
                     nurseService.saveNurse(nurse);
                     System.out.println("  - 已创建护士用户：李护士，同步创建护士角色表记录");
                 }

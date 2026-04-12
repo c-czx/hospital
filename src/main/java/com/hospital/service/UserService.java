@@ -31,9 +31,6 @@ public class UserService {
     
     @Autowired
     private DepartmentRepository departmentRepository;
-
-    @Autowired
-    private PatientRepository patientRepository;
     
     @Autowired
     private PatientRepository patientRepository;
@@ -57,7 +54,7 @@ public class UserService {
         } else if ("NURSE".equals(role)) {
             Nurse nurse = new Nurse();
             nurse.setUser(savedUser);
-            nurse.setPhone(savedUser.getPhone());
+            
             nurseRepository.save(nurse);
             System.out.println("【已为护士 " + savedUser.getName() + " 创建角色表记录】");
         } else if ("PATIENT".equals(role)) {
@@ -200,7 +197,6 @@ public class UserService {
         } else if ("NURSE".equals(newRole)) {
             Nurse nurse = new Nurse();
             nurse.setUser(user);
-            nurse.setPhone(user.getPhone());
             nurseRepository.save(nurse);
             System.out.println("  - 已在护士表中创建");
         } else if ("PATIENT".equals(newRole)) {

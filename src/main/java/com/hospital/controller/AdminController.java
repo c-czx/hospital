@@ -228,7 +228,7 @@ public class AdminController {
         // 如果用户之前是患者，从患者表中删除
         Patient oldPatient = patientService.findByUser(user);
         if (oldPatient != null) {
-            patientService.deletePatient(oldPatient);
+            patientService.deletePatient(oldPatient.getId());
         }
         // 如果用户之前是护士，从护士表中删除
         Nurse oldNurse = nurseService.findByUser(user);
@@ -324,7 +324,9 @@ public class AdminController {
         List<User> availableUsers = allUsers.stream()
             .filter(u -> !"NURSE".equals(u.getRole()))
             .collect(java.util.stream.Collectors.toList());
+        List<Department> departments = departmentService.findAll();
         model.addAttribute("users", availableUsers);
+        model.addAttribute("departments", departments);
         return "admin/nurse-form";
     }
     
@@ -332,7 +334,8 @@ public class AdminController {
      * 处理添加护士请求
      */
     @PostMapping("/nurse/create")
-    public String createNurse(@RequestParam Long userId) {
+    public String createNurse(@RequestParam Long userId, @RequestParam(required = false) Long departmentId,
+                             @RequestParam(required = false) String ward, @RequestParam(required = false) String title) {
         User user = userService.findById(userId);
         // 同步更新用户角色为 NURSE
         user.setRole("NURSE");
@@ -341,7 +344,7 @@ public class AdminController {
         // 如果用户之前是患者，从患者表中删除
         Patient oldPatient = patientService.findByUser(user);
         if (oldPatient != null) {
-            patientService.deletePatient(oldPatient);
+            patientService.deletePatient(oldPatient.getId());
         }
         // 如果用户之前是医生，从医生表中删除
         Doctor oldDoctor = doctorService.findByUser(user);
@@ -349,8 +352,16 @@ public class AdminController {
             doctorService.deleteDoctor(oldDoctor);
         }
         
+        Department department = null;
+        if (departmentId != null && departmentId != 0) {
+            department = departmentService.findById(departmentId);
+        }
+        
         Nurse nurse = new Nurse();
         nurse.setUser(user);
+        nurse.setDepartment(department);
+        nurse.setWard(ward);
+        nurse.setTitle(title);
         
         nurseService.saveNurse(nurse);
         return "redirect:/admin/nurses";
@@ -362,8 +373,9 @@ public class AdminController {
     @GetMapping("/nurse/edit/{id}")
     public String editNurse(@PathVariable Long id, Model model) {
         Nurse nurse = nurseService.findById(id);
+        List<Department> departments = departmentService.findAll();
         model.addAttribute("nurse", nurse);
-        model.addAttribute("users", null); // 编辑时不需要用户列表
+        model.addAttribute("departments", departments);
         return "admin/nurse-form";
     }
     
@@ -372,11 +384,20 @@ public class AdminController {
      */
     @PostMapping("/nurse/edit/{id}")
     public String updateNurse(@PathVariable Long id, @RequestParam Long userId,
-                             @RequestParam String phone) {
+                             @RequestParam(required = false) Long departmentId,
+                             @RequestParam(required = false) String ward, @RequestParam(required = false) String title) {
         User user = userService.findById(userId);
+        
+        Department department = null;
+        if (departmentId != null && departmentId != 0) {
+            department = departmentService.findById(departmentId);
+        }
         
         Nurse nurse = nurseService.findById(id);
         nurse.setUser(user);
+        nurse.setDepartment(department);
+        nurse.setWard(ward);
+        nurse.setTitle(title);
         
         nurseService.updateNurse(nurse);
         return "redirect:/admin/nurses";
