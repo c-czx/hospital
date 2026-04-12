@@ -185,11 +185,15 @@ public class AdminController {
      */
     @GetMapping("/doctor/create")
     public String createDoctorForm(Model model) {
-        List<Department> departments = departmentService.findAll();
-        List<User> users = userService.findByRole("DOCTOR");
         model.addAttribute("doctor", new Doctor());
+        List<Department> departments = departmentService.findAll();
+        // 获取所有非 DOCTOR 角色的用户
+        List<User> allUsers = userService.findAll();
+        List<User> availableUsers = allUsers.stream()
+            .filter(u -> !"DOCTOR".equals(u.getRole()))
+            .collect(java.util.stream.Collectors.toList());
         model.addAttribute("departments", departments);
-        model.addAttribute("users", users);
+        model.addAttribute("users", availableUsers);
         return "admin/doctor-form";
     }
     
@@ -201,6 +205,10 @@ public class AdminController {
                            @RequestParam String title, @RequestParam String specialty,
                            @RequestParam String schedule) {
         User user = userService.findById(userId);
+        // 同步更新用户角色为 DOCTOR
+        user.setRole("DOCTOR");
+        userService.updateUser(user);
+        
         Department department = departmentService.findById(departmentId);
         
         Doctor doctor = new Doctor();
@@ -284,8 +292,12 @@ public class AdminController {
     @GetMapping("/nurse/create")
     public String createNurseForm(Model model) {
         model.addAttribute("nurse", new Nurse());
-        List<User> nurses = userService.findByRole("NURSE");
-        model.addAttribute("users", nurses);
+        // 获取所有非 NURSE 角色的用户
+        List<User> allUsers = userService.findAll();
+        List<User> availableUsers = allUsers.stream()
+            .filter(u -> !"NURSE".equals(u.getRole()))
+            .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("users", availableUsers);
         return "admin/nurse-form";
     }
     
@@ -296,6 +308,9 @@ public class AdminController {
     public String createNurse(@RequestParam Long userId, @RequestParam String nurseName,
                              @RequestParam String phone, @RequestParam String department) {
         User user = userService.findById(userId);
+        // 同步更新用户角色为 NURSE
+        user.setRole("NURSE");
+        userService.updateUser(user);
         
         Nurse nurse = new Nurse();
         nurse.setUser(user);
@@ -313,9 +328,8 @@ public class AdminController {
     @GetMapping("/nurse/edit/{id}")
     public String editNurse(@PathVariable Integer id, Model model) {
         Nurse nurse = nurseService.findById(id);
-        List<User> nurses = userService.findByRole("NURSE");
         model.addAttribute("nurse", nurse);
-        model.addAttribute("users", nurses);
+        model.addAttribute("users", null); // 编辑时不需要用户列表
         return "admin/nurse-form";
     }
     
