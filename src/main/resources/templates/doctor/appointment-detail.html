@@ -55,6 +55,11 @@
                     <input type="hidden" name="appointmentId" th:if="${appointmentId != null}" th:value="${appointmentId}">
 
                     <h4>病历记录</h4>
+                    <div class="form-group" style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                        <p style="margin-bottom: 5px;"><strong>分诊信息：</strong></p>
+                        <p style="margin-bottom: 5px;">体温：<span th:text="${medicalRecord != null and medicalRecord.temperature != null ? medicalRecord.temperature + ' ℃' : '无'}" style="color: #e74c3c; font-weight: bold;"></span></p>
+                        <p style="margin-bottom: 0;">护士笔记：<span th:text="${medicalRecord != null and medicalRecord.nurseNotes != null and medicalRecord.nurseNotes != '' ? medicalRecord.nurseNotes : '无'}"></span></p>
+                    </div>
                     <div class="form-group">
                         <label>主诉：</label>
                         <textarea name="chiefComplaint" class="form-control" rows="2" required th:text="${medicalRecord != null && medicalRecord.chiefComplaint != null ? medicalRecord.chiefComplaint : ''}"></textarea>
@@ -142,6 +147,8 @@
 
                 <div th:if="${currentAppointment != null and currentAppointment.status != '叫号中'}" class="read-only-view">
                     <h4>病历记录</h4>
+                    <p><strong>体温：</strong><span th:text="${medicalRecord != null and medicalRecord.temperature != null ? medicalRecord.temperature + ' ℃' : '无'}" style="color: #e74c3c; font-weight: bold;"></span></p>
+                    <p><strong>护士笔记：</strong><span th:text="${medicalRecord != null and medicalRecord.nurseNotes != null and medicalRecord.nurseNotes != '' ? medicalRecord.nurseNotes : '无'}"></span></p>
                     <p><strong>主诉：</strong><span th:text="${medicalRecord != null ? medicalRecord.chiefComplaint : '—'}"></span></p>
                     <p><strong>现病史：</strong><span th:text="${medicalRecord != null ? medicalRecord.presentIllness : '—'}"></span></p>
                     <p><strong>诊断结果：</strong><span th:text="${medicalRecord != null ? medicalRecord.diagnosisResult : '—'}"></span></p>
