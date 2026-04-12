@@ -305,8 +305,7 @@ public class AdminController {
      * 处理添加护士请求
      */
     @PostMapping("/nurse/create")
-    public String createNurse(@RequestParam Long userId, @RequestParam String nurseName,
-                             @RequestParam String phone, @RequestParam String department) {
+    public String createNurse(@RequestParam Long userId, @RequestParam String phone) {
         User user = userService.findById(userId);
         // 同步更新用户角色为 NURSE
         user.setRole("NURSE");
@@ -314,9 +313,7 @@ public class AdminController {
         
         Nurse nurse = new Nurse();
         nurse.setUser(user);
-        nurse.setNurseName(nurseName);
         nurse.setPhone(phone);
-        nurse.setDepartment(department);
         
         nurseService.saveNurse(nurse);
         return "redirect:/admin/nurses";
@@ -337,15 +334,13 @@ public class AdminController {
      * 处理编辑护士请求
      */
     @PostMapping("/nurse/edit/{id}")
-    public String updateNurse(@PathVariable Integer id, @RequestParam Long userId, @RequestParam String nurseName,
-                             @RequestParam String phone, @RequestParam String department) {
+    public String updateNurse(@PathVariable Integer id, @RequestParam Long userId,
+                             @RequestParam String phone) {
         User user = userService.findById(userId);
         
         Nurse nurse = nurseService.findById(id);
         nurse.setUser(user);
-        nurse.setNurseName(nurseName);
         nurse.setPhone(phone);
-        nurse.setDepartment(department);
         
         nurseService.updateNurse(nurse);
         return "redirect:/admin/nurses";

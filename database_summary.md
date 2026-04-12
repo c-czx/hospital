@@ -120,9 +120,7 @@
 |--------|------|------|------|
 | id | BIGINT | PK, 自增 | 主键 |
 | user_id | BIGINT | FK, NOT NULL | 外键，关联 users 表（每个护士对应一个用户账号） |
-| nurse_name | VARCHAR | NOT NULL | 护士姓名 |
 | phone | VARCHAR | | 联系电话 |
-| department | VARCHAR | | 所属科室（如护理部） |
 
 ### 5. 患者表 (patients)
 

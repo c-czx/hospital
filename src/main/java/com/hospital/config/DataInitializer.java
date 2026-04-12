@@ -215,12 +215,10 @@ public class DataInitializer implements CommandLineRunner {
                 
                 Nurse nurse = new Nurse();
                 nurse.setUser(user);
-                nurse.setNurseName(user.getName());
                 nurse.setPhone(user.getPhone());
-                nurse.setDepartment("护理部");
                 nurseService.saveNurse(nurse);
                 
-                System.out.println("【创建成功】护士 ID: " + nurse.getId() + ", 科室：护理部");
+                System.out.println("【创建成功】护士 ID: " + nurse.getId());
             }
         }
         
