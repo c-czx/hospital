@@ -16,6 +16,7 @@
                 <li><a href="/doctor/patients">我的就诊</a></li>
                 <li><a href="/doctor/prescriptions">处方管理</a></li>
                 <li><a href="/doctor/checkups">检查管理</a></li>
+                <li><a href="/doctor/prices">价格公示</a></li>
                 <li><a href="/doctor/profile">个人信息</a></li>
                 <li><a href="/logout">退出登录</a></li>
             </ul>
@@ -25,19 +26,16 @@
             <h1>开具检查</h1>
             <div class="appointment-detail">
                 <form action="/doctor/createCheckup" method="post" style="margin-top: 20px;">
-                    <input type="hidden" name="doctorId" value="${doctorId}">
-                    <input type="hidden" name="patientId" value="${patientId}">
+                    <input type="hidden" name="doctorId" th:value="${doctorId}">
+                    <input type="hidden" name="patientId" th:value="${patientId}">
                     
                     <div class="form-group">
-                        <label for="type">检查类型</label>
+                        <label for="type">检查项目</label>
                         <select id="type" name="type" class="form-control" required>
-                            <option value="">请选择检查类型</option>
-                            <option value="体温">体温</option>
-                            <option value="血压">血压</option>
-                            <option value="胸片">胸片</option>
-                            <option value="血常规">血常规</option>
-                            <option value="尿常规">尿常规</option>
-                            <option value="心电图">心电图</option>
+                            <option value="">-- 请选择检查项目 --</option>
+                            <option th:each="item : ${checkupItems}"
+                                    th:value="${item.name}"
+                                    th:text="${item.name + ' (' + item.price + '元)'}"></option>
                         </select>
                     </div>
                     

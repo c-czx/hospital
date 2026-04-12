@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>价格公示 - 医院挂号系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>医生中心</h3>
+            <ul>
+                <li><a href="/doctor/dashboard">首页</a></li>
+                <li><a href="/doctor/schedule">号源发布</a></li>
+                <li><a href="/doctor/patients">今日预约</a></li>
+                <li><a href="/doctor/appointments">我的就诊</a></li>
+                <li><a href="/doctor/prescriptions">处方管理</a></li>
+                <li><a href="/doctor/checkups">检查管理</a></li>
+                <li><a href="/doctor/prices" class="active">价格公示</a></li>
+                <li><a href="/doctor/profile">个人信息</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>药品与检查价格公示</h1>
+            
+            <div class="row" style="display: flex; gap: 20px;">
+                <div class="col-md-6" style="flex: 1; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                    <h3>💊 药品价格表</h3>
+                    <table class="table" style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                        <thead>
+                            <tr style="background: #f8f9fa;">
+                                <th style="padding: 12px; border-bottom: 2px solid #dee2e6; text-align: left;">药品名称</th>
+                                <th style="padding: 12px; border-bottom: 2px solid #dee2e6; text-align: left;">单位</th>
+                                <th style="padding: 12px; border-bottom: 2px solid #dee2e6; text-align: left;">单价</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="drug : ${drugs}" style="border-bottom: 1px solid #dee2e6;">
+                                <td style="padding: 12px;" th:text="${drug.name}"></td>
+                                <td style="padding: 12px;" th:text="${drug.unit}"></td>
+                                <td style="padding: 12px; color: #e74c3c; font-weight: bold;" th:text="${drug.price + ' 元'}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="col-md-6" style="flex: 1; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                    <h3>🔬 检查项目价格表</h3>
+                    <table class="table" style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                        <thead>
+                            <tr style="background: #f8f9fa;">
+                                <th style="padding: 12px; border-bottom: 2px solid #dee2e6; text-align: left;">项目名称</th>
+                                <th style="padding: 12px; border-bottom: 2px solid #dee2e6; text-align: left;">说明</th>
+                                <th style="padding: 12px; border-bottom: 2px solid #dee2e6; text-align: left;">价格</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item : ${checkupItems}" style="border-bottom: 1px solid #dee2e6;">
+                                <td style="padding: 12px;" th:text="${item.name}"></td>
+                                <td style="padding: 12px;" th:text="${item.description}"></td>
+                                <td style="padding: 12px; color: #e74c3c; font-weight: bold;" th:text="${item.price + ' 元'}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="actions" style="margin-top: 30px;">
+                <a href="/doctor/dashboard" class="btn btn-secondary">返回工作台</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
