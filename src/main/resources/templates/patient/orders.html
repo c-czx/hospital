@@ -148,7 +148,7 @@
                             <div id="details-[[${appointment.id}]]" style="display: none; margin-top: 15px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
                                 <!-- 病历信息 -->
                                 <div th:if="${medicalRecords != null}">
-                                    <div th:each="record : ${medicalRecords}" th:if="${record.user.id == appointment.user.id}">
+                                    <div th:each="record : ${medicalRecords}" th:if="${record.patient.id == appointment.patient.id}">
                                         <h5>病历信息</h5>
                                         <p>主诉：[[${record.chiefComplaint}]]</p>
                                         <p>现病史：[[${record.presentIllness}]]</p>
@@ -159,7 +159,7 @@
                                 
                                 <!-- 处方信息 -->
                                 <div th:if="${prescriptions != null}">
-                                    <div th:each="prescription : ${prescriptions}" th:if="${prescription.user.id == appointment.user.id}">
+                                    <div th:each="prescription : ${prescriptions}" th:if="${prescription.patient.id == appointment.patient.id}">
                                         <h5>处方信息</h5>
                                         <p>药品清单：[[${prescription.drugList}]]</p>
                                         <p>用法用量：[[${prescription.usage}]]</p>
@@ -169,7 +169,7 @@
                                 
                                 <!-- 医嘱信息 -->
                                 <div th:if="${advices != null}">
-                                    <div th:each="advice : ${advices}" th:if="${advice.user.id == appointment.user.id}">
+                                    <div th:each="advice : ${advices}" th:if="${advice.patient.id == appointment.patient.id}">
                                         <h5>医嘱信息</h5>
                                         <p>医嘱内容：[[${advice.content}]]</p>
                                         <p>开具时间：[[${#temporals.format(advice.createTime, 'yyyy-MM-dd HH:mm')}]]</p>

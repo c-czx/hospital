@@ -30,7 +30,7 @@ public class AdviceService {
             map.put("content", advice.getContent() != null ? advice.getContent() : "");
             map.put("status", advice.getStatus() != null ? advice.getStatus() : 0);
             map.put("createTime", advice.getCreateTime());
-            map.put("patientName", (advice.getUser() != null && advice.getUser().getName() != null) ? advice.getUser().getName() : "未知患者");
+            map.put("patientName", (advice.getPatient() != null && advice.getPatient().getUser() != null && advice.getPatient().getUser().getName() != null) ? advice.getPatient().getUser().getName() : "未知患者");
             result.add(map);
         }
 

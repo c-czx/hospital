@@ -22,8 +22,8 @@ public class PrescriptionService {
         return prescriptionRepository.findById(id).orElse(null);
     }
     
-    public List<Prescription> findByUserId(Long userId) {
-        return prescriptionRepository.findByUserId(userId);
+    public List<Prescription> findByPatientId(Long patientId) {
+        return prescriptionRepository.findByPatientId(patientId);
     }
     
     public List<Prescription> findByDoctorId(Long doctorId) {

@@ -19,8 +19,8 @@ public class MedicalRecord {
     private Doctor doctor;
     
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "patient_id", nullable = false)
+    private Patient patient;
     
     private String chiefComplaint;
     private String presentIllness;
@@ -47,12 +47,12 @@ public class MedicalRecord {
         this.doctor = doctor; 
     }
     
-    public User getUser() { 
-        return user; 
+    public Patient getPatient() { 
+        return patient; 
     }
     
-    public void setUser(User user) { 
-        this.user = user; 
+    public void setPatient(Patient patient) { 
+        this.patient = patient; 
     }
     
     public String getChiefComplaint() { 

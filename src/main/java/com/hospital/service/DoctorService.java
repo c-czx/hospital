@@ -47,6 +47,9 @@ public class DoctorService {
     
     @Autowired
     private CheckupRepository checkupRepository;
+    
+    @Autowired
+    private MedicalRecordService medicalRecordService;
 
     public Doctor saveDoctor(Doctor doctor) {
         return doctorRepository.save(doctor);
@@ -100,19 +103,22 @@ public class DoctorService {
             for (Appointment apt : appointments) {
                 if ("已预约".equals(apt.getStatus()) || "叫号中".equals(apt.getStatus()) || "已完成".equals(apt.getStatus())) {
                     Map<String, Object> patientMap = new HashMap<>();
-                    User patient = apt.getUser();
-                    if (patient != null) {
-                        patientMap.put("id", patient.getId());
-                        patientMap.put("name", patient.getName());
-                        patientMap.put("gender", patient.getGender());
-                        patientMap.put("age", patient.getAge());
-                        patientMap.put("phone", patient.getPhone());
-                        patientMap.put("appointmentId", apt.getId());
-                        patientMap.put("appointmentTime", apt.getAppointmentTime());
-                        patientMap.put("status", apt.getStatus());
-                        patientMap.put("symptoms", apt.getSymptoms());
-                        data.add(patientMap);
-                    }
+                        com.hospital.entity.Patient patientEntity = apt.getPatient();
+                        if (patientEntity != null) {
+                            User patient = patientEntity.getUser();
+                            if (patient != null) {
+                                patientMap.put("id", patient.getId());
+                                patientMap.put("name", patient.getName());
+                                patientMap.put("gender", patient.getGender());
+                                patientMap.put("age", patient.getAge());
+                                patientMap.put("phone", patient.getPhone());
+                                patientMap.put("appointmentId", apt.getId());
+                                patientMap.put("appointmentTime", apt.getAppointmentTime());
+                                patientMap.put("status", apt.getStatus());
+                                patientMap.put("symptoms", apt.getSymptoms());
+                                data.add(patientMap);
+                            }
+                        }
                 }
             }
         }
@@ -129,18 +135,21 @@ public class DoctorService {
         List<Object> data = new ArrayList<>();
         for (Appointment apt : appointments) {
             Map<String, Object> aptMap = new HashMap<>();
-            User patient = apt.getUser();
-            if (patient != null) {
-                aptMap.put("id", patient.getId());
-                aptMap.put("name", patient.getName());
-                aptMap.put("gender", patient.getGender());
-                aptMap.put("age", patient.getAge());
-                aptMap.put("phone", patient.getPhone());
-                aptMap.put("appointmentId", apt.getId());
-                aptMap.put("appointmentTime", apt.getAppointmentTime());
-                aptMap.put("status", apt.getStatus());
-                aptMap.put("symptoms", apt.getSymptoms());
-                data.add(aptMap);
+            com.hospital.entity.Patient patientEntity = apt.getPatient();
+            if (patientEntity != null) {
+                User patient = patientEntity.getUser();
+                if (patient != null) {
+                    aptMap.put("id", patient.getId());
+                    aptMap.put("name", patient.getName());
+                    aptMap.put("gender", patient.getGender());
+                    aptMap.put("age", patient.getAge());
+                    aptMap.put("phone", patient.getPhone());
+                    aptMap.put("appointmentId", apt.getId());
+                    aptMap.put("appointmentTime", apt.getAppointmentTime());
+                    aptMap.put("status", apt.getStatus());
+                    aptMap.put("symptoms", apt.getSymptoms());
+                    data.add(aptMap);
+                }
             }
         }
         Map<String, Object> result = new HashMap<>();
@@ -175,7 +184,7 @@ public class DoctorService {
 
     // 【医嘱列表】
     public Map<String, Object> getAdviceList(Long patientId) {
-        List<Advice> advices = adviceRepository.findByUserId(patientId);
+        List<Advice> advices = adviceRepository.findByPatientId(patientId);
         
         List<Object> data = new ArrayList<>();
         for (Advice advice : advices) {
@@ -194,7 +203,7 @@ public class DoctorService {
     
     // 【获取患者病历】当前医生维度下时间最新的一条（与医生端详情/保存逻辑一致）
     public MedicalRecord getMedicalRecord(Long patientId, Long doctorId) {
-        List<MedicalRecord> records = medicalRecordRepository.findByUserId(patientId);
+        List<MedicalRecord> records = medicalRecordService.findByUserId(patientId);
         return records.stream()
                 .filter(r -> r.getDoctor() != null && doctorId.equals(r.getDoctor().getId()))
                 .max(Comparator.comparing(this::medicalRecordSortTime))
@@ -213,7 +222,7 @@ public class DoctorService {
     
     // 【获取患者处方】
     public Prescription getPrescription(Long patientId, Long doctorId) {
-        List<Prescription> prescriptions = prescriptionRepository.findByUserId(patientId);
+        List<Prescription> prescriptions = prescriptionRepository.findByPatientId(patientId);
         return prescriptions.stream()
                 .filter(p -> p.getDoctor() != null && doctorId.equals(p.getDoctor().getId()))
                 .max(Comparator.comparing(p -> p.getCreateTime() != null ? p.getCreateTime() : LocalDateTime.MIN))
@@ -222,7 +231,7 @@ public class DoctorService {
     
     // 【获取患者医嘱】
     public Advice getAdvice(Long patientId, Long doctorId) {
-        List<Advice> advices = adviceRepository.findByUserId(patientId);
+        List<Advice> advices = adviceRepository.findByPatientId(patientId);
         return advices.stream()
                 .filter(a -> a.getDoctor() != null && doctorId.equals(a.getDoctor().getId()))
                 .max(Comparator.comparing(a -> a.getCreateTime() != null ? a.getCreateTime() : LocalDateTime.MIN))
@@ -231,7 +240,7 @@ public class DoctorService {
     
     // 【获取患者检查记录】
     public Checkup getCheckup(Long patientId, Long doctorId) {
-        List<Checkup> checkups = checkupRepository.findByUser_Id(patientId);
+        List<Checkup> checkups = checkupRepository.findByPatient_Id(patientId);
         return checkups.stream()
                 .filter(c -> c.getDoctor() != null && doctorId.equals(c.getDoctor().getId()))
                 .max(Comparator.comparing(c -> c.getCreateTime() != null ? c.getCreateTime() : LocalDateTime.MIN))
@@ -319,7 +328,7 @@ public class DoctorService {
     // 【新增】创建医嘱
     public Map<String, Object> createAdvice(Advice advice) {
         // 检查是否已有医嘱
-        List<Advice> existingAdvices = adviceRepository.findByUserId(advice.getUser().getId());
+        List<Advice> existingAdvices = adviceRepository.findByPatientId(advice.getPatient().getId());
         if (!existingAdvices.isEmpty()) {
             // 更新现有医嘱
             Advice existingAdvice = existingAdvices.get(0);

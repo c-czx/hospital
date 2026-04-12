@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface CheckupRepository extends JpaRepository<Checkup, Long> {
     List<Checkup> findByDoctor_Id(Long doctorId);
-    List<Checkup> findByUser_Id(Long userId);
+    List<Checkup> findByPatient_Id(Long patientId);
 }

@@ -19,6 +19,8 @@ public class Department {
     
     private String description;
     
+    private String location; // 科室楼层位置
+    
     @OneToMany(mappedBy = "department")
     private List<Doctor> doctors;
     
@@ -47,6 +49,14 @@ public class Department {
     
     public void setDescription(String description) {
         this.description = description;
+    }
+    
+    public String getLocation() {
+        return location;
+    }
+    
+    public void setLocation(String location) {
+        this.location = location;
     }
     
     public List<Doctor> getDoctors() {

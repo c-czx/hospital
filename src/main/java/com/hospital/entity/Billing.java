@@ -16,8 +16,8 @@ public class Billing {
     private Long id;
     
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "patient_id", nullable = false)
+    private Patient patient;
     
     private String type;
     private BigDecimal amount;
@@ -32,12 +32,12 @@ public class Billing {
         this.id = id;
     }
     
-    public User getUser() {
-        return user;
+    public Patient getPatient() {
+        return patient;
     }
     
-    public void setUser(User user) {
-        this.user = user;
+    public void setPatient(Patient patient) {
+        this.patient = patient;
     }
     
     public String getType() {
