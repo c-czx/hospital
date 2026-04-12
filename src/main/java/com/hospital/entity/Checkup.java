@@ -19,8 +19,8 @@ public class Checkup {
     private Doctor doctor;
     
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "patient_id", nullable = false)
+    private Patient patient;
     
     private String type; // 检查类型：体温、血压、胸片等
     private String description; // 检查描述
@@ -45,12 +45,12 @@ public class Checkup {
         this.doctor = doctor;
     }
     
-    public User getUser() {
-        return user;
+    public Patient getPatient() {
+        return patient;
     }
     
-    public void setUser(User user) {
-        this.user = user;
+    public void setPatient(Patient patient) {
+        this.patient = patient;
     }
     
     public String getType() {
@@ -102,11 +102,11 @@ public class Checkup {
     }
     
     // 用于接收表单提交的参数
-    public void setUserId(Long userId) {
-        if (userId != null) {
-            User user = new User();
-            user.setId(userId);
-            this.user = user;
+    public void setPatientId(Long patientId) {
+        if (patientId != null) {
+            Patient patient = new Patient();
+            patient.setId(patientId);
+            this.patient = patient;
         }
     }
     

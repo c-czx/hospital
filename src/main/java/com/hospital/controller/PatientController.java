@@ -190,7 +190,17 @@ public class PatientController {
         
         // 直接创建预约，跳过号源验证
         Appointment appointment = new Appointment();
-        appointment.setUser(user);
+        
+        // 先根据 User 对象找到对应的 Patient 对象
+        com.hospital.entity.Patient patient = patientService.findByUserId(user.getId());
+        if (patient == null) {
+            // 如果找不到对应的 Patient 对象，创建一个新的
+            patient = new com.hospital.entity.Patient();
+            patient.setUser(user);
+            patient = patientService.save(patient);
+        }
+        
+        appointment.setPatient(patient);
         appointment.setDoctor(doctor);
         appointment.setDepartment(department);
         appointment.setAppointmentTime(appointTime);
@@ -296,7 +306,17 @@ public class PatientController {
         if (user == null) {
             return "redirect:/login";
         }
-        List<Appointment> appointments = appointmentService.findByUserId(user.getId());
+        
+        // 查找对应的 Patient 对象
+        com.hospital.entity.Patient patient = patientService.findByUserId(user.getId());
+        if (patient == null) {
+            // 如果找不到对应的 Patient 对象，创建一个新的
+            patient = new com.hospital.entity.Patient();
+            patient.setUser(user);
+            patient = patientService.save(patient);
+        }
+        
+        List<Appointment> appointments = appointmentService.findByPatientId(patient.getId());
         model.addAttribute("appointments", appointments);
         return "patient/appointments";
     }
@@ -313,6 +333,12 @@ public class PatientController {
     @Autowired
     private AdviceRepository adviceRepository;
     
+    @Autowired
+    private MedicalRecordService medicalRecordService;
+    
+    @Autowired
+    private PatientService patientService;
+    
     @GetMapping("/orders")
     public String orders(Authentication authentication, Model model) {
         User user = userService.findByPhone(authentication.getName());
@@ -320,20 +346,29 @@ public class PatientController {
             return "redirect:/login";
         }
         
+        // 查找对应的 Patient 对象
+        com.hospital.entity.Patient patient = patientService.findByUserId(user.getId());
+        if (patient == null) {
+            // 如果找不到对应的 Patient 对象，创建一个新的
+            patient = new com.hospital.entity.Patient();
+            patient.setUser(user);
+            patient = patientService.save(patient);
+        }
+        
         // 获取已就诊记录（状态为已完成的预约）
-        List<Appointment> completedAppointments = appointmentService.findByUserIdAndStatus(user.getId(), "已完成");
+        List<Appointment> completedAppointments = appointmentService.findByPatientIdAndStatus(patient.getId(), "已完成");
         
         // 获取缴费记录
-        List<Billing> billingRecords = billingService.findByUserId(user.getId());
+        List<Billing> billingRecords = billingService.findByPatientId(patient.getId());
         
         // 获取病历记录
-        List<MedicalRecord> medicalRecords = medicalRecordRepository.findByUserId(user.getId());
+        List<MedicalRecord> medicalRecords = medicalRecordService.findByPatientId(patient.getId());
         
         // 获取处方记录
-        List<Prescription> prescriptions = prescriptionRepository.findByUserId(user.getId());
+        List<Prescription> prescriptions = prescriptionRepository.findByPatientId(patient.getId());
         
         // 获取医嘱记录
-        List<Advice> advices = adviceRepository.findByUserId(user.getId());
+        List<Advice> advices = adviceRepository.findByPatientId(patient.getId());
         
         model.addAttribute("completedAppointments", completedAppointments);
         model.addAttribute("billingRecords", billingRecords);
@@ -352,7 +387,7 @@ public class PatientController {
         
         // 获取缴费记录
         Billing billing = billingService.findById(billingId);
-        if (billing != null && billing.getUser().getId().equals(user.getId())) {
+        if (billing != null && billing.getPatient() != null && billing.getPatient().getUser() != null && billing.getPatient().getUser().getId().equals(user.getId())) {
             // 更新缴费状态为已支付
             billing.setStatus("已支付");
             billingService.updateBilling(billing);

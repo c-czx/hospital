@@ -7,6 +7,6 @@ import java.util.List;
 
 @Repository
 public interface AdviceRepository extends JpaRepository<Advice, Long> {
-    List<Advice> findByUserId(Long userId);
+    List<Advice> findByPatientId(Long patientId);
     List<Advice> findByDoctorId(Long doctorId);
 }

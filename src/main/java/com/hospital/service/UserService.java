@@ -31,6 +31,9 @@ public class UserService {
     
     @Autowired
     private DepartmentRepository departmentRepository;
+
+    @Autowired
+    private PatientRepository patientRepository;
     
     @Autowired
     private PatientRepository patientRepository;
@@ -88,6 +91,20 @@ public class UserService {
                 }
             } catch (Exception e) {
                 System.err.println("【创建医生记录失败】" + e.getMessage());
+            }
+        }
+    }
+    
+    @Transactional
+    public void createPatientRecord(User user) {
+        Patient existingPatient = patientRepository.findByUser(user);
+        if (existingPatient == null) {
+            try {
+                Patient patient = new Patient(user);
+                patientRepository.save(patient);
+                System.out.println("【创建患者记录成功】用户ID: " + user.getId() + "，患者ID: " + patient.getId());
+            } catch (Exception e) {
+                System.err.println("【创建患者记录失败】" + e.getMessage());
             }
         }
     }
@@ -233,5 +250,30 @@ public class UserService {
     
     public boolean existsByPhone(String phone) {
         return userRepository.existsByPhone(phone);
+    }
+    
+    /**
+     * 为所有已存在的患者用户创建对应的患者记录
+     */
+    @Transactional
+    public void createPatientRecordsForExistingUsers() {
+        List<User> patientUsers = userRepository.findByRole("PATIENT");
+        int createdCount = 0;
+        
+        for (User user : patientUsers) {
+            Patient existingPatient = patientRepository.findByUser(user);
+            if (existingPatient == null) {
+                try {
+                    Patient patient = new Patient(user);
+                    patientRepository.save(patient);
+                    createdCount++;
+                    System.out.println("【为现有用户创建患者记录】用户ID: " + user.getId() + "，用户名: " + user.getName() + "，患者ID: " + patient.getId());
+                } catch (Exception e) {
+                    System.err.println("【创建患者记录失败】用户ID: " + user.getId() + "，错误: " + e.getMessage());
+                }
+            }
+        }
+        
+        System.out.println("【患者记录创建完成】共处理 " + patientUsers.size() + " 个患者用户，新创建 " + createdCount + " 个患者记录");
     }
 }

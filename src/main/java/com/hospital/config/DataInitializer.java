@@ -143,10 +143,19 @@ public class DataInitializer implements CommandLineRunner {
             Department generalPractice = new Department();
             generalPractice.setName("全科");
             generalPractice.setDescription("全科医疗诊疗");
+            generalPractice.setLocation("1楼");
             departmentService.saveDepartment(generalPractice);
             System.out.println("【创建科室】全科");
         } else {
-            System.out.println("【已存在】全科");
+            // 更新已存在的科室位置
+            Department generalPractice = departmentService.findByNameContaining("全科").get(0);
+            if (generalPractice.getLocation() == null) {
+                generalPractice.setLocation("1楼");
+                departmentService.saveDepartment(generalPractice);
+                System.out.println("【更新科室】全科 - 添加位置: 1楼");
+            } else {
+                System.out.println("【已存在】全科");
+            }
         }
         
         // 内科
@@ -154,10 +163,19 @@ public class DataInitializer implements CommandLineRunner {
             Department internalMedicine = new Department();
             internalMedicine.setName("内科");
             internalMedicine.setDescription("内科疾病诊疗");
+            internalMedicine.setLocation("2楼");
             departmentService.saveDepartment(internalMedicine);
             System.out.println("【创建科室】内科");
         } else {
-            System.out.println("【已存在】内科");
+            // 更新已存在的科室位置
+            Department internalMedicine = departmentService.findByNameContaining("内科").get(0);
+            if (internalMedicine.getLocation() == null) {
+                internalMedicine.setLocation("2楼");
+                departmentService.saveDepartment(internalMedicine);
+                System.out.println("【更新科室】内科 - 添加位置: 2楼");
+            } else {
+                System.out.println("【已存在】内科");
+            }
         }
         
         // 外科
@@ -165,10 +183,19 @@ public class DataInitializer implements CommandLineRunner {
             Department surgery = new Department();
             surgery.setName("外科");
             surgery.setDescription("外科手术及治疗");
+            surgery.setLocation("3楼");
             departmentService.saveDepartment(surgery);
             System.out.println("【创建科室】外科");
         } else {
-            System.out.println("【已存在】外科");
+            // 更新已存在的科室位置
+            Department surgery = departmentService.findByNameContaining("外科").get(0);
+            if (surgery.getLocation() == null) {
+                surgery.setLocation("3楼");
+                departmentService.saveDepartment(surgery);
+                System.out.println("【更新科室】外科 - 添加位置: 3楼");
+            } else {
+                System.out.println("【已存在】外科");
+            }
         }
         
         // 耳鼻喉
@@ -176,10 +203,19 @@ public class DataInitializer implements CommandLineRunner {
             Department ent = new Department();
             ent.setName("耳鼻喉");
             ent.setDescription("耳鼻喉科疾病诊疗");
+            ent.setLocation("4楼");
             departmentService.saveDepartment(ent);
             System.out.println("【创建科室】耳鼻喉");
         } else {
-            System.out.println("【已存在】耳鼻喉");
+            // 更新已存在的科室位置
+            Department ent = departmentService.findByNameContaining("耳鼻喉").get(0);
+            if (ent.getLocation() == null) {
+                ent.setLocation("4楼");
+                departmentService.saveDepartment(ent);
+                System.out.println("【更新科室】耳鼻喉 - 添加位置: 4楼");
+            } else {
+                System.out.println("【已存在】耳鼻喉");
+            }
         }
         
         // 妇产科
@@ -187,10 +223,19 @@ public class DataInitializer implements CommandLineRunner {
             Department gynecology = new Department();
             gynecology.setName("妇产科");
             gynecology.setDescription("妇科产科疾病诊疗");
+            gynecology.setLocation("5楼");
             departmentService.saveDepartment(gynecology);
             System.out.println("【创建科室】妇产科");
         } else {
-            System.out.println("【已存在】妇产科");
+            // 更新已存在的科室位置
+            Department gynecology = departmentService.findByNameContaining("妇产科").get(0);
+            if (gynecology.getLocation() == null) {
+                gynecology.setLocation("5楼");
+                departmentService.saveDepartment(gynecology);
+                System.out.println("【更新科室】妇产科 - 添加位置: 5楼");
+            } else {
+                System.out.println("【已存在】妇产科");
+            }
         }
         
         System.out.println("========================================");
@@ -247,6 +292,9 @@ public class DataInitializer implements CommandLineRunner {
         List<User> nurseUsers = userService.findByRole("NURSE");
         System.out.println("【护士用户数量】" + nurseUsers.size());
         
+        // 默认科室：全科
+        Department defaultDept = departmentService.findByNameContaining("全科").get(0);
+        
         for (User user : nurseUsers) {
             // 检查是否已存在护士记录
             boolean exists = false;
@@ -264,7 +312,9 @@ public class DataInitializer implements CommandLineRunner {
                 
                 Nurse nurse = new Nurse();
                 nurse.setUser(user);
-                nurse.setPhone(user.getPhone());
+                nurse.setDepartment(defaultDept);
+                nurse.setWard("普通病房");
+                nurse.setTitle("护士");
                 nurseService.saveNurse(nurse);
                 
                 System.out.println("【创建成功】护士 ID: " + nurse.getId());
@@ -273,6 +323,36 @@ public class DataInitializer implements CommandLineRunner {
         
         System.out.println("========================================");
         System.out.println("【护士初始化完成】");
+        System.out.println("========================================");
+    }
+    
+    /**
+     * 初始化患者数据
+     */
+    private void initializePatients() {
+        System.out.println("========================================");
+        System.out.println("【初始化患者数据】开始检查...");
+        
+        List<User> patientUsers = userService.findByRole("PATIENT");
+        System.out.println("【患者用户数量】" + patientUsers.size());
+        
+        for (User user : patientUsers) {
+            Patient existingPatient = patientService.findByUserId(user.getId());
+            if (existingPatient == null) {
+                System.out.println("【创建患者记录】用户：" + user.getName() + ", ID: " + user.getId());
+                
+                Patient patient = new Patient();
+                patient.setUser(user);
+                patientService.save(patient);
+                
+                System.out.println("【创建成功】患者 ID: " + patient.getId() + ", 用户: " + user.getName());
+            } else {
+                System.out.println("【已存在】用户：" + user.getName() + ", 患者 ID: " + existingPatient.getId());
+            }
+        }
+        
+        System.out.println("========================================");
+        System.out.println("【患者初始化完成】");
         System.out.println("========================================");
     }
 }

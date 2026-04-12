@@ -15,8 +15,8 @@ public class Appointment {
     private Long id;
     
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "patient_id", nullable = false)
+    private Patient patient;
     
     @ManyToOne
     @JoinColumn(name = "doctor_id", nullable = false)
@@ -39,12 +39,12 @@ public class Appointment {
         this.id = id;
     }
     
-    public User getUser() {
-        return user;
+    public Patient getPatient() {
+        return patient;
     }
     
-    public void setUser(User user) {
-        this.user = user;
+    public void setPatient(Patient patient) {
+        this.patient = patient;
     }
     
     public Doctor getDoctor() {

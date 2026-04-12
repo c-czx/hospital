@@ -2,6 +2,7 @@ package com.hospital.controller;
 
 import com.hospital.entity.*;
 import com.hospital.service.*;
+import com.hospital.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,6 +31,9 @@ public class NurseController {
     @Autowired
     private DoctorService doctorService;
     
+    @Autowired
+    private PatientService patientService;
+    
     @GetMapping("/dashboard")
     public String dashboard() {
         return "nurse/dashboard";
@@ -37,7 +41,7 @@ public class NurseController {
     
     @GetMapping("/patients")
     public String patients(Model model) {
-        List<User> patients = userService.findByRole("patient");
+        List<User> patients = userService.findByRole("PATIENT");
         model.addAttribute("patients", patients);
         return "nurse/patients";
     }
@@ -48,7 +52,7 @@ public class NurseController {
         LocalDateTime todayEnd = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59);
         List<Appointment> appointments = appointmentService.findByAppointmentTimeBetween(todayStart, todayEnd);
         List<User> patients = appointments.stream()
-                .map(Appointment::getUser)
+                .map(appointment -> appointment.getPatient().getUser())
                 .distinct()
                 .toList();
         model.addAttribute("patients", patients);
@@ -58,9 +62,19 @@ public class NurseController {
     @GetMapping("/patient/{id}")
     public String patientDetail(@PathVariable Long id, Model model) {
         User patient = userService.findById(id);
-        List<Appointment> appointments = appointmentService.findByUserId(id);
-        List<MedicalRecord> medicalRecords = medicalRecordService.findByUserId(id);
-        List<Billing> billings = billingService.findByUserId(id);
+        
+        // 查找对应的 Patient 对象
+        com.hospital.entity.Patient patientEntity = patientService.findByUserId(id);
+        if (patientEntity == null) {
+            // 如果找不到对应的 Patient 对象，创建一个新的
+            patientEntity = new com.hospital.entity.Patient();
+            patientEntity.setUser(patient);
+            patientEntity = patientService.save(patientEntity);
+        }
+        
+        List<Appointment> appointments = appointmentService.findByPatientId(patientEntity.getId());
+        List<MedicalRecord> medicalRecords = medicalRecordService.findByPatientId(patientEntity.getId());
+        List<Billing> billings = billingService.findByPatientId(patientEntity.getId());
         
         model.addAttribute("patient", patient);
         model.addAttribute("appointments", appointments);
@@ -90,8 +104,11 @@ public class NurseController {
         
         User patient = userService.findById(userId);
         
+        // 先根据 User 对象找到对应的 Patient 对象
+        com.hospital.entity.Patient patientEntity = patientService.findByUser(patient);
+        
         Billing billing = new Billing();
-        billing.setUser(patient);
+        billing.setPatient(patientEntity);
         billing.setType(type);
         billing.setAmount(amount);
         billing.setStatus(status);
@@ -106,14 +123,14 @@ public class NurseController {
         billing.setStatus("已支付");
         billingService.updateBilling(billing);
         
-        return "redirect:/nurse/patient/" + billing.getUser().getId();
+        return "redirect:/nurse/patient/" + billing.getPatient().getUser().getId();
     }
     
     @GetMapping("/medical-record/edit/{id}")
     public String editMedicalRecord(@PathVariable Long id, Model model) {
         MedicalRecord record = medicalRecordService.findById(id);
         model.addAttribute("record", record);
-        model.addAttribute("patient", record.getUser());
+        model.addAttribute("patient", record.getPatient().getUser());
         return "nurse/medical-record-edit";
     }
     
@@ -127,7 +144,7 @@ public class NurseController {
         record.setNurseNotes(nurseNotes);
         medicalRecordService.updateMedicalRecord(record);
         
-        return "redirect:/nurse/patient/" + record.getUser().getId();
+        return "redirect:/nurse/patient/" + record.getPatient().getUser().getId();
     }
     
     @GetMapping("/medical-record/create")
@@ -150,8 +167,11 @@ public class NurseController {
         User patient = userService.findById(userId);
         Doctor doctor = doctorService.findById(doctorId);
         
+        // 先根据 User 对象找到对应的 Patient 对象
+        com.hospital.entity.Patient patientEntity = patientService.findByUser(patient);
+        
         MedicalRecord record = new MedicalRecord();
-        record.setUser(patient);
+        record.setPatient(patientEntity);
         record.setDoctor(doctor);
         record.setChiefComplaint(chiefComplaint);
         record.setPresentIllness(presentIllness);

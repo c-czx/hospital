@@ -17,8 +17,15 @@ public class Nurse {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "phone", length = 20)
-    private String phone;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department; // 所属科室
+
+    @Column(name = "ward", length = 50)
+    private String ward; // 负责病区
+
+    @Column(name = "title", length = 50)
+    private String title; // 职称
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -26,6 +33,12 @@ public class Nurse {
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
+    public Department getDepartment() { return department; }
+    public void setDepartment(Department department) { this.department = department; }
+
+    public String getWard() { return ward; }
+    public void setWard(String ward) { this.ward = ward; }
+
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 }

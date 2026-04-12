@@ -21,8 +21,8 @@ public class CheckupService {
         return checkupRepository.findByDoctor_Id(doctorId);
     }
 
-    public List<Checkup> findByUserId(Long userId) {
-        return checkupRepository.findByUser_Id(userId);
+    public List<Checkup> findByPatientId(Long patientId) {
+        return checkupRepository.findByPatient_Id(patientId);
     }
 
     public Checkup findById(Long id) {
@@ -56,7 +56,7 @@ public class CheckupService {
             map.put("result", checkup.getResult());
             map.put("status", checkup.getStatus());
             map.put("createTime", checkup.getCreateTime());
-            map.put("patientName", checkup.getUser().getName());
+            map.put("patientName", checkup.getPatient().getUser().getName());
             result.add(map);
         }
 
