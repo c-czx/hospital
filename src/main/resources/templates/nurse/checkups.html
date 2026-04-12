@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>协助诊疗 - 护士端</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>护士中心</h3>
+            <ul>
+                <li><a href="/nurse/dashboard">首页</a></li>
+                <li><a href="/nurse/patients">患者信息查看</a></li>
+                <li><a href="/nurse/checkups" class="active">协助诊疗</a></li>
+                <li><a href="/nurse/billing/patients">缴费管理</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>协助诊疗</h1>
+            <p>处理医生开具的检查项目</p>
+
+            <div class="appointments-list">
+                <div class="card">
+                    <div class="card-header">
+                        待检查患者列表
+                    </div>
+                    <div class="card-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>患者姓名</th>
+                                    <th>检查类型</th>
+                                    <th>检查描述</th>
+                                    <th>开具时间</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="checkup : ${checkups}">
+                                    <td th:text="${checkup.id}"></td>
+                                    <td th:text="${checkup.patient.user.name}"></td>
+                                    <td th:text="${checkup.type}"></td>
+                                    <td th:text="${checkup.description}"></td>
+                                    <td th:text="${#temporals.format(checkup.createTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                                    <td>
+                                        <span class="status-pending" th:if="${checkup.status == 0}">待检查</span>
+                                        <span class="status-completed" th:if="${checkup.status == 1}">已完成</span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/nurse/checkup/{id}(id=${checkup.id})}" class="btn btn-primary">查看详情</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

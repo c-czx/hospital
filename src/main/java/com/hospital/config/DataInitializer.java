@@ -55,32 +55,49 @@ public class DataInitializer implements CommandLineRunner {
             admin.setGender("male");
             admin.setPhone("13800000000");
             admin.setEmail("admin@hospital.com");
+            admin.setAge(35);  // 设置年龄
             userService.saveUser(admin);
             System.out.println("  - 已创建管理员：系统管理员");
         }
         
-        if (userService.findByPhone("13800000001") == null) {
-            User doctor1 = new User();
-            doctor1.setPassword("doctor123");  // 不要预先加密，saveUser 方法会加密
-            doctor1.setName("张医生");
-            doctor1.setRole("DOCTOR");
-            doctor1.setGender("male");
-            doctor1.setPhone("13800000001");
-            doctor1.setEmail("doctor1@hospital.com");
-            userService.saveUser(doctor1);
+        // 为每个科室创建一个医生
+        String[] departments = {"全科", "内科", "外科", "耳鼻喉", "妇产科"};
+        String[] doctorNames = {"刘医生", "张医生", "王医生", "陈医生", "赵医生"};
+        String[] specialties = {"全科医疗", "心血管疾病", "普外科", "耳鼻喉科", "妇产科"};
+        String[] phones = {"13800000001", "13800000004", "13800000005", "13800000006", "13800000007"};
+        int[] ages = {45, 40, 42, 38, 39};
+        
+        for (int i = 0; i < departments.length; i++) {
+            String departmentName = departments[i];
+            String doctorName = doctorNames[i];
+            String specialty = specialties[i];
+            String phone = phones[i];
+            int age = ages[i];
             
-            // 补充医生角色表详细信息
-            User savedDoctor = userService.findByPhone("13800000001");
-            if (savedDoctor != null) {
-                Doctor doctor = doctorService.findByUserId(savedDoctor.getId());
-                if (doctor != null) {
-                    Department dept = departmentService.findByNameContaining("内科").get(0);
-                    doctor.setDepartment(dept);
-                    doctor.setTitle("主任医师");
-                    doctor.setSpecialty("心血管疾病");
-                    doctor.setSchedule("周一至周五 8:00-12:00");
-                    doctorService.saveDoctor(doctor);
-                    System.out.println("  - 已创建医生用户：张医生，同步创建医生角色表记录（内科/主任医师）");
+            if (userService.findByPhone(phone) == null) {
+                User doctorUser = new User();
+                doctorUser.setPassword("doctor123");  // 不要预先加密，saveUser 方法会加密
+                doctorUser.setName(doctorName);
+                doctorUser.setRole("DOCTOR");
+                doctorUser.setGender("male");
+                doctorUser.setPhone(phone);
+                doctorUser.setEmail("doctor" + (i+1) + "@hospital.com");
+                doctorUser.setAge(age);  // 设置年龄
+                userService.saveUser(doctorUser);
+                
+                // 补充医生角色表详细信息
+                User savedDoctor = userService.findByPhone(phone);
+                if (savedDoctor != null) {
+                    Doctor doctor = doctorService.findByUserId(savedDoctor.getId());
+                    if (doctor != null) {
+                        Department dept = departmentService.findByNameContaining(departmentName).get(0);
+                        doctor.setDepartment(dept);
+                        doctor.setTitle("主任医师");
+                        doctor.setSpecialty(specialty);
+                        doctor.setSchedule("周一至周五 8:00-12:00");
+                        doctorService.saveDoctor(doctor);
+                        System.out.println("  - 已创建医生用户：" + doctorName + "，同步创建医生角色表记录（" + departmentName + "/主任医师）");
+                    }
                 }
             }
         }
@@ -93,6 +110,7 @@ public class DataInitializer implements CommandLineRunner {
             nurse1.setGender("female");
             nurse1.setPhone("13800000002");
             nurse1.setEmail("nurse1@hospital.com");
+            nurse1.setAge(28);  // 设置年龄
             userService.saveUser(nurse1);
             
             // 补充护士角色表详细信息
@@ -114,6 +132,7 @@ public class DataInitializer implements CommandLineRunner {
             patient1.setGender("male");
             patient1.setPhone("13800000003");
             patient1.setEmail("patient1@hospital.com");
+            patient1.setAge(50);  // 设置年龄
             userService.saveUser(patient1);
             
             // 补充患者角色表详细信息

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>检查详情 - 护士端</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>护士中心</h3>
+            <ul>
+                <li><a href="/nurse/dashboard">首页</a></li>
+                <li><a href="/nurse/patients">患者信息查看</a></li>
+                <li><a href="/nurse/checkups" class="active">协助诊疗</a></li>
+                <li><a href="/nurse/billing/patients">缴费管理</a></li>
+                <li><a href="/logout">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <div class="main-content">
+            <h1>检查详情 - <span th:text="${patient.name}"></span></h1>
+
+            <div class="appointment-detail">
+                <h3>检查信息</h3>
+                
+                <!-- 编辑按钮 -->
+                <div th:if="${checkup.status == 1}">
+                    <button id="editButton" class="btn btn-primary" onclick="toggleEdit()">编辑</button>
+                </div>
+                
+                <form th:action="@{/nurse/checkup/{id}/update(id=${checkup.id})}" method="post">
+                    <div class="form-group">
+                        <label for="type">检查类型</label>
+                        <input type="text" class="form-control" id="type" th:value="${checkup.type}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">检查描述</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" placeholder="请输入检查描述" th:text="${checkup.description}" th:readonly="${checkup.status == 1}"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="result">检查结果</label>
+                        <textarea class="form-control" id="result" name="result" rows="5" required placeholder="请输入检查结果" th:text="${checkup.result}" th:readonly="${checkup.status == 1}"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="createTime">开具时间</label>
+                        <input type="text" class="form-control" id="createTime" th:value="${#temporals.format(checkup.createTime, 'yyyy-MM-dd HH:mm:ss')}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="status">状态</label>
+                        <input type="text" class="form-control" id="status" th:value="${checkup.status == 0 ? '待检查' : '已完成'}" readonly>
+                    </div>
+                    <div th:if="${checkup.status == 0}" style="margin-bottom: 10px;">
+                        <button type="submit" class="btn btn-primary">提交检查结果</button>
+                    </div>
+                    <div id="submitButton" style="display: none; margin-bottom: 10px;">
+                        <button type="submit" class="btn btn-primary">保存修改</button>
+                    </div>
+                    <a href="/nurse/checkups" class="btn btn-secondary">返回</a>
+                </form>
+            </div>
+            
+            <script>
+                function toggleEdit() {
+                    // 启用编辑
+                    document.getElementById('description').readOnly = false;
+                    document.getElementById('result').readOnly = false;
+                    // 显示保存按钮
+                    document.getElementById('submitButton').style.display = 'block';
+                    // 隐藏编辑按钮
+                    document.getElementById('editButton').style.display = 'none';
+                }
+            </script>
+        </div>
+    </div>
+</body>
+</html>

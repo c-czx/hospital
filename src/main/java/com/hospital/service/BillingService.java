@@ -28,7 +28,24 @@ public class BillingService {
     }
     
     public List<Billing> findByPatientId(Long patientId) {
-        return billingRepository.findByPatientId(patientId);
+        List<Billing> billings = billingRepository.findByPatientId(patientId);
+        // 去重：根据缴费类型进行去重，保留已支付状态的记录，如果没有已支付状态的则保留待支付状态的
+        return billings.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        billing -> billing.getType(),
+                        billing -> billing,
+                        (existing, replacement) -> {
+                            // 如果现有记录是已支付状态，保留现有记录
+                            if ("已支付".equals(existing.getStatus())) {
+                                return existing;
+                            }
+                            // 否则保留新记录
+                            return replacement;
+                        }
+                ))
+                .values()
+                .stream()
+                .collect(java.util.stream.Collectors.toList());
     }
     
     public List<Billing> findByUserId(Long userId) {

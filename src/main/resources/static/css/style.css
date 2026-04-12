@@ -351,6 +351,14 @@ body {
     background: #e9ecef;
 }
 
+.status-pending {
+    color: orange;
+}
+
+.status-completed {
+    color: green;
+}
+
 .appointment-body p {
     margin: 10px 0;
     color: #666;
@@ -398,7 +406,7 @@ body {
 
 .data-table th, .data-table td {
     padding: 15px;
-    text-align: left;
+    text-align: center;
     border-bottom: 1px solid #e9ecef;
 }
 

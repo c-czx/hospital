@@ -26,7 +26,9 @@ public class Checkup {
     private String description; // 检查描述
     private String result; // 检查结果
     private Integer status; // 状态：0-待检查，1-已完成
+    @Column(columnDefinition = "DATETIME(0)")
     private LocalDateTime createTime;
+    @Column(columnDefinition = "DATETIME(0)")
     private LocalDateTime updateTime;
 
     public Long getId() {

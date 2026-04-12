@@ -361,6 +361,31 @@ public class PatientController {
         // 获取缴费记录
         List<Billing> billingRecords = billingService.findByPatientId(patient.getId());
         
+        // 计算每个就诊的总费用
+        java.util.Map<Long, java.math.BigDecimal> appointmentTotalAmounts = new java.util.HashMap<>();
+        java.util.Map<Long, List<Billing>> appointmentBillings = new java.util.HashMap<>();
+        
+        for (Appointment appointment : completedAppointments) {
+            java.math.BigDecimal total = java.math.BigDecimal.ZERO;
+            List<Billing> appointmentBillingList = new java.util.ArrayList<>();
+            
+            for (Billing billing : billingRecords) {
+                // 简单处理：假设缴费记录的创建时间在预约时间前后一天内，就认为是该预约的费用
+                if (billing.getCreateTime() != null && appointment.getAppointmentTime() != null) {
+                    java.time.LocalDateTime billingTime = billing.getCreateTime();
+                    java.time.LocalDateTime appointmentTime = appointment.getAppointmentTime();
+                    java.time.Duration duration = java.time.Duration.between(billingTime, appointmentTime);
+                    if (Math.abs(duration.toHours()) <= 24) {
+                        total = total.add(billing.getAmount());
+                        appointmentBillingList.add(billing);
+                    }
+                }
+            }
+            
+            appointmentTotalAmounts.put(appointment.getId(), total);
+            appointmentBillings.put(appointment.getId(), appointmentBillingList);
+        }
+        
         // 获取病历记录
         List<MedicalRecord> medicalRecords = medicalRecordService.findByPatientId(patient.getId());
         
@@ -371,10 +396,12 @@ public class PatientController {
         List<Advice> advices = adviceRepository.findByPatientId(patient.getId());
         
         model.addAttribute("completedAppointments", completedAppointments);
-        model.addAttribute("billingRecords", billingRecords);
+        model.addAttribute("appointmentTotalAmounts", appointmentTotalAmounts);
+        model.addAttribute("appointmentBillings", appointmentBillings);
         model.addAttribute("medicalRecords", medicalRecords);
         model.addAttribute("prescriptions", prescriptions);
         model.addAttribute("advices", advices);
+        model.addAttribute("billingRecords", billingRecords);
         return "patient/orders";
     }
     
@@ -391,6 +418,44 @@ public class PatientController {
             // 更新缴费状态为已支付
             billing.setStatus("已支付");
             billingService.updateBilling(billing);
+        }
+        
+        return "redirect:/patient/orders";
+    }
+    
+    @PostMapping("/pay-appointment-billings")
+    public String payAppointmentBillings(@RequestParam Long appointmentId, Authentication authentication) {
+        User user = userService.findByPhone(authentication.getName());
+        if (user == null) {
+            return "redirect:/login";
+        }
+        
+        // 查找对应的 Patient 对象
+        com.hospital.entity.Patient patient = patientService.findByUserId(user.getId());
+        if (patient == null) {
+            return "redirect:/patient/orders";
+        }
+        
+        // 获取该患者的所有缴费记录
+        List<Billing> billingRecords = billingService.findByPatientId(patient.getId());
+        
+        // 获取该预约
+        Appointment appointment = appointmentService.findById(appointmentId);
+        if (appointment == null || !appointment.getPatient().getId().equals(patient.getId())) {
+            return "redirect:/patient/orders";
+        }
+        
+        // 支付该预约相关的所有待支付费用
+        for (Billing billing : billingRecords) {
+            if (billing.getCreateTime() != null && appointment.getAppointmentTime() != null) {
+                java.time.LocalDateTime billingTime = billing.getCreateTime();
+                java.time.LocalDateTime appointmentTime = appointment.getAppointmentTime();
+                java.time.Duration duration = java.time.Duration.between(billingTime, appointmentTime);
+                if (Math.abs(duration.toHours()) <= 24 && "待支付".equals(billing.getStatus())) {
+                    billing.setStatus("已支付");
+                    billingService.updateBilling(billing);
+                }
+            }
         }
         
         return "redirect:/patient/orders";

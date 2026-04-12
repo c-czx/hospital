@@ -49,7 +49,7 @@ public class Backup {
     /**
      * 备份时间
      */
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "DATETIME(0)")
     private LocalDateTime backupTime;
 
     /**

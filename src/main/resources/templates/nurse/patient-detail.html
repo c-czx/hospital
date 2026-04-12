@@ -13,7 +13,7 @@
             <ul>
                 <li><a href="/nurse/dashboard">首页</a></li>
                 <li><a href="/nurse/patients">患者信息查看</a></li>
-                <li><a href="/nurse/appointments">协助诊疗</a></li>
+                <li><a href="/nurse/checkups">协助诊疗</a></li>
                 <li><a href="/nurse/billing/patients">缴费管理</a></li>
                 <li><a href="/logout">退出登录</a></li>
             </ul>
@@ -60,15 +60,18 @@
                 
                 <div class="billing-section">
                     <h3>缴费记录</h3>
+                    <div class="billing-summary" style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+                        <p><strong>总费用：</strong><span th:text="${totalAmount}"></span></p>
+                        <p><strong>已支付：</strong><span th:text="${paidAmount}"></span></p>
+                        <p><strong>待支付：</strong><span th:text="${unpaidAmount}"></span></p>
+                        <a th:href="@{/nurse/billing/patient/{id}/pay(id=${patient.id})}" class="btn btn-primary" th:if="${unpaidAmount.compareTo(new java.math.BigDecimal(0)) > 0}">协助支付</a>
+                    </div>
                     <div th:each="billing : ${billings}" class="billing-item">
                         <p><strong>类型：</strong><span th:text="${billing.type}"></span></p>
                         <p><strong>金额：</strong><span th:text="${billing.amount}"></span></p>
                         <p><strong>状态：</strong><span th:text="${billing.status}"></span></p>
-                        <div th:if="${billing.status == '未支付'}">
-                            <a th:href="@{/nurse/billing/{id}/pay(id=${billing.id})}" class="btn btn-primary">支付</a>
-                        </div>
                     </div>
-                    <a th:href="@{/nurse/billing/create(userId=${patient.id})}" class="btn btn-secondary">创建缴费</a>
+                    <a th:href="@{/nurse/billing/create(userId=${patient.id})}" class="btn btn-secondary" style="margin-top: 10px;">创建缴费</a>
                 </div>
             </div>
         </div>

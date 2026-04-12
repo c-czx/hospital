@@ -26,9 +26,11 @@ public class Appointment {
     @JoinColumn(name = "department_id", nullable = false)
     private Department department;
     
+    @Column(columnDefinition = "DATETIME(0)")
     private LocalDateTime appointmentTime;
-    private String status;
     private String symptoms;
+    private String status;
+    @Column(columnDefinition = "DATETIME(0)")
     private LocalDateTime createTime;
     
     public Long getId() {

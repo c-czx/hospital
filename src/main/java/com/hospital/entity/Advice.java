@@ -24,7 +24,9 @@ public class Advice {
     
     private String content;
     private Integer status;
+    @Column(columnDefinition = "DATETIME(0)")
     private LocalDateTime createTime;
+    @Column(columnDefinition = "DATETIME(0)")
     private LocalDateTime updateTime;
 
     public Long getId() { 

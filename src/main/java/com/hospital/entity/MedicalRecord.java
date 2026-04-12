@@ -25,7 +25,9 @@ public class MedicalRecord {
     private String chiefComplaint;
     private String presentIllness;
     private String diagnosisResult;
+    @Column(columnDefinition = "DATETIME(0)")
     private LocalDateTime diagnosisTime;
+    @Column(columnDefinition = "DATETIME(0)")
     private LocalDateTime createTime;
     private Double temperature;
     private Integer bloodPressure;

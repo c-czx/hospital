@@ -18,7 +18,9 @@ public class Schedule {
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
     
+    @Column(columnDefinition = "DATETIME(0)")
     private LocalDateTime startTime;
+    @Column(columnDefinition = "DATETIME(0)")
     private LocalDateTime endTime;
     private Integer totalNumber;
     private Integer remainNumber;

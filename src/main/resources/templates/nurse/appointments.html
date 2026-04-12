@@ -13,7 +13,7 @@
             <ul>
                 <li><a href="/nurse/dashboard">首页</a></li>
                 <li><a href="/nurse/patients">患者信息查看</a></li>
-                <li><a href="/nurse/appointments">协助诊疗</a></li>
+                <li><a href="/nurse/checkups">协助诊疗</a></li>
                 <li><a href="/nurse/billing/patients">缴费管理</a></li>
                 <li><a href="/logout">退出登录</a></li>
             </ul>
@@ -24,7 +24,7 @@
             <div class="appointments-list">
                 <div th:each="appointment : ${appointments}" class="appointment-card">
                     <div class="appointment-header">
-                        <h3 th:text="${appointment.user.name}"></h3>
+                        <h3 th:text="${appointment.patient.user.name}"></h3>
                         <span class="status" th:text="${appointment.status}"></span>
                     </div>
                     <div class="appointment-body">
@@ -33,7 +33,7 @@
                         <p><strong>预约时间：</strong><span th:text="${#temporals.format(appointment.appointmentTime, 'yyyy-MM-dd HH:mm:ss')}"></span></p>
                         <p><strong>症状：</strong><span th:text="${appointment.symptoms}"></span></p>
                         <div class="appointment-actions">
-                            <a th:href="@{/nurse/patient/{id}(id=${appointment.user.id})}" class="btn btn-primary">查看患者详情</a>
+                            <a th:href="@{/nurse/patient/{id}(id=${appointment.patient.user.id})}" class="btn btn-primary">查看患者详情</a>
                         </div>
                     </div>
                 </div>

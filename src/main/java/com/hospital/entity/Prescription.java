@@ -27,6 +27,7 @@ public class Prescription {
     @Column(name = "usage_info")
     private String usage;
     
+    @Column(columnDefinition = "DATETIME(0)")
     private LocalDateTime createTime;
 
     public Long getId() { 

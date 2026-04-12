@@ -135,7 +135,7 @@
                     </div>
                     <div th:unless="${completedAppointments.isEmpty()}">
                         <div th:each="appointment : ${completedAppointments}" class="order-card">
-                            <h4>就诊记录 [[${appointment.id}]]</h4>
+                            <h4>就诊记录</h4>
                             <p>医生：[[${appointment.doctor.user.name}]] - [[${appointment.doctor.title}]]</p>
                             <p>科室：[[${appointment.department.name}]]</p>
                             <p>就诊时间：[[${#temporals.format(appointment.appointmentTime, 'yyyy-MM-dd HH:mm')}]]</p>
@@ -175,6 +175,18 @@
                                         <p>开具时间：[[${#temporals.format(advice.createTime, 'yyyy-MM-dd HH:mm')}]]</p>
                                     </div>
                                 </div>
+                                
+                                <!-- 费用详情 -->
+                                <div th:if="${appointmentBillings != null}">
+                                    <div th:if="${appointmentBillings[appointment.id] != null and not appointmentBillings[appointment.id].isEmpty()}">
+                                        <h5>费用详情</h5>
+                                        <div style="font-size: 14px; color: #666;">
+                                            <div th:each="billing : ${appointmentBillings[appointment.id]}">
+                                                <p>• [[${billing.type}]]：¥[[${billing.amount}]] <span th:if="${billing.status == '已支付'}" style="color: #4CAF50;">（已支付）</span><span th:unless="${billing.status == '已支付'}" style="color: #ff9800;">（待支付）</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             
                             <div class="order-info">
@@ -188,23 +200,45 @@
                 <!-- 缴费记录 -->
                 <div class="orders-section">
                     <h3>缴费记录</h3>
-                    <div th:if="${billingRecords.isEmpty()}" class="empty-message">
+                    <div th:if="${completedAppointments.isEmpty()}" class="empty-message">
                         <p>暂无缴费记录</p>
                     </div>
-                    <div th:unless="${billingRecords.isEmpty()}">
-                        <div th:each="billing : ${billingRecords}" class="order-card">
-                            <h4>缴费记录 [[${billing.id}]]</h4>
-                            <p>缴费类型：[[${billing.type}]]</p>
-                            <p>缴费金额：¥[[${billing.amount}]]</p>
-                            <div th:if="${billing.status != '已支付'}">
-                                <form th:action="@{/patient/pay-billing}" method="post" style="display: inline;">
-                                    <input type="hidden" th:name="billingId" th:value="${billing.id}">
-                                    <button type="submit" class="btn btn-secondary">立即支付</button>
-                                </form>
+                    <div th:unless="${completedAppointments.isEmpty()}">
+                        <div th:each="appointment : ${completedAppointments}" class="order-card">
+                            <h4>就诊缴费记录</h4>
+                            <p>医生：[[${appointment.doctor.user.name}]] - [[${appointment.doctor.title}]]</p>
+                            <p>科室：[[${appointment.department.name}]]</p>
+                            <p>就诊时间：[[${#temporals.format(appointment.appointmentTime, 'yyyy-MM-dd HH:mm')}]]</p>
+                            <p><strong>总费用：¥[[${appointmentTotalAmounts[appointment.id]}]]</strong></p>
+                            
+                            <!-- 费用详情 -->
+                            <div th:if="${appointmentBillings[appointment.id] != null and not appointmentBillings[appointment.id].isEmpty()}" style="font-size: 14px; color: #666; margin-top: 10px;">
+                                <p><strong>费用详情：</strong></p>
+                                <div th:each="billing : ${appointmentBillings[appointment.id]}">
+                                    <p>• [[${billing.type}]]：¥[[${billing.amount}]] <span th:if="${billing.status == '已支付'}" style="color: #4CAF50;">（已支付）</span><span th:unless="${billing.status == '已支付'}" style="color: #ff9800;">（待支付）</span></p>
+                                </div>
                             </div>
+                            
+                            <!-- 支付按钮 -->
+                            <div th:if="${appointmentBillings[appointment.id] != null}">
+                                <!-- 检查是否有未支付的费用 -->
+                                <div th:each="billing : ${appointmentBillings[appointment.id]}" th:if="${billing.status != '已支付'}">
+                                    <form th:action="@{/patient/pay-appointment-billings}" method="post" style="display: inline;">
+                                        <input type="hidden" th:name="appointmentId" th:value="${appointment.id}">
+                                        <button type="submit" class="btn btn-secondary">支付</button>
+                                    </form>
+                                    <br/>
+                                    <!-- <small>（点击后将支付该就诊的所有待支付费用）</small> -->
+                                    <br/>
+                                    <!-- 只显示一次支付按钮 -->
+                                    <th:block th:remove="all-after">
+                                    </th:block>
+                                </div>
+                            </div>
+                            
                             <div class="order-info">
-                                <span class="order-status" th:classappend="${billing.status == '已支付' ? 'completed' : 'pending'}">[[${billing.status}]]</span>
-                                <span>创建时间：[[${#temporals.format(billing.createTime, 'yyyy-MM-dd HH:mm')}]]</span>
+                                <!-- <span class="order-status completed">已就诊</span> -->
+                                <span>创建时间：[[${#temporals.format(appointment.createTime, 'yyyy-MM-dd HH:mm')}]]</span>
                             </div>
                         </div>
                     </div>

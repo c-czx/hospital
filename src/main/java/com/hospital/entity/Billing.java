@@ -22,6 +22,7 @@ public class Billing {
     private String type;
     private BigDecimal amount;
     private String status;
+    @Column(columnDefinition = "DATETIME(0)")
     private LocalDateTime createTime;
     
     public Long getId() {

@@ -62,4 +62,12 @@ public class CheckupService {
 
         return result;
     }
+    
+    public List<Checkup> findByStatus(Integer status) {
+        return checkupRepository.findByStatus(status);
+    }
+    
+    public List<Checkup> findAll() {
+        return checkupRepository.findAll();
+    }
 }
