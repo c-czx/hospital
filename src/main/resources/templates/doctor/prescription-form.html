@@ -17,6 +17,7 @@
                 <li><a href="/doctor/appointments">我的就诊</a></li>
                 <li><a href="/doctor/prescriptions">处方管理</a></li>
                 <li><a href="/doctor/checkups">检查管理</a></li>
+                <li><a href="/doctor/prices">价格公示</a></li>
                 <li><a href="/doctor/profile">个人信息</a></li>
                 <li><a href="/logout">退出登录</a></li>
             </ul>
@@ -46,8 +47,17 @@
 
                     <h3 style="color: #10b981; margin-bottom: 20px; border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-top: 30px;">开具处方</h3>
                     <div class="form-group">
+                        <label>选择药品（可选）：</label>
+                        <select id="drugSelector" class="form-control" onchange="addDrug()">
+                            <option value="">-- 请选择药品 --</option>
+                            <option th:each="drug : ${drugs}" 
+                                    th:value="${drug.name}" 
+                                    th:text="${drug.name + ' (' + drug.price + '元/' + drug.unit + ')'}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>药品列表：</label>
-                        <input type="text" name="drugList" class="form-control" placeholder="例：阿莫西林，布洛芬" required>
+                        <input type="text" id="drugListInput" name="drugList" class="form-control" placeholder="例：阿莫西林，布洛芬" required>
                     </div>
                     <div class="form-group">
                         <label>用法用量：</label>
@@ -63,14 +73,11 @@
                     <h3 style="color: #10b981; margin-bottom: 20px; border-bottom: 2px solid #10b981; padding-bottom: 10px; margin-top: 30px;">开具检查</h3>
                     <div class="form-group">
                         <label>检查类型：</label>
-                        <select name="checkupType" class="form-control" required>
-                            <option value="">请选择检查类型</option>
-                            <option value="DR胸片">DR胸片</option>
-                            <option value="X光">X光</option>
-                            <option value="血常规">血常规</option>
-                            <option value="尿常规">尿常规</option>
-                            <option value="测体温">测体温</option>
-                            <option value="量血压">量血压</option>
+                        <select name="checkupType" class="form-control">
+                            <option value="">不开具检查 / 请选择</option>
+                            <option th:each="item : ${checkupItems}"
+                                    th:value="${item.name}"
+                                    th:text="${item.name + ' (' + item.price + '元)'}"></option>
                         </select>
                     </div>
 
@@ -79,6 +86,33 @@
                         <a href="/doctor/patients" class="btn btn-secondary">取消</a>
                     </div>
                 </form>
+
+                <script>
+                    function addDrug() {
+                        const selector = document.getElementById('drugSelector');
+                        const drugName = selector.value;
+                        if (!drugName) return;
+
+                        const input = document.getElementById('drugListInput');
+                        let currentVal = input.value.trim();
+                        
+                        if (currentVal) {
+                            // 检查是否已存在
+                            const items = currentVal.split(/[,，]\s*/);
+                            if (items.includes(drugName)) {
+                                alert('该药品已在列表中');
+                                selector.value = '';
+                                return;
+                            }
+                            input.value = currentVal + '，' + drugName;
+                        } else {
+                            input.value = drugName;
+                        }
+                        
+                        // 重置选择器
+                        selector.value = '';
+                    }
+                </script>
             </div>
 
             <div class="actions">

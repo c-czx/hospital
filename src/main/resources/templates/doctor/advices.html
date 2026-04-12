@@ -17,6 +17,7 @@
                 <li><a href="/doctor/appointments">我的就诊</a></li>
                 <li><a href="/doctor/prescriptions">处方管理</a></li>
                 <li><a href="/doctor/checkups">检查管理</a></li>
+                <li><a href="/doctor/prices">价格公示</a></li>
                 <li><a href="/doctor/profile">个人信息</a></li>
                 <li><a href="/logout">退出登录</a></li>
             </ul>
@@ -45,7 +46,7 @@
                             <td th:text="${prescription.drugList}"></td>
                             <td th:text="${prescription.createTime != null ? #temporals.format(prescription.createTime, 'yyyy-MM-dd HH:mm') : '—'}"></td>
                         </tr>
-                    </tbody>
+                    </tbody>        
                 </table>
             </div>
             

@@ -20,6 +20,10 @@ import com.hospital.repository.MedicalRecordRepository;
 import com.hospital.repository.PrescriptionRepository;
 import com.hospital.repository.AdviceRepository;
 import com.hospital.repository.CheckupRepository;
+import com.hospital.repository.DrugRepository;
+import com.hospital.repository.CheckupItemRepository;
+import com.hospital.entity.Drug;
+import com.hospital.entity.CheckupItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -73,6 +77,12 @@ public class DoctorController {
     
     @Autowired
     private CheckupRepository checkupRepository;
+    
+    @Autowired
+    private DrugRepository drugRepository;
+    
+    @Autowired
+    private CheckupItemRepository checkupItemRepository;
     
     private Long getCurrentDoctorId(Authentication authentication) {
         try {
@@ -164,6 +174,18 @@ public class DoctorController {
         Checkup checkup = pickRecordForVisit(checkups, Checkup::getCreateTime, currentAppointment);
         model.addAttribute("checkup", checkup);
 
+        // 如果药品库为空，初始化一些默认药品
+        if (drugRepository.count() == 0) {
+            initDefaultDrugs();
+        }
+        // 如果检查项目库为空，初始化一些默认项目
+        if (checkupItemRepository.count() == 0) {
+            initDefaultCheckupItems();
+        }
+
+        model.addAttribute("drugs", drugRepository.findAll());
+        model.addAttribute("checkupItems", checkupItemRepository.findAll());
+
         model.addAttribute("doctorId", doctorId);
         model.addAttribute("patientId", patientId);
         model.addAttribute("appointmentId", appointmentId);
@@ -225,8 +247,15 @@ public class DoctorController {
         if (doctorId == null) {
             return "redirect:/login";
         }
+        
+        // 确保数据已初始化
+        if (drugRepository.count() == 0) initDefaultDrugs();
+        if (checkupItemRepository.count() == 0) initDefaultCheckupItems();
+        
         model.addAttribute("patientId", patientId);
         model.addAttribute("doctorId", doctorId);
+        model.addAttribute("drugs", drugRepository.findAll());
+        model.addAttribute("checkupItems", checkupItemRepository.findAll());
         return "doctor/prescription-form";
     }
 
@@ -311,6 +340,22 @@ public class DoctorController {
         model.addAttribute("prescriptions", prescriptions);
         model.addAttribute("advices", advices);
         return "doctor/advices";
+    }
+
+    @GetMapping("/prices")
+    public String priceList(Model model, Authentication authentication) {
+        Long doctorId = getCurrentDoctorId(authentication);
+        if (doctorId == null) {
+            return "redirect:/login";
+        }
+        
+        // 确保初始化
+        if (drugRepository.count() == 0) initDefaultDrugs();
+        if (checkupItemRepository.count() == 0) initDefaultCheckupItems();
+
+        model.addAttribute("drugs", drugRepository.findAll());
+        model.addAttribute("checkupItems", checkupItemRepository.findAll());
+        return "doctor/prices";
     }
 
     @PostMapping("/publishSchedule")
@@ -501,6 +546,40 @@ public class DoctorController {
         doctorService.updateAdvice(advice);
         return "redirect:/doctor/advices";
     }
+
+    private void initDefaultDrugs() {
+        String[][] drugData = {
+            {"阿莫西林胶囊", "15.5", "盒"},
+            {"布洛芬缓释胶囊", "22.8", "盒"},
+            {"维生素C片", "5.0", "瓶"},
+            {"感冒清热颗粒", "18.0", "盒"},
+            {"氯化钠注射液", "2.5", "袋"}
+        };
+        for (String[] data : drugData) {
+            Drug drug = new Drug();
+            drug.setName(data[0]);
+            drug.setPrice(new java.math.BigDecimal(data[1]));
+            drug.setUnit(data[2]);
+            drugRepository.save(drug);
+        }
+    }
+
+    private void initDefaultCheckupItems() {
+        String[][] checkupData = {
+            {"血常规", "45.0", "基础血液检查"},
+            {"心电图", "80.0", "心脏功能检查"},
+            {"胸部X射线", "120.0", "心肺影像检查"},
+            {"腹部B超", "150.0", "内脏影像检查"},
+            {"尿常规", "30.0", "基础尿液检查"}
+        };
+        for (String[] data : checkupData) {
+            CheckupItem item = new CheckupItem();
+            item.setName(data[0]);
+            item.setPrice(new java.math.BigDecimal(data[1]));
+            item.setDescription(data[2]);
+            checkupItemRepository.save(item);
+        }
+    }
     
     @GetMapping("/appointment-history")
     public String appointmentHistory(@RequestParam Long id, Model model, Authentication authentication) {
@@ -577,8 +656,13 @@ public class DoctorController {
         if (doctorId == null) {
             return "redirect:/login";
         }
+        
+        // 确保数据已初始化
+        if (checkupItemRepository.count() == 0) initDefaultCheckupItems();
+        
         model.addAttribute("patientId", patientId);
         model.addAttribute("doctorId", doctorId);
+        model.addAttribute("checkupItems", checkupItemRepository.findAll());
         return "doctor/checkup-form";
     }
     

@@ -39,6 +39,10 @@ public class AppointmentService {
         return appointmentRepository.findByStatus(status);
     }
     
+    public List<Appointment> findByUserIdAndStatus(Long userId, String status) {
+        return appointmentRepository.findByUserIdAndStatus(userId, status);
+    }
+    
     public List<Appointment> findByAppointmentTimeBetween(LocalDateTime startTime, LocalDateTime endTime) {
         return appointmentRepository.findByAppointmentTimeBetween(startTime, endTime);
     }

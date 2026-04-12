@@ -17,6 +17,7 @@
                 <li><a href="/doctor/appointments">我的就诊</a></li>
                 <li><a href="/doctor/prescriptions">处方管理</a></li>
                 <li><a href="/doctor/checkups">检查管理</a></li>
+                <li><a href="/doctor/prices">价格公示</a></li>
                 <li><a href="/doctor/profile">个人信息</a></li>
                 <li><a href="/logout">退出登录</a></li>
             </ul>
@@ -54,6 +55,11 @@
                     <input type="hidden" name="appointmentId" th:if="${appointmentId != null}" th:value="${appointmentId}">
 
                     <h4>病历记录</h4>
+                    <div class="form-group" style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                        <p style="margin-bottom: 5px;"><strong>分诊信息：</strong></p>
+                        <p style="margin-bottom: 5px;">体温：<span th:text="${medicalRecord != null and medicalRecord.temperature != null ? medicalRecord.temperature + ' ℃' : '无'}" style="color: #e74c3c; font-weight: bold;"></span></p>
+                        <p style="margin-bottom: 0;">护士笔记：<span th:text="${medicalRecord != null and medicalRecord.nurseNotes != null and medicalRecord.nurseNotes != '' ? medicalRecord.nurseNotes : '无'}"></span></p>
+                    </div>
                     <div class="form-group">
                         <label>主诉：</label>
                         <textarea name="chiefComplaint" class="form-control" rows="2" required th:text="${medicalRecord != null && medicalRecord.chiefComplaint != null ? medicalRecord.chiefComplaint : ''}"></textarea>
@@ -69,8 +75,19 @@
 
                     <h4 style="margin-top: 30px;">处方</h4>
                     <div class="form-group">
+                        <label>选择药品（可选）：</label>
+                        <select id="drugSelector" class="form-control" onchange="addDrug()">
+                            <option value="">-- 请选择药品 --</option>
+                            <option th:each="drug : ${drugs}" 
+                                    th:value="${drug.name}" 
+                                    th:data-price="${drug.price}"
+                                    th:data-unit="${drug.unit}"
+                                    th:text="${drug.name + ' (' + drug.price + '元/' + drug.unit + ')'}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>药品列表：</label>
-                        <input type="text" name="drugList" class="form-control" placeholder="例：阿莫西林，布洛芬" required th:value="${prescription != null && prescription.drugList != null ? prescription.drugList : ''}">
+                        <input type="text" id="drugListInput" name="drugList" class="form-control" placeholder="例：阿莫西林，布洛芬" required th:value="${prescription != null && prescription.drugList != null ? prescription.drugList : ''}">
                     </div>
                     <div class="form-group">
                         <label>用法用量：</label>
@@ -88,12 +105,10 @@
                         <label>检查类型（选填）：</label>
                         <select name="checkupType" class="form-control">
                             <option value="">不开具检查 / 请选择</option>
-                            <option value="DR胸片" th:selected="${checkup != null and checkup.type == 'DR胸片'}">DR胸片</option>
-                            <option value="X光" th:selected="${checkup != null and checkup.type == 'X光'}">X光</option>
-                            <option value="血常规" th:selected="${checkup != null and checkup.type == '血常规'}">血常规</option>
-                            <option value="尿常规" th:selected="${checkup != null and checkup.type == '尿常规'}">尿常规</option>
-                            <option value="测体温" th:selected="${checkup != null and checkup.type == '测体温'}">测体温</option>
-                            <option value="量血压" th:selected="${checkup != null and checkup.type == '量血压'}">量血压</option>
+                            <option th:each="item : ${checkupItems}"
+                                    th:value="${item.name}"
+                                    th:selected="${checkup != null and checkup.type == item.name}"
+                                    th:text="${item.name + ' (' + item.price + '元)'}"></option>
                         </select>
                     </div>
 
@@ -103,8 +118,37 @@
                     </div>
                 </form>
 
+                <script>
+                    function addDrug() {
+                        const selector = document.getElementById('drugSelector');
+                        const drugName = selector.value;
+                        if (!drugName) return;
+
+                        const input = document.getElementById('drugListInput');
+                        let currentVal = input.value.trim();
+                        
+                        if (currentVal) {
+                            // 检查是否已存在
+                            const items = currentVal.split(/[,，]\s*/);
+                            if (items.includes(drugName)) {
+                                alert('该药品已在列表中');
+                                selector.value = '';
+                                return;
+                            }
+                            input.value = currentVal + '，' + drugName;
+                        } else {
+                            input.value = drugName;
+                        }
+                        
+                        // 重置选择器
+                        selector.value = '';
+                    }
+                </script>
+
                 <div th:if="${currentAppointment != null and currentAppointment.status != '叫号中'}" class="read-only-view">
                     <h4>病历记录</h4>
+                    <p><strong>体温：</strong><span th:text="${medicalRecord != null and medicalRecord.temperature != null ? medicalRecord.temperature + ' ℃' : '无'}" style="color: #e74c3c; font-weight: bold;"></span></p>
+                    <p><strong>护士笔记：</strong><span th:text="${medicalRecord != null and medicalRecord.nurseNotes != null and medicalRecord.nurseNotes != '' ? medicalRecord.nurseNotes : '无'}"></span></p>
                     <p><strong>主诉：</strong><span th:text="${medicalRecord != null ? medicalRecord.chiefComplaint : '—'}"></span></p>
                     <p><strong>现病史：</strong><span th:text="${medicalRecord != null ? medicalRecord.presentIllness : '—'}"></span></p>
                     <p><strong>诊断结果：</strong><span th:text="${medicalRecord != null ? medicalRecord.diagnosisResult : '—'}"></span></p>
