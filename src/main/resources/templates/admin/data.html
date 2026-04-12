@@ -5,6 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>数据管理 - 医院挂号系统</title>
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .alert {
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .backup-type-full {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .backup-type-incremental {
+            color: #17a2b8;
+            font-weight: bold;
+        }
+        .status-success {
+            color: #28a745;
+        }
+        .status-failed {
+            color: #dc3545;
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
@@ -24,6 +56,10 @@
         
         <div class="main-content">
             <h1>数据管理</h1>
+            
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+            
             <div class="dashboard-cards">
                 <div class="card">
                     <h3>💾 数据备份</h3>
@@ -32,13 +68,13 @@
                         <div class="form-group">
                             <label>备份类型</label>
                             <select name="backupType" class="form-control">
-                                <option value="full">完整备份</option>
-                                <option value="incremental">增量备份</option>
+                                <option value="FULL">完整备份</option>
+                                <option value="INCREMENTAL">增量备份</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label>备份说明</label>
-                            <input type="text" name="description" placeholder="例如：2024年1月数据备份">
+                            <input type="text" name="description" placeholder="例如：2024 年 1 月数据备份">
                         </div>
                         <button type="submit" class="btn btn-primary">开始备份</button>
                     </form>
@@ -46,52 +82,52 @@
                 <div class="card">
                     <h3>📂 备份列表</h3>
                     <p>查看历史备份记录</p>
-                    <table class="data-table">
+                    <div th:if="${#lists.isEmpty(backups)}">
+                        <p style="color: #666; font-style: italic;">暂无备份记录</p>
+                    </div>
+                    <table class="data-table" th:if="${!#lists.isEmpty(backups)}">
                         <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>备份类型</th>
                                 <th>备份时间</th>
                                 <th>文件大小</th>
+                                <th>状态</th>
+                                <th>说明</th>
                                 <th>操作</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:each="backup : ${backups}">
                                 <td th:text="${backup.id}"></td>
-                                <td th:text="${backup.backupType}"></td>
-                                <td th:text="${backup.backupTime}"></td>
-                                <td th:text="${backup.fileSize}"></td>
                                 <td>
-                                    <a th:href="@{/admin/data/restore/{id}(id=${backup.id})}" class="btn btn-secondary">恢复</a>
-                                    <a th:href="@{/admin/data/download/{id}(id=${backup.id})}" class="btn btn-secondary">下载</a>
-                                    <a th:href="@{/admin/data/delete/{id}(id=${backup.id})}" class="btn btn-danger">删除</a>
+                                    <span th:class="${backup.backupType == 'FULL'} ? 'backup-type-full' : 'backup-type-incremental'"
+                                          th:text="${backup.backupType == 'FULL'} ? '完整备份' : '增量备份'"></span>
+                                </td>
+                                <td th:text="${#temporals.format(backup.backupTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                                <td th:text="${backup.fileSize > 0} ? ${backup.fileSize / 1024} + ' KB' : '0 KB'"></td>
+                                <td>
+                                    <span th:class="${backup.status == 'SUCCESS'} ? 'status-success' : 'status-failed'"
+                                          th:text="${backup.status == 'SUCCESS'} ? '成功' : '失败'"></span>
+                                </td>
+                                <td th:text="${backup.description != null} ? ${backup.description} : '-'"></td>
+                                <td>
+                                    <form th:action="@{/admin/data/restore/{id}(id=${backup.id})}" method="post" style="display: inline;">
+                                        <button type="submit" class="btn btn-secondary" 
+                                                th:disabled="${backup.status != 'SUCCESS'}"
+                                                onclick="return confirm('确定要恢复到此备份点吗？此操作将覆盖当前数据！')">恢复</button>
+                                    </form>
+                                    <a th:href="@{/admin/data/download/{id}(id=${backup.id})}" 
+                                       class="btn btn-secondary"
+                                       th:disabled="${backup.status != 'SUCCESS'}">下载</a>
+                                    <form th:action="@{/admin/data/delete/{id}(id=${backup.id})}" method="post" style="display: inline;">
+                                        <button type="submit" class="btn btn-danger"
+                                                onclick="return confirm('确定要删除此备份吗？')">删除</button>
+                                    </form>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
-                <div class="card">
-                    <h3>📊 数据统计</h3>
-                    <p>系统数据统计信息</p>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <span class="stat-value" th:text="${userCount}"></span>
-                            <span class="stat-label">用户总数</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value" th:text="${departmentCount}"></span>
-                            <span class="stat-label">科室总数</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value" th:text="${doctorCount}"></span>
-                            <span class="stat-label">医生总数</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-value" th:text="${appointmentCount}"></span>
-                            <span class="stat-label">预约总数</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
