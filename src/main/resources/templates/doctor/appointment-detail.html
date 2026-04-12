@@ -148,6 +148,7 @@
                 <div th:if="${currentAppointment != null and currentAppointment.status != '叫号中'}" class="read-only-view">
                     <h4>病历记录</h4>
                     <p><strong>体温：</strong><span th:text="${medicalRecord != null and medicalRecord.temperature != null ? medicalRecord.temperature + ' ℃' : '无'}" style="color: #e74c3c; font-weight: bold;"></span></p>
+                    <p><strong>血压：</strong><span th:text="${medicalRecord != null and medicalRecord.bloodPressure != null ? medicalRecord.bloodPressure : '无'}" style="color: #e74c3c; font-weight: bold;"></span></p>
                     <p><strong>护士笔记：</strong><span th:text="${medicalRecord != null and medicalRecord.nurseNotes != null and medicalRecord.nurseNotes != '' ? medicalRecord.nurseNotes : '无'}"></span></p>
                     <p><strong>主诉：</strong><span th:text="${medicalRecord != null ? medicalRecord.chiefComplaint : '—'}"></span></p>
                     <p><strong>现病史：</strong><span th:text="${medicalRecord != null ? medicalRecord.presentIllness : '—'}"></span></p>
