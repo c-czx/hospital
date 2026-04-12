@@ -45,12 +45,30 @@
                         <td th:text="${nurse.title != null ? nurse.title : '无'}"></td>
                         <td>
                             <a th:href="@{/admin/nurse/edit/{id}(id=${nurse.id})}" class="btn btn-secondary">编辑</a>
-                            <a th:href="@{/admin/nurse/delete/{id}(id=${nurse.id})}" class="btn btn-danger">删除</a>
+                            <a th:href="@{/admin/nurse/delete/{id}(id=${nurse.id})}" 
+                               class="btn btn-danger delete-btn"
+                               th:data-name="${nurse.user != null ? nurse.user.name : '未知'}"
+                               th:data-type="'护士'">删除</a>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.delete-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var name = this.getAttribute('data-name');
+                    var type = this.getAttribute('data-type');
+                    if (confirm('确定要删除' + type + '「' + name + '」吗？此操作将同时删除用户账号和' + type + '表记录，且不可恢复！')) {
+                        window.location.href = this.getAttribute('href');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

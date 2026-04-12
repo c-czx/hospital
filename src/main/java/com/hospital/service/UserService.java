@@ -52,10 +52,7 @@ public class UserService {
             createDoctorRecord(savedUser);
             System.out.println("【已为医生 " + savedUser.getName() + " 创建角色表记录】");
         } else if ("NURSE".equals(role)) {
-            Nurse nurse = new Nurse();
-            nurse.setUser(savedUser);
-            
-            nurseRepository.save(nurse);
+            createNurseRecord(savedUser);
             System.out.println("【已为护士 " + savedUser.getName() + " 创建角色表记录】");
         } else if ("PATIENT".equals(role)) {
             Patient patient = new Patient();
@@ -85,10 +82,35 @@ public class UserService {
                     doctor.setSpecialty("普通内科");
                     doctor.setSchedule("周一至周五 8:00-12:00");
                     doctorRepository.save(doctor);
+                    System.out.println("【创建医生记录成功】用户 ID: " + user.getId() + "，医生 ID: " + doctor.getId());
                 }
             } catch (Exception e) {
                 System.err.println("【创建医生记录失败】" + e.getMessage());
             }
+        }
+    }
+    
+    @Transactional
+    public void createNurseRecord(User user) {
+        nurseRepository.findByUserId(user.getId()).ifPresent(existingNurse -> {
+            throw new RuntimeException("护士记录已存在");
+        });
+        
+        try {
+            Nurse nurse = new Nurse();
+            nurse.setUser(user);
+            // 设置默认科室（如果存在）
+            List<Department> depts = departmentRepository.findAll();
+            if (!depts.isEmpty()) {
+                nurse.setDepartment(depts.get(0));
+            }
+            // 设置默认病区和职称
+            nurse.setWard("普通病区");
+            nurse.setTitle("护士");
+            nurseRepository.save(nurse);
+            System.out.println("【创建护士记录成功】用户 ID: " + user.getId() + "，护士 ID: " + nurse.getId());
+        } catch (Exception e) {
+            System.err.println("【创建护士记录失败】" + e.getMessage());
         }
     }
     
@@ -98,8 +120,10 @@ public class UserService {
         if (existingPatient == null) {
             try {
                 Patient patient = new Patient(user);
+                patient.setUser(user);
+                patient.setAllergies("无");
                 patientRepository.save(patient);
-                System.out.println("【创建患者记录成功】用户ID: " + user.getId() + "，患者ID: " + patient.getId());
+                System.out.println("【创建患者记录成功】用户 ID: " + user.getId() + "，患者 ID: " + patient.getId());
             } catch (Exception e) {
                 System.err.println("【创建患者记录失败】" + e.getMessage());
             }
@@ -195,15 +219,10 @@ public class UserService {
         if ("DOCTOR".equals(newRole)) {
             createDoctorRecord(user);
         } else if ("NURSE".equals(newRole)) {
-            Nurse nurse = new Nurse();
-            nurse.setUser(user);
-            nurseRepository.save(nurse);
+            createNurseRecord(user);
             System.out.println("  - 已在护士表中创建");
         } else if ("PATIENT".equals(newRole)) {
-            Patient patient = new Patient();
-            patient.setUser(user);
-            patient.setAllergies("无");
-            patientRepository.save(patient);
+            createPatientRecord(user);
             System.out.println("  - 已在患者表中创建");
         }
         // ADMIN 不需要创建角色表记录
