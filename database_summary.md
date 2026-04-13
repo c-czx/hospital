@@ -195,8 +195,8 @@
 | doctor_id | BIGINT | FK, NOT NULL | 外键，关联 doctors 表 |
 | department_id | BIGINT | FK, NOT NULL | 外键，关联 departments 表 |
 | appointment_time | DATETIME | | 预约时间 |
-| status | VARCHAR | | 预约状态（如 'pending', 'confirmed', 'cancelled'） |
 | symptoms | TEXT | | 主诉/症状描述 |
+| status | VARCHAR | | 预约状态（如 'pending', 'confirmed', 'cancelled'） |
 | create_time | DATETIME | | 创建时间 |
 
 ### 8. 病例表 (medical_records)
@@ -229,7 +229,7 @@
 | patient_id | BIGINT | FK, NOT NULL | 外键，关联 patients 表 |
 | appointment_id | BIGINT | FK | 外键，关联 appointments 表 |
 | drug_list | TEXT | | 药品清单 |
-| usage | TEXT | | 用法用量 |
+| usage_info | TEXT | | 用法用量 |
 | create_time | DATETIME | | 创建时间 |
 
 ### 10. 检查项目表 (checkups)
