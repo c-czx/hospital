@@ -26,6 +26,7 @@ import com.hospital.entity.Drug;
 import com.hospital.entity.CheckupItem;
 import com.hospital.service.MedicalRecordService;
 import com.hospital.service.PatientService;
+import com.hospital.service.BillingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -91,6 +92,9 @@ public class DoctorController {
     
     @Autowired
     private PatientService patientService;
+    
+    @Autowired
+    private BillingService billingService;
     
     private Long getCurrentDoctorId(Authentication authentication) {
         try {
@@ -516,82 +520,143 @@ public class DoctorController {
 
         Appointment currentAppointment = resolveCurrentAppointment(appointmentId, patientId, doctorId);
         
-        List<MedicalRecord> medicalRecords = medicalRecordService.findByPatientId(patient.getId()).stream()
-                .filter(r -> r.getDoctor() != null && doctorId.equals(r.getDoctor().getId()))
-                .collect(Collectors.toList());
-        MedicalRecord record = pickRecordForVisit(medicalRecords, this::medicalRecordAnchorTime, currentAppointment);
-        if (record == null) {
-            record = new MedicalRecord();
-            record.setDoctor(doctor);
-            record.setPatient(patient);
-            record.setCreateTime(java.time.LocalDateTime.now());
+        // 如果没有传递appointmentId，查找患者的最新预约
+        if (currentAppointment == null) {
+            List<Appointment> appointments = appointmentService.findByPatientId(patient.getId());
+            if (!appointments.isEmpty()) {
+                currentAppointment = appointments.stream()
+                    .sorted((a1, a2) -> a2.getCreateTime().compareTo(a1.getCreateTime()))
+                    .findFirst()
+                    .orElse(null);
+            }
         }
+        
+        // 每次就诊都创建新的病历记录
+        MedicalRecord record = new MedicalRecord();
+        record.setDoctor(doctor);
+        record.setPatient(patient);
+        record.setAppointment(currentAppointment);
+        record.setCreateTime(java.time.LocalDateTime.now());
         record.setChiefComplaint(chiefComplaint);
         record.setPresentIllness(presentIllness);
         record.setDiagnosisResult(diagnosisResult);
         record.setDiagnosisTime(java.time.LocalDateTime.now());
         doctorService.saveRecord(record);
         
-        List<Prescription> prescriptions = prescriptionRepository.findByPatientId(patient.getId()).stream()
-                .filter(p -> p.getDoctor() != null && doctorId.equals(p.getDoctor().getId()))
-                .collect(Collectors.toList());
-        Prescription prescription = pickRecordForVisit(prescriptions, Prescription::getCreateTime, currentAppointment);
-        if (prescription == null) {
-            prescription = new Prescription();
-            prescription.setDoctor(doctor);
-            prescription.setPatient(patient);
-            prescription.setCreateTime(java.time.LocalDateTime.now());
-        }
+        // 每次就诊都创建新的处方记录
+        Prescription prescription = new Prescription();
+        prescription.setDoctor(doctor);
+        prescription.setPatient(patient);
+        prescription.setAppointment(currentAppointment);
+        prescription.setCreateTime(java.time.LocalDateTime.now());
         prescription.setDrugList(drugList);
         prescription.setUsage(usage);
         doctorService.createPrescription(prescription);
         
-        List<Advice> advices = adviceRepository.findByPatientId(patient.getId()).stream()
-                .filter(a -> a.getDoctor() != null && doctorId.equals(a.getDoctor().getId()))
-                .collect(Collectors.toList());
-        Advice advice = pickRecordForVisit(advices, Advice::getCreateTime, currentAppointment);
-        if (advice == null) {
-            advice = new Advice();
-            advice.setDoctor(doctor);
-            advice.setPatient(patient);
-            advice.setStatus(1);
-            advice.setCreateTime(java.time.LocalDateTime.now());
-        }
+        // 每次就诊都创建新的医嘱记录
+        Advice advice = new Advice();
+        advice.setDoctor(doctor);
+        advice.setPatient(patient);
+        advice.setAppointment(currentAppointment);
+        advice.setStatus(1);
+        advice.setCreateTime(java.time.LocalDateTime.now());
         advice.setContent(content);
         advice.setUpdateTime(java.time.LocalDateTime.now());
         doctorService.createAdvice(advice);
         
+        // 每次就诊都创建新的检查记录
         if (checkupType != null && !checkupType.trim().isEmpty()) {
-            List<Checkup> checkups = checkupRepository.findByPatient_Id(patient.getId()).stream()
-                    .filter(c -> c.getDoctor() != null && doctorId.equals(c.getDoctor().getId()))
-                    .collect(Collectors.toList());
-            Checkup checkup = pickRecordForVisit(checkups, Checkup::getCreateTime, currentAppointment);
-            if (checkup == null) {
-                checkup = new Checkup();
-                checkup.setDoctor(doctor);
-                checkup.setPatient(patient);
-                checkup.setCreateTime(java.time.LocalDateTime.now());
-                checkup.setStatus(0);
-            }
+            Checkup checkup = new Checkup();
+            checkup.setDoctor(doctor);
+            checkup.setPatient(patient);
+            checkup.setAppointment(currentAppointment);
+            checkup.setCreateTime(java.time.LocalDateTime.now());
+            checkup.setStatus(0);
             checkup.setType(checkupType.trim());
             checkup.setUpdateTime(java.time.LocalDateTime.now());
             doctorService.saveCheckup(checkup);
         }
         
+        // 生成账单记录
+        if (currentAppointment != null) {
+            // 固定费用：挂号费 50 元，门诊费 100 元
+            java.math.BigDecimal registrationFee = new java.math.BigDecimal(50);
+            java.math.BigDecimal outpatientFee = new java.math.BigDecimal(100);
+            
+            // 创建挂号费缴费记录
+            com.hospital.entity.Billing registrationBilling = new com.hospital.entity.Billing();
+            registrationBilling.setPatient(patient);
+            registrationBilling.setAppointment(currentAppointment);
+            registrationBilling.setType("挂号费");
+            registrationBilling.setAmount(registrationFee);
+            registrationBilling.setStatus("待支付");
+            registrationBilling.setCreateTime(java.time.LocalDateTime.now());
+            billingService.saveBilling(registrationBilling);
+            
+            // 创建门诊费缴费记录
+            com.hospital.entity.Billing outpatientBilling = new com.hospital.entity.Billing();
+            outpatientBilling.setPatient(patient);
+            outpatientBilling.setAppointment(currentAppointment);
+            outpatientBilling.setType("门诊费");
+            outpatientBilling.setAmount(outpatientFee);
+            outpatientBilling.setStatus("待支付");
+            outpatientBilling.setCreateTime(java.time.LocalDateTime.now());
+            billingService.saveBilling(outpatientBilling);
+            
+            // 如果有检查，创建检查费缴费记录
+            if (checkupType != null && !checkupType.trim().isEmpty()) {
+                // 根据检查类型设置费用
+                java.math.BigDecimal checkupFee = new java.math.BigDecimal(0);
+                String checkupTypeStr = checkupType.trim();
+                if ("心电图".equals(checkupTypeStr)) {
+                    checkupFee = new java.math.BigDecimal(150);
+                } else if ("血常规".equals(checkupTypeStr)) {
+                    checkupFee = new java.math.BigDecimal(80);
+                } else if ("胸片".equals(checkupTypeStr)) {
+                    checkupFee = new java.math.BigDecimal(200);
+                } else if ("B超".equals(checkupTypeStr)) {
+                    checkupFee = new java.math.BigDecimal(120);
+                } else {
+                    checkupFee = new java.math.BigDecimal(100); // 默认检查费用
+                }
+                
+                com.hospital.entity.Billing checkupBilling = new com.hospital.entity.Billing();
+                checkupBilling.setPatient(patient);
+                checkupBilling.setAppointment(currentAppointment);
+                checkupBilling.setType(checkupTypeStr + "检查费");
+                checkupBilling.setAmount(checkupFee);
+                checkupBilling.setStatus("待支付");
+                checkupBilling.setCreateTime(java.time.LocalDateTime.now());
+                billingService.saveBilling(checkupBilling);
+            }
+            
+            // 如果有处方，创建药品费用缴费记录
+            if (drugList != null && !drugList.trim().isEmpty()) {
+                // 解析处方中的药品信息
+                String[] drugs = drugList.split(",");
+                for (String drug : drugs) {
+                    drug = drug.trim();
+                    if (!drug.isEmpty()) {
+                        // 这里可以根据药品名称查询药品价格，这里简单设置一个默认价格
+                        java.math.BigDecimal drugFee = new java.math.BigDecimal(50); // 默认药品价格
+                        
+                        com.hospital.entity.Billing drugBilling = new com.hospital.entity.Billing();
+                        drugBilling.setPatient(patient);
+                        drugBilling.setAppointment(currentAppointment);
+                        drugBilling.setType(drug + "药品费");
+                        drugBilling.setAmount(drugFee);
+                        drugBilling.setStatus("待支付");
+                        drugBilling.setCreateTime(java.time.LocalDateTime.now());
+                        billingService.saveBilling(drugBilling);
+                    }
+                }
+            }
+        }
+        
+        // 更新预约状态为已完成
         if (currentAppointment != null
                 && ("已预约".equals(currentAppointment.getStatus()) || "叫号中".equals(currentAppointment.getStatus()))) {
             appointmentService.updateAppointmentStatus(currentAppointment.getId(), "已完成");
-        } else {
-            List<Appointment> appointments = appointmentService.findByPatientId(patient.getId());
-            if (!appointments.isEmpty()) {
-                Appointment latestAppointment = appointments.stream()
-                    .sorted((a1, a2) -> a2.getCreateTime().compareTo(a1.getCreateTime()))
-                    .findFirst()
-                    .orElse(null);
-                if (latestAppointment != null && ("已预约".equals(latestAppointment.getStatus()) || "叫号中".equals(latestAppointment.getStatus()))) {
-                    appointmentService.updateAppointmentStatus(latestAppointment.getId(), "已完成");
-                }
-            }
         }
         
         return "redirect:/doctor/appointments";

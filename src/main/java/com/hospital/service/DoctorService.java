@@ -344,29 +344,14 @@ public class DoctorService {
     
     // 【新增】创建医嘱
     public Map<String, Object> createAdvice(Advice advice) {
-        // 检查是否已有医嘱
-        List<Advice> existingAdvices = adviceRepository.findByPatientId(advice.getPatient().getId());
-        if (!existingAdvices.isEmpty()) {
-            // 更新现有医嘱
-            Advice existingAdvice = existingAdvices.get(0);
-            existingAdvice.setContent(advice.getContent());
-            existingAdvice.setStatus(advice.getStatus());
-            existingAdvice.setUpdateTime(LocalDateTime.now());
-            adviceRepository.save(existingAdvice);
-            Map<String, Object> result = new HashMap<>();
-            result.put("code", 200);
-            result.put("msg", "更新成功");
-            return result;
-        } else {
-            // 创建新医嘱
-            advice.setCreateTime(LocalDateTime.now());
-            advice.setStatus(1);
-            adviceRepository.save(advice);
-            Map<String, Object> result = new HashMap<>();
-            result.put("code", 200);
-            result.put("msg", "创建成功");
-            return result;
-        }
+        // 每次就诊都创建新的医嘱记录
+        advice.setCreateTime(LocalDateTime.now());
+        advice.setStatus(1);
+        adviceRepository.save(advice);
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 200);
+        result.put("msg", "创建成功");
+        return result;
     }
 
     // 【新增】减少号源剩余数量

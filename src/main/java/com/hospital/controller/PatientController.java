@@ -339,6 +339,9 @@ public class PatientController {
     @Autowired
     private PatientService patientService;
     
+    @Autowired
+    private CheckupRepository checkupRepository;
+    
     @GetMapping("/orders")
     public String orders(Authentication authentication, Model model) {
         User user = userService.findByPhone(authentication.getName());
@@ -361,33 +364,8 @@ public class PatientController {
         // 获取缴费记录
         List<Billing> billingRecords = billingService.findByPatientId(patient.getId());
         
-        // 计算每个就诊的总费用
-        java.util.Map<Long, java.math.BigDecimal> appointmentTotalAmounts = new java.util.HashMap<>();
-        java.util.Map<Long, List<Billing>> appointmentBillings = new java.util.HashMap<>();
-        
-        for (Appointment appointment : completedAppointments) {
-            java.math.BigDecimal total = java.math.BigDecimal.ZERO;
-            List<Billing> appointmentBillingList = new java.util.ArrayList<>();
-            
-            for (Billing billing : billingRecords) {
-                // 简单处理：假设缴费记录的创建时间在预约时间前后一天内，就认为是该预约的费用
-                if (billing.getCreateTime() != null && appointment.getAppointmentTime() != null) {
-                    java.time.LocalDateTime billingTime = billing.getCreateTime();
-                    java.time.LocalDateTime appointmentTime = appointment.getAppointmentTime();
-                    java.time.Duration duration = java.time.Duration.between(billingTime, appointmentTime);
-                    if (Math.abs(duration.toHours()) <= 24) {
-                        total = total.add(billing.getAmount());
-                        appointmentBillingList.add(billing);
-                    }
-                }
-            }
-            
-            appointmentTotalAmounts.put(appointment.getId(), total);
-            appointmentBillings.put(appointment.getId(), appointmentBillingList);
-        }
-        
         // 获取病历记录
-        List<MedicalRecord> medicalRecords = medicalRecordService.findByPatientId(patient.getId());
+        List<MedicalRecord> medicalRecords = medicalRecordRepository.findByPatientId(patient.getId());
         
         // 获取处方记录
         List<Prescription> prescriptions = prescriptionRepository.findByPatientId(patient.getId());
@@ -395,12 +373,70 @@ public class PatientController {
         // 获取医嘱记录
         List<Advice> advices = adviceRepository.findByPatientId(patient.getId());
         
+        // 计算每个就诊的总费用
+        java.util.Map<Long, java.math.BigDecimal> appointmentTotalAmounts = new java.util.HashMap<>();
+        java.util.Map<Long, List<Billing>> appointmentBillings = new java.util.HashMap<>();
+        java.util.Map<Long, MedicalRecord> appointmentMedicalRecords = new java.util.HashMap<>();
+        java.util.Map<Long, Prescription> appointmentPrescriptions = new java.util.HashMap<>();
+        java.util.Map<Long, Advice> appointmentAdvices = new java.util.HashMap<>();
+        java.util.Map<Long, List<Checkup>> appointmentCheckups = new java.util.HashMap<>();
+        
+        for (Appointment appointment : completedAppointments) {
+            java.math.BigDecimal total = java.math.BigDecimal.ZERO;
+            List<Billing> appointmentBillingList = new java.util.ArrayList<>();
+            List<Checkup> appointmentCheckupList = new java.util.ArrayList<>();
+            
+            // 计算该预约的总费用
+            for (Billing billing : billingRecords) {
+                if (billing.getAppointment() != null && billing.getAppointment().getId().equals(appointment.getId())) {
+                    total = total.add(billing.getAmount());
+                    appointmentBillingList.add(billing);
+                }
+            }
+            
+            // 查找该预约的病历记录
+            for (MedicalRecord record : medicalRecords) {
+                if (record.getAppointment() != null && record.getAppointment().getId().equals(appointment.getId())) {
+                    appointmentMedicalRecords.put(appointment.getId(), record);
+                    break;
+                }
+            }
+            
+            // 查找该预约的处方记录
+            for (Prescription prescription : prescriptions) {
+                if (prescription.getAppointment() != null && prescription.getAppointment().getId().equals(appointment.getId())) {
+                    appointmentPrescriptions.put(appointment.getId(), prescription);
+                    break;
+                }
+            }
+            
+            // 查找该预约的医嘱记录
+            for (Advice advice : advices) {
+                if (advice.getAppointment() != null && advice.getAppointment().getId().equals(appointment.getId())) {
+                    appointmentAdvices.put(appointment.getId(), advice);
+                    break;
+                }
+            }
+            
+            // 查找该预约的检查记录
+            for (Checkup checkup : checkupRepository.findByPatient_Id(patient.getId())) {
+                if (checkup.getAppointment() != null && checkup.getAppointment().getId().equals(appointment.getId())) {
+                    appointmentCheckupList.add(checkup);
+                }
+            }
+            
+            appointmentTotalAmounts.put(appointment.getId(), total);
+            appointmentBillings.put(appointment.getId(), appointmentBillingList);
+            appointmentCheckups.put(appointment.getId(), appointmentCheckupList);
+        }
+        
         model.addAttribute("completedAppointments", completedAppointments);
         model.addAttribute("appointmentTotalAmounts", appointmentTotalAmounts);
         model.addAttribute("appointmentBillings", appointmentBillings);
-        model.addAttribute("medicalRecords", medicalRecords);
-        model.addAttribute("prescriptions", prescriptions);
-        model.addAttribute("advices", advices);
+        model.addAttribute("appointmentMedicalRecords", appointmentMedicalRecords);
+        model.addAttribute("appointmentPrescriptions", appointmentPrescriptions);
+        model.addAttribute("appointmentAdvices", appointmentAdvices);
+        model.addAttribute("appointmentCheckups", appointmentCheckups);
         model.addAttribute("billingRecords", billingRecords);
         return "patient/orders";
     }
@@ -447,14 +483,9 @@ public class PatientController {
         
         // 支付该预约相关的所有待支付费用
         for (Billing billing : billingRecords) {
-            if (billing.getCreateTime() != null && appointment.getAppointmentTime() != null) {
-                java.time.LocalDateTime billingTime = billing.getCreateTime();
-                java.time.LocalDateTime appointmentTime = appointment.getAppointmentTime();
-                java.time.Duration duration = java.time.Duration.between(billingTime, appointmentTime);
-                if (Math.abs(duration.toHours()) <= 24 && "待支付".equals(billing.getStatus())) {
-                    billing.setStatus("已支付");
-                    billingService.updateBilling(billing);
-                }
+            if (billing.getAppointment() != null && billing.getAppointment().getId().equals(appointmentId) && "待支付".equals(billing.getStatus())) {
+                billing.setStatus("已支付");
+                billingService.updateBilling(billing);
             }
         }
         

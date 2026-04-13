@@ -1,6 +1,7 @@
 package com.hospital.controller;
 
 import com.hospital.entity.*;
+import com.hospital.repository.*;
 import com.hospital.service.*;
 import com.hospital.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/nurse")
@@ -40,6 +42,9 @@ public class NurseController {
     @Autowired
     private PrescriptionService prescriptionService;
     
+    @Autowired
+    private BillingRepository billingRepository;
+    
     @GetMapping("/dashboard")
     public String dashboard() {
         return "nurse/dashboard";
@@ -54,46 +59,45 @@ public class NurseController {
     
     @GetMapping("/billing/patients")
     public String billingPatients(Model model) {
-        // 获取所有患者
-        List<User> patients = userService.findByRole("PATIENT");
+        // 获取所有已完成的预约
+        List<Appointment> appointments = appointmentService.findByStatus("已完成");
         
-        // 计算每个患者的总费用、已支付费用和待支付费用
+        // 计算每个预约的总费用、已支付费用和待支付费用
         java.util.Map<Long, java.math.BigDecimal> totalAmounts = new java.util.HashMap<>();
         java.util.Map<Long, java.math.BigDecimal> paidAmounts = new java.util.HashMap<>();
         java.util.Map<Long, java.math.BigDecimal> unpaidAmounts = new java.util.HashMap<>();
         
-        for (User patient : patients) {
-            // 查找对应的 Patient 对象
-            com.hospital.entity.Patient patientEntity = patientService.findByUserId(patient.getId());
-            if (patientEntity != null) {
-                // 获取患者的所有缴费记录
-                List<Billing> billings = billingService.findByPatientId(patientEntity.getId());
-                
-                // 计算总费用、已支付费用和待支付费用
-                java.math.BigDecimal total = java.math.BigDecimal.ZERO;
-                java.math.BigDecimal paid = java.math.BigDecimal.ZERO;
-                java.math.BigDecimal unpaid = java.math.BigDecimal.ZERO;
-                
-                for (Billing billing : billings) {
-                    total = total.add(billing.getAmount());
-                    if ("已支付".equals(billing.getStatus())) {
-                        paid = paid.add(billing.getAmount());
-                    } else {
-                        unpaid = unpaid.add(billing.getAmount());
-                    }
+        for (Appointment appointment : appointments) {
+            // 获取预约对应的所有缴费记录
+            List<Billing> billings = billingService.findByPatientId(appointment.getPatient().getId());
+            // 筛选出与当前预约相关的缴费记录
+            java.util.List<Billing> appointmentBillings = new java.util.ArrayList<>();
+            for (Billing billing : billings) {
+                if (billing.getAppointment() != null && billing.getAppointment().getId().equals(appointment.getId())) {
+                    appointmentBillings.add(billing);
                 }
-                
-                totalAmounts.put(patient.getId(), total);
-                paidAmounts.put(patient.getId(), paid);
-                unpaidAmounts.put(patient.getId(), unpaid);
-            } else {
-                totalAmounts.put(patient.getId(), java.math.BigDecimal.ZERO);
-                paidAmounts.put(patient.getId(), java.math.BigDecimal.ZERO);
-                unpaidAmounts.put(patient.getId(), java.math.BigDecimal.ZERO);
             }
+            
+            // 计算总费用、已支付费用和待支付费用
+            java.math.BigDecimal total = java.math.BigDecimal.ZERO;
+            java.math.BigDecimal paid = java.math.BigDecimal.ZERO;
+            java.math.BigDecimal unpaid = java.math.BigDecimal.ZERO;
+            
+            for (Billing billing : appointmentBillings) {
+                total = total.add(billing.getAmount());
+                if ("已支付".equals(billing.getStatus())) {
+                    paid = paid.add(billing.getAmount());
+                } else {
+                    unpaid = unpaid.add(billing.getAmount());
+                }
+            }
+            
+            totalAmounts.put(appointment.getId(), total);
+            paidAmounts.put(appointment.getId(), paid);
+            unpaidAmounts.put(appointment.getId(), unpaid);
         }
         
-        model.addAttribute("patients", patients);
+        model.addAttribute("appointments", appointments);
         model.addAttribute("totalAmounts", totalAmounts);
         model.addAttribute("paidAmounts", paidAmounts);
         model.addAttribute("unpaidAmounts", unpaidAmounts);
@@ -211,6 +215,19 @@ public class NurseController {
         return "redirect:/nurse/billing/patients";
     }
     
+    @PostMapping("/billing/appointment/{id}/pay")
+    public String payAppointmentBilling(@PathVariable Long id) {
+        // 获取所有缴费记录
+        List<Billing> billings = billingRepository.findAll();
+        for (Billing billing : billings) {
+            if (billing.getAppointment() != null && billing.getAppointment().getId().equals(id) && "待支付".equals(billing.getStatus())) {
+                billing.setStatus("已支付");
+                billingService.updateBilling(billing);
+            }
+        }
+        return "redirect:/nurse/billing/patients";
+    }
+    
     @GetMapping("/medical-record/edit/{id}")
     public String editMedicalRecord(@PathVariable Long id, Model model) {
         MedicalRecord record = medicalRecordService.findById(id);
@@ -321,6 +338,7 @@ public class NurseController {
         // 创建挂号费缴费记录
         Billing registrationBilling = new Billing();
         registrationBilling.setPatient(checkup.getPatient());
+        registrationBilling.setAppointment(checkup.getAppointment());
         registrationBilling.setType("挂号费");
         registrationBilling.setAmount(registrationFee);
         registrationBilling.setStatus("待支付");
@@ -329,6 +347,7 @@ public class NurseController {
         // 创建门诊费缴费记录
         Billing outpatientBilling = new Billing();
         outpatientBilling.setPatient(checkup.getPatient());
+        outpatientBilling.setAppointment(checkup.getAppointment());
         outpatientBilling.setType("门诊费");
         outpatientBilling.setAmount(outpatientFee);
         outpatientBilling.setStatus("待支付");
@@ -337,28 +356,45 @@ public class NurseController {
         // 创建检查费缴费记录
         Billing checkupBilling = new Billing();
         checkupBilling.setPatient(checkup.getPatient());
+        checkupBilling.setAppointment(checkup.getAppointment());
         checkupBilling.setType(checkupType + "检查费");
         checkupBilling.setAmount(checkupFee);
         checkupBilling.setStatus("待支付");
         billingService.saveBilling(checkupBilling);
         
         // 创建药品费用缴费记录
-        createBillingForPrescription(checkup.getPatient());
+        createBillingForPrescription(checkup);
     }
     
-    private void createBillingForPrescription(Patient patient) {
+    private void createBillingForPrescription(Checkup checkup) {
+        Patient patient = checkup.getPatient();
+        Appointment appointment = checkup.getAppointment();
+        
         // 查询患者的处方信息
         List<Prescription> prescriptions = prescriptionService.findByPatientId(patient.getId());
         if (!prescriptions.isEmpty()) {
-            // 获取最新的处方
-            Prescription latestPrescription = prescriptions.stream()
-                    .sorted((p1, p2) -> p2.getCreateTime().compareTo(p1.getCreateTime()))
-                    .findFirst()
-                    .orElse(null);
+            // 筛选与当前检查记录相同预约的处方
+            List<Prescription> relatedPrescriptions = prescriptions.stream()
+                    .filter(p -> p.getAppointment() != null && p.getAppointment().getId().equals(appointment.getId()))
+                    .collect(Collectors.toList());
             
-            if (latestPrescription != null && latestPrescription.getDrugList() != null && !latestPrescription.getDrugList().isEmpty()) {
+            // 如果没有找到相关处方，使用最新的处方
+            Prescription targetPrescription;
+            if (!relatedPrescriptions.isEmpty()) {
+                targetPrescription = relatedPrescriptions.stream()
+                        .sorted((p1, p2) -> p2.getCreateTime().compareTo(p1.getCreateTime()))
+                        .findFirst()
+                        .orElse(null);
+            } else {
+                targetPrescription = prescriptions.stream()
+                        .sorted((p1, p2) -> p2.getCreateTime().compareTo(p1.getCreateTime()))
+                        .findFirst()
+                        .orElse(null);
+            }
+            
+            if (targetPrescription != null && targetPrescription.getDrugList() != null && !targetPrescription.getDrugList().isEmpty()) {
                 // 解析处方中的药品信息
-                String drugList = latestPrescription.getDrugList();
+                String drugList = targetPrescription.getDrugList();
                 // 简单处理：假设药品列表格式为 "药品1,药品2,药品3"
                 String[] drugs = drugList.split(",");
                 
@@ -371,6 +407,7 @@ public class NurseController {
                         
                         Billing drugBilling = new Billing();
                         drugBilling.setPatient(patient);
+                        drugBilling.setAppointment(appointment);
                         drugBilling.setType(drug + "药品费");
                         drugBilling.setAmount(drugFee);
                         drugBilling.setStatus("待支付");
