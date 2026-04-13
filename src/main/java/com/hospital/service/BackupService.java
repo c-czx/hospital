@@ -75,9 +75,21 @@ public class BackupService {
     public void init() {
         // 从数据库 URL 中提取数据库名称
         // 格式：jdbc:mysql://localhost:3306/hospital_db?...
-        if (databaseUrl.contains("/")) {
-            String dbPart = databaseUrl.substring(databaseUrl.lastIndexOf("/") + 1);
-            databaseName = dbPart.split("\\?")[0];
+        if (databaseUrl != null && databaseUrl.contains("jdbc:mysql://")) {
+            // 找到 jdbc:mysql:// 之后的部分
+            String afterProtocol = databaseUrl.substring("jdbc:mysql://".length());
+            // 找到第一个 / 的位置（在 host:port 之后）
+            int firstSlashAfterHost = afterProtocol.indexOf("/");
+            if (firstSlashAfterHost != -1) {
+                // 从第一个 / 之后开始提取数据库名
+                String dbPart = afterProtocol.substring(firstSlashAfterHost + 1);
+                // 如果有 ?，则取 ? 之前的部分；否则取整个部分
+                if (dbPart.contains("?")) {
+                    databaseName = dbPart.split("\\?")[0];
+                } else {
+                    databaseName = dbPart;
+                }
+            }
         }
 
         // 创建备份目录
