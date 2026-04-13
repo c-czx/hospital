@@ -22,6 +22,10 @@ public class Checkup {
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
     
+    @ManyToOne
+    @JoinColumn(name = "appointment_id")
+    private Appointment appointment;
+    
     private String type; // 检查类型：体温、血压、胸片等
     private String description; // 检查描述
     private String result; // 检查结果
@@ -53,6 +57,14 @@ public class Checkup {
     
     public void setPatient(Patient patient) {
         this.patient = patient;
+    }
+    
+    public Appointment getAppointment() {
+        return appointment;
+    }
+    
+    public void setAppointment(Appointment appointment) {
+        this.appointment = appointment;
     }
     
     public String getType() {

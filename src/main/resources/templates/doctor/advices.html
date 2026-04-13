@@ -42,7 +42,7 @@
                     </thead>
                     <tbody>
                         <tr th:each="prescription : ${prescriptions}">
-                            <td th:text="${prescription.user != null ? prescription.user.name : '未知患者'}"></td>
+                            <td th:text="${prescription.patientName != null ? prescription.patientName : '未知患者'}"></td>
                             <td th:text="${prescription.drugList}"></td>
                             <td th:text="${prescription.createTime != null ? #temporals.format(prescription.createTime, 'yyyy-MM-dd HH:mm') : '—'}"></td>
                         </tr>

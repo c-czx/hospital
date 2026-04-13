@@ -22,6 +22,10 @@ public class Advice {
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
     
+    @ManyToOne
+    @JoinColumn(name = "appointment_id")
+    private Appointment appointment;
+    
     private String content;
     private Integer status;
     @Column(columnDefinition = "DATETIME(0)")
@@ -51,6 +55,14 @@ public class Advice {
     
     public void setPatient(Patient patient) { 
         this.patient = patient; 
+    }
+    
+    public Appointment getAppointment() {
+        return appointment;
+    }
+    
+    public void setAppointment(Appointment appointment) {
+        this.appointment = appointment;
     }
     
     public String getContent() { 

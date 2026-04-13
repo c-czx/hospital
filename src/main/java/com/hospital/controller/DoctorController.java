@@ -356,7 +356,24 @@ public class DoctorController {
         }
         List<Prescription> prescriptions = prescriptionService.findByDoctorId(doctorId);
         List<Map<String, Object>> advices = adviceService.getAdvicesWithPatientName(doctorId);
-        model.addAttribute("prescriptions", prescriptions);
+        
+        // 为处方添加患者姓名信息
+        List<Map<String, Object>> prescriptionsWithPatientName = new java.util.ArrayList<>();
+        for (Prescription prescription : prescriptions) {
+            Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", prescription.getId());
+            map.put("drugList", prescription.getDrugList());
+            map.put("usage", prescription.getUsage());
+            map.put("createTime", prescription.getCreateTime());
+            if (prescription.getPatient() != null && prescription.getPatient().getUser() != null) {
+                map.put("patientName", prescription.getPatient().getUser().getName());
+            } else {
+                map.put("patientName", "未知患者");
+            }
+            prescriptionsWithPatientName.add(map);
+        }
+        
+        model.addAttribute("prescriptions", prescriptionsWithPatientName);
         model.addAttribute("advices", advices);
         return "doctor/advices";
     }

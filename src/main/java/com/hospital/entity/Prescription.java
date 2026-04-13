@@ -22,6 +22,10 @@ public class Prescription {
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
     
+    @ManyToOne
+    @JoinColumn(name = "appointment_id")
+    private Appointment appointment;
+    
     private String drugList;
 
     @Column(name = "usage_info")
@@ -52,6 +56,14 @@ public class Prescription {
     
     public void setPatient(Patient patient) { 
         this.patient = patient; 
+    }
+    
+    public Appointment getAppointment() {
+        return appointment;
+    }
+    
+    public void setAppointment(Appointment appointment) {
+        this.appointment = appointment;
     }
     
     public String getDrugList() { 

@@ -19,6 +19,10 @@ public class Billing {
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
     
+    @ManyToOne
+    @JoinColumn(name = "appointment_id")
+    private Appointment appointment;
+    
     private String type;
     private BigDecimal amount;
     private String status;
@@ -39,6 +43,14 @@ public class Billing {
     
     public void setPatient(Patient patient) {
         this.patient = patient;
+    }
+    
+    public Appointment getAppointment() {
+        return appointment;
+    }
+    
+    public void setAppointment(Appointment appointment) {
+        this.appointment = appointment;
     }
     
     public String getType() {

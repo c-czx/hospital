@@ -39,13 +39,14 @@
 | PK id          |<----->| PK id          |       | PK id          |
 | FK user_id     |       | FK doctor_id   |       | FK doctor_id   |
 |    medical_    |       |    start_time  |       | FK patient_id  |
-|    record_num  |       |    end_time    |       |    chief_compl |
-|    allergies   |       |    total_num   |       |    present_ill |
-|    emergency_  |       |    remain_num  |       |    diagnosis   |
-|    contact     |       |    status      |       |    diag_time   |
-|    emergency_  |       +----------------+       |    create_time |
-|    phone       |                                |    temperature |
-+----------------+                                |    blood_press |
+|    record_num  |       |    end_time    |       | FK appointment_|
+|    allergies   |       |    total_num   |       |    chief_compl |
+|    emergency_  |       |    remain_num  |       |    present_ill |
+|    contact     |       |    status      |       |    diagnosis   |
+|    emergency_  |       +----------------+       |    diag_time   |
+|    phone       |                                |    create_time |
++----------------+                                |    temperature |
+                                                  |    blood_press |
                                                   |    nurse_notes |
                                                   +----------------+
       ^                                                 ^
@@ -56,7 +57,8 @@
 +----------------+       +----------------+       +----------------+
 | PK id          |       | PK id          |       | PK id          |
 | FK doctor_id   |       | FK doctor_id   |       | FK patient_id  |
-| FK patient_id  |       | FK patient_id  |       |    type        |
+| FK patient_id  |       | FK patient_id  |       | FK appointment_|
+| FK appointment_|       | FK appointment_|       |    type        |
 |    drug_list   |       |    content     |       |    amount      |
 |    usage       |       |    status      |       |    status      |
 |    create_time |       |    create_time |       |    create_time |
@@ -70,6 +72,7 @@
 | PK id          |            |
 | FK doctor_id   |<-----------+
 | FK patient_id  |
+| FK appointment_|
 |    type        |
 |    description |
 |    result      |
@@ -196,7 +199,7 @@
 | symptoms | TEXT | | 主诉/症状描述 |
 | create_time | DATETIME | | 创建时间 |
 
-### 8. 就诊记录表 (medical_records)
+### 8. 病例表 (medical_records)
 
 记录医生为患者诊疗的详细记录。
 
@@ -205,6 +208,7 @@
 | id | BIGINT | PK, 自增 | 主键 |
 | doctor_id | BIGINT | FK, NOT NULL | 外键，关联 doctors 表 |
 | patient_id | BIGINT | FK, NOT NULL | 外键，关联 patients 表 |
+| appointment_id | BIGINT | FK | 外键，关联 appointments 表 |
 | chief_complaint | TEXT | | 主诉 |
 | present_illness | TEXT | | 现病史 |
 | diagnosis_result | TEXT | | 诊断结果 |
@@ -223,6 +227,7 @@
 | id | BIGINT | PK, 自增 | 主键 |
 | doctor_id | BIGINT | FK, NOT NULL | 外键，关联 doctors 表 |
 | patient_id | BIGINT | FK, NOT NULL | 外键，关联 patients 表 |
+| appointment_id | BIGINT | FK | 外键，关联 appointments 表 |
 | drug_list | TEXT | | 药品清单 |
 | usage | TEXT | | 用法用量 |
 | create_time | DATETIME | | 创建时间 |
@@ -236,6 +241,7 @@
 | id | BIGINT | PK, 自增 | 主键 |
 | doctor_id | BIGINT | FK, NOT NULL | 外键，关联 doctors 表 |
 | patient_id | BIGINT | FK, NOT NULL | 外键，关联 patients 表 |
+| appointment_id | BIGINT | FK | 外键，关联 appointments 表 |
 | type | VARCHAR | | 检查类型（如体温、血压、胸片等） |
 | description | TEXT | | 检查描述 |
 | result | TEXT | | 检查结果 |
@@ -252,6 +258,7 @@
 | id | BIGINT | PK, 自增 | 主键 |
 | doctor_id | BIGINT | FK, NOT NULL | 外键，关联 doctors 表 |
 | patient_id | BIGINT | FK, NOT NULL | 外键，关联 patients 表 |
+| appointment_id | BIGINT | FK | 外键，关联 appointments 表 |
 | content | TEXT | | 医嘱内容 |
 | status | INT | | 状态（如 0-未读，1-已读） |
 | create_time | DATETIME | | 创建时间 |
@@ -265,6 +272,7 @@
 |--------|------|------|------|
 | id | BIGINT | PK, 自增 | 主键 |
 | patient_id | BIGINT | FK, NOT NULL | 外键，关联 patients 表 |
+| appointment_id | BIGINT | FK | 外键，关联 appointments 表 |
 | type | VARCHAR | | 账单类型（如 '挂号费', '药费', '检查费', '治疗费'） |
 | amount | DECIMAL(10,2) | | 金额 |
 | status | VARCHAR | | 账单状态（如 '未支付', '已支付'） |
