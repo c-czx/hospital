@@ -196,7 +196,7 @@ public class NurseController {
         return "redirect:/nurse/patient/" + billing.getPatient().getUser().getId();
     }
     
-    @GetMapping("/billing/patient/{id}/pay")
+    @PostMapping("/billing/patient/{id}/pay")
     public String payPatientBilling(@PathVariable Long id) {
         // 查找对应的 Patient 对象
         com.hospital.entity.Patient patientEntity = patientService.findByUserId(id);
@@ -316,6 +316,19 @@ public class NurseController {
     }
     
     private void createBillingForCheckup(Checkup checkup) {
+        // 检查是否已经存在该预约的账单记录
+        List<Billing> existingBillings = billingRepository.findByAppointmentId(checkup.getAppointment().getId());
+        boolean hasRegistrationFee = false;
+        boolean hasOutpatientFee = false;
+        
+        for (Billing billing : existingBillings) {
+            if ("挂号费".equals(billing.getType())) {
+                hasRegistrationFee = true;
+            } else if ("门诊费".equals(billing.getType())) {
+                hasOutpatientFee = true;
+            }
+        }
+        
         // 固定费用：挂号费 50 元，门诊费 100 元
         BigDecimal registrationFee = new BigDecimal(50);
         BigDecimal outpatientFee = new BigDecimal(100);
@@ -335,23 +348,27 @@ public class NurseController {
             checkupFee = new BigDecimal(100); // 默认检查费用
         }
         
-        // 创建挂号费缴费记录
-        Billing registrationBilling = new Billing();
-        registrationBilling.setPatient(checkup.getPatient());
-        registrationBilling.setAppointment(checkup.getAppointment());
-        registrationBilling.setType("挂号费");
-        registrationBilling.setAmount(registrationFee);
-        registrationBilling.setStatus("待支付");
-        billingService.saveBilling(registrationBilling);
+        // 只有当不存在挂号费时才创建
+        if (!hasRegistrationFee) {
+            Billing registrationBilling = new Billing();
+            registrationBilling.setPatient(checkup.getPatient());
+            registrationBilling.setAppointment(checkup.getAppointment());
+            registrationBilling.setType("挂号费");
+            registrationBilling.setAmount(registrationFee);
+            registrationBilling.setStatus("待支付");
+            billingService.saveBilling(registrationBilling);
+        }
         
-        // 创建门诊费缴费记录
-        Billing outpatientBilling = new Billing();
-        outpatientBilling.setPatient(checkup.getPatient());
-        outpatientBilling.setAppointment(checkup.getAppointment());
-        outpatientBilling.setType("门诊费");
-        outpatientBilling.setAmount(outpatientFee);
-        outpatientBilling.setStatus("待支付");
-        billingService.saveBilling(outpatientBilling);
+        // 只有当不存在门诊费时才创建
+        if (!hasOutpatientFee) {
+            Billing outpatientBilling = new Billing();
+            outpatientBilling.setPatient(checkup.getPatient());
+            outpatientBilling.setAppointment(checkup.getAppointment());
+            outpatientBilling.setType("门诊费");
+            outpatientBilling.setAmount(outpatientFee);
+            outpatientBilling.setStatus("待支付");
+            billingService.saveBilling(outpatientBilling);
+        }
         
         // 创建检查费缴费记录
         Billing checkupBilling = new Billing();

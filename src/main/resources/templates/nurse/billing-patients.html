@@ -52,7 +52,9 @@
                                     <td th:text="${unpaidAmounts[appointment.id]}"></td>
                                     <td>
                                         <a th:href="@{/nurse/patient/{id}(id=${appointment.patient.user.id})}" class="btn btn-primary" style="margin-right: 10px;">查看详情</a>
-                                        <a th:href="@{/nurse/billing/appointment/{id}/pay(id=${appointment.id})}" class="btn btn-primary" th:if="${unpaidAmounts[appointment.id].compareTo(new java.math.BigDecimal(0)) > 0}">协助支付</a>
+                                        <form th:action="@{/nurse/billing/appointment/{id}/pay(id=${appointment.id})}" method="post" style="display: inline;" th:if="${unpaidAmounts[appointment.id].compareTo(new java.math.BigDecimal(0)) > 0}">
+                                            <button type="submit" class="btn btn-primary">协助支付</button>
+                                        </form>
                                     </td>
                                 </tr>
                             </tbody>

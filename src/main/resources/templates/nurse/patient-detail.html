@@ -64,7 +64,9 @@
                         <p><strong>总费用：</strong><span th:text="${totalAmount}"></span></p>
                         <p><strong>已支付：</strong><span th:text="${paidAmount}"></span></p>
                         <p><strong>待支付：</strong><span th:text="${unpaidAmount}"></span></p>
-                        <a th:href="@{/nurse/billing/patient/{id}/pay(id=${patient.id})}" class="btn btn-primary" th:if="${unpaidAmount.compareTo(new java.math.BigDecimal(0)) > 0}">协助支付</a>
+                        <form th:action="@{/nurse/billing/patient/{id}/pay(id=${patient.id})}" method="post" style="display: inline;" th:if="${unpaidAmount.compareTo(new java.math.BigDecimal(0)) > 0}">
+                            <button type="submit" class="btn btn-primary">协助支付</button>
+                        </form>
                     </div>
                     <div th:each="billing : ${billings}" class="billing-item">
                         <p><strong>类型：</strong><span th:text="${billing.type}"></span></p>
