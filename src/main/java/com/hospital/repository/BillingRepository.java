@@ -9,4 +9,5 @@ import java.util.List;
 public interface BillingRepository extends JpaRepository<Billing, Long> {
     List<Billing> findByPatientId(Long patientId);
     List<Billing> findByStatus(String status);
+    List<Billing> findByAppointmentId(Long appointmentId);
 }

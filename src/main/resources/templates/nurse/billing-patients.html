@@ -32,7 +32,7 @@
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>患者姓名</th>
+                                    <th>预约信息</th>
                                     <th>总费用</th>
                                     <th>已支付</th>
                                     <th>待支付</th>
@@ -40,14 +40,21 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr th:each="patient : ${patients}">
-                                    <td th:text="${patient.name}"></td>
-                                    <td th:text="${totalAmounts[patient.id]}"></td>
-                                    <td th:text="${paidAmounts[patient.id]}"></td>
-                                    <td th:text="${unpaidAmounts[patient.id]}"></td>
+                                <tr th:each="appointment : ${appointments}">
                                     <td>
-                                        <a th:href="@{/nurse/patient/{id}(id=${patient.id})}" class="btn btn-primary" style="margin-right: 10px;">查看详情</a>
-                                        <a th:href="@{/nurse/billing/patient/{id}/pay(id=${patient.id})}" class="btn btn-primary" th:if="${unpaidAmounts[patient.id].compareTo(new java.math.BigDecimal(0)) > 0}">协助支付</a>
+                                        <div>患者：[[${appointment.patient.user.name}]]</div>
+                                        <div>时间：[[${#temporals.format(appointment.appointmentTime, 'yyyy-MM-dd HH:mm')}]]</div>
+                                        <div>科室：[[${appointment.doctor.department.name}]]</div>
+                                        <div>医生：[[${appointment.doctor.user.name}]]</div>
+                                    </td>
+                                    <td th:text="${totalAmounts[appointment.id]}"></td>
+                                    <td th:text="${paidAmounts[appointment.id]}"></td>
+                                    <td th:text="${unpaidAmounts[appointment.id]}"></td>
+                                    <td>
+                                        <a th:href="@{/nurse/patient/{id}(id=${appointment.patient.user.id})}" class="btn btn-primary" style="margin-right: 10px;">查看详情</a>
+                                        <form th:action="@{/nurse/billing/appointment/{id}/pay(id=${appointment.id})}" method="post" style="display: inline;" th:if="${unpaidAmounts[appointment.id].compareTo(new java.math.BigDecimal(0)) > 0}">
+                                            <button type="submit" class="btn btn-primary">协助支付</button>
+                                        </form>
                                     </td>
                                 </tr>
                             </tbody>

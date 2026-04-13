@@ -64,14 +64,20 @@
                         <p><strong>总费用：</strong><span th:text="${totalAmount}"></span></p>
                         <p><strong>已支付：</strong><span th:text="${paidAmount}"></span></p>
                         <p><strong>待支付：</strong><span th:text="${unpaidAmount}"></span></p>
-                        <a th:href="@{/nurse/billing/patient/{id}/pay(id=${patient.id})}" class="btn btn-primary" th:if="${unpaidAmount.compareTo(new java.math.BigDecimal(0)) > 0}">协助支付</a>
+                        <form th:action="@{/nurse/billing/patient/{id}/pay(id=${patient.id})}" method="post" style="display: inline;" th:if="${unpaidAmount.compareTo(new java.math.BigDecimal(0)) > 0}">
+                            <button type="submit" class="btn btn-primary">协助支付</button>
+                        </form>
                     </div>
                     <div th:each="billing : ${billings}" class="billing-item">
                         <p><strong>类型：</strong><span th:text="${billing.type}"></span></p>
                         <p><strong>金额：</strong><span th:text="${billing.amount}"></span></p>
                         <p><strong>状态：</strong><span th:text="${billing.status}"></span></p>
                     </div>
-                    <a th:href="@{/nurse/billing/create(userId=${patient.id})}" class="btn btn-secondary" style="margin-top: 10px;">创建缴费</a>
+                    <!-- <a th:href="@{/nurse/billing/create(userId=${patient.id})}" class="btn btn-secondary" style="margin-top: 10px;">创建缴费</a> -->
+                    <div style="margin-top: 20px;">
+                        <a href="/nurse/patients" class="btn btn-secondary" style="margin-right: 10px;">返回患者列表</a>
+                        <a href="/nurse/dashboard" class="btn btn-secondary">返回工作台</a>
+                    </div>
                 </div>
             </div>
         </div>
